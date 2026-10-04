@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>وحدة العلاوات والترفيعات - بلدية هيت</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+:root{--bg:#eaf1ef;--card:#fff;--ink:#16302d;--mut:#5d7471;--pri:#0f4c47;--pri2:#1b6b63;--gold:#c58f2c;--line:#cfdcd9;--red:#b3261e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a19;--card:#172826;--ink:#e6f0ee;--mut:#9bb3af;--pri:#2a8f84;--pri2:#3aa89b;--line:#2c4542}}
+:root[data-theme="dark"]{--bg:#0e1a19;--card:#172826;--ink:#e6f0ee;--mut:#9bb3af;--pri:#2a8f84;--pri2:#3aa89b;--line:#2c4542}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,"Segoe UI",sans-serif;line-height:1.6}
+.hero{background:linear-gradient(135deg,#0f4c47,#1b6b63);color:#fff;text-align:center;padding:28px 16px 54px;
+border-bottom:4px solid var(--gold);border-radius:0 0 50% 50%/0 0 28px 28px}
+.hero h1{margin:0;font-size:clamp(22px,5vw,34px);font-weight:800}.hero p{margin:4px 0 0;font-size:clamp(15px,3.5vw,20px);color:#f1d9a3;font-weight:600}
+.wrap{max-width:980px;margin:-30px auto 24px;padding:0 14px}
+.alert{background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:8px 14px;margin-bottom:14px;font-size:14px;text-align:center}
+.grid{background:var(--card);border-radius:28px;border:2px solid var(--line);padding:22px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tile{border:2px solid var(--pri2);background:var(--bg);color:var(--ink);border-radius:50px;min-height:92px;font:600 16px Cairo,Tahoma,sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px;transition:.15s}
+.tile:hover,.tile:focus-visible{background:var(--pri);color:#fff;transform:translateY(-2px);outline:3px solid var(--gold)}
+.tile svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tile.top{grid-column:2}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr)}.tile.top{grid-column:1/-1}}
+.bar{display:flex;align-items:center;gap:10px;background:var(--pri);color:#fff;padding:10px 16px;position:sticky;top:0;z-index:5}
+.bar h2{margin:0;font-size:18px;flex:1}
+button,.btn{font-family:inherit;cursor:pointer}
+.btn{background:var(--pri);color:#fff;border:0;border-radius:10px;padding:9px 18px;font-weight:600;font-size:15px}
+.btn.alt{background:var(--card);color:var(--pri);border:1.5px solid var(--pri)}.btn.gold{background:var(--gold);color:#241a05}.btn.red{background:var(--red)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--gold)}
+.page{max-width:1100px;margin:0 auto;padding:14px}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:820px){.cols{grid-template-columns:1fr}}
+fieldset{border:1.5px solid var(--line);border-radius:14px;background:var(--card);padding:10px 14px 14px;margin:0}
+legend{font-weight:800;color:var(--pri2);padding:0 8px}
+label{display:block;font-size:13px;color:var(--mut);margin-top:8px;font-weight:600}
+input,select,textarea{width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:15px Cairo,Tahoma,sans-serif}
+input[readonly]{background:var(--line);font-weight:700}
+.note{color:var(--red);font-size:13px;margin:12px 2px;font-weight:600}
+.act{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.tw{overflow-x:auto;background:var(--card);border-radius:12px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+th{background:var(--pri);color:#fff;padding:8px;white-space:nowrap}td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:12px}.tools>div{min-width:150px}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stat div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}.stat b{display:block;font-size:30px;color:var(--pri2)}
+.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;display:none;z-index:9}
+.tw td input{min-width:84px;padding:4px}
+body *,.btn,.tile{font-size:inherit}
+</style>
+</head>
+<body>
+<div id="home">
+ <div class="hero"><h1>مديرية بلدية هيت</h1><p>وحدة العلاوات والترفيعات</p></div>
+ <div class="wrap"><div class="alert" id="alerts"></div>
+ <div class="grid" id="tiles"></div></div>
+</div>
+<div id="view" hidden></div>
+<div class="toast" id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),KEY='hit-ap-v1';
+const DEF={emps:[],set:{base:[0,0,0,0,429000,362000,0,0,210000,170000],allow:[20,17,10,8,6,6,6,3,3,3].map(x=>x*1000),years:[0,5,5,5,5,4,4,4,4,4],dA:10,dP:30}};
+let S=JSON.parse(JSON.stringify(DEF)),editId=null,dl=null;
+try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+S.emps.forEach(e=>{e.lastA=e.lastA||e.last||'';e.lastP=e.lastP||e.lastPromo||'';e.letters=e.letters||[]});
+if(!S.set.grid)S.set.grid=Array.from({length:10},(_,i)=>Array.from({length:11},(_,j)=>S.set.base[i]?S.set.base[i]+j*S.set.allow[i]:0));
+S.set.titles=S.set.titles||['رئيس ملاحظين فنيين','مأمور تسجيل رابع','سائق ثالث','رئيس حرفيين اقدم','رئيس حرفيين اقدم اول','حرفي','حرفي اول'];S.ui=S.ui||{};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2600)};
+const pd=s=>s?new Date(s+'T00:00:00'):null;
+const fd=d=>d?`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:'';
+const iso=d=>d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';
+const addM=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x};
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const num=v=>+v||0,nf=n=>num(n).toLocaleString('en-US');
+const salary=(g,s)=>(S.set.grid[g-1]||[])[s-1]||0;
+const bA=e=>(e.lastA||'')>(e.lastP||'')?(e.lastA||''):(e.lastP||'');
+const ltxt=ls=>ls.map(l=>`${l.type} في ${fd(pd(l.date))} (${l.months} شهر)`).join(' و ');
+function avail(e){const b=bA(e);return (e.letters||[]).filter(l=>!l.used&&l.date>=b).sort((x,y)=>x.date<y.date?-1:1).slice(0,3)}
+function perL(e){const lp=pd(e.lastP),y=S.set.years[num(e.g)-1];if(!lp||!y)return[];const end=iso(addM(lp,y*12));return (e.letters||[]).filter(l=>l.date>=e.lastP&&l.date<=end)}
+const thP=e=>perL(e).filter(l=>l.type=='شكر');
+const thanksIn=e=>thP(e).length;
+function calc(e){
+ const g=num(e.g),s=num(e.s),b=bA(e),la=pd(b);if(!g||!s||!la)return null;
+ const av=avail(e),m=av.reduce((t,l)=>t+num(l.months),0),pen=num(e.pen);
+ const aDue=addM(la,12-m+pen),yrs=S.set.years[g-1];
+ const promo=!!yrs&&s>=yrs,pDue=promo?aDue:null,due=aDue;
+ const ng=promo?Math.max(g-1,1):g,ns=promo?1:Math.min(s+1,11);
+ return{status:promo?'ترفيع':'علاوة',aDue,pDue,due,ng,ns,nsal:salary(ng,ns),amt:S.set.allow[g-1],av,usedTxt:ltxt(av),lastD:la,lastT:(e.lastP&&e.lastP>=(e.lastA||''))?'ترفيع':'علاوة'};
+}
+const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
+const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['gear','الإعدادات',0,()=>settings()]];
+function home(){
+ $('#view').hidden=true;$('#home').hidden=false;
+ const t=new Date(),n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c);
+ const a=n.filter(x=>x.c.status=='علاوة'&&x.c.due>=t&&x.c.due<=addD(t,S.set.dA)).length;
+ const p=n.filter(x=>x.c.status=='ترفيع'&&x.c.due>=t&&x.c.due<=addM(t,1)).length;
+ $('#alerts').textContent=`الإشعارات: ${a} علاوة خلال ${S.set.dA} أيام، و${p} ترفيع خلال شهر`;
+ $('#tiles').innerHTML=TILES.map((x,i)=>`<button class="tile ${x[2]||''}" data-i="${i}"><svg viewBox="0 0 24 24">${ICON[x[0]]}</svg>${x[1]}</button>`).join('');
+ document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{$('#home').hidden=true;$('#view').hidden=false;TILES[b.dataset.i][3]();window.scrollTo(0,0)});
+}
+const shell=(title,body)=>{$('#view').innerHTML=`<div class="bar"><button class="btn alt" onclick="home()">رجوع</button><h2>${title}</h2></div><div class="page">${body}</div>`};
+const opt=(arr,v)=>arr.map(x=>`<option ${x==v?'selected':''}>${x}</option>`).join('');
+const rng=(n,v)=>opt(Array.from({length:n},(_,i)=>i+1),v);
+const EDU=['دكتوراه','ماجستير','دبلوم عالي','بكالوريوس','دبلوم','اعدادية','متوسطة','ابتدائية','يقرأ ويكتب'];
+let curL=[];
+const cur=()=>({...read(),letters:curL});
+function empForm(id){
+ editId=id??null;const e=id?S.emps.find(x=>x.id==id):{g:5,s:1,edu:'بكالوريوس'};curL=JSON.parse(JSON.stringify(e.letters||[]));
+ const f=(k,l,t='text',x='')=>`<label>${l}<input id="f_${k}" type="${t}" value="${e[k]??''}" ${x}></label>`;
+ shell(id?'تعديل بيانات موظف':'إضافة موظف',`<div class="cols">
+ <fieldset><legend>معلومات عامة</legend>${f('name','اسم الموظف (رباعي)')}<label>العنوان الوظيفي<input id="f_title" list="ttls" value="${e.title||''}"><datalist id="ttls">${S.set.titles.map(t=>`<option>${t}</option>`).join('')}</datalist></label>
+ <label>التحصيل الدراسي<select id="f_edu">${opt(EDU,e.edu)}</select></label>
+ <label>ملاحظات<textarea id="f_notes" rows="4">${e.notes||''}</textarea></label></fieldset>
+ <fieldset><legend>معلومات العلاوة السابقة</legend>
+ <label>الدرجة الوظيفية<select id="f_g">${rng(10,e.g)}</select></label><label>المرحلة<select id="f_s">${rng(11,e.s)}</select></label>
+ <label>الراتب<input id="f_sal" readonly></label>${f('lastA','تاريخ آخر علاوة','date')}${f('lastP','تاريخ آخر ترفيع','date')}
+ ${f('promoOrder','أمر آخر ترفيع (رقم وتاريخ)')}${f('pen','العقوبة (شهر)','number','min=0')}</fieldset>
+ <fieldset><legend>معلومات العلاوة الجديدة</legend>
+ <label>الدرجة الوظيفية<input id="n_g" readonly></label><label>المرحلة<input id="n_s" readonly></label><label>الراتب<input id="n_sal" readonly></label>
+ <label>التاريخ (الاستحقاق)<input id="n_d" readonly></label><label>مقدار العلاوة<input id="n_amt" readonly></label><label>حالة الاستحقاق<input id="n_st" readonly></label></fieldset></div>
+ <fieldset style="margin-top:14px"><legend>كتب القدم والشكر (الحد 3 كتب لكل علاوة، ولا يُستخدم الكتاب في علاوتين)</legend>
+ <div class="tools"><div><label>النوع<select id="l_type"><option>قدم</option><option>شكر</option></select></label></div><div><label>التاريخ<input id="l_date" type="date"></label></div><div><label>الأشهر<input id="l_m" type="number" value="1" min="0"></label></div><button class="btn" onclick="addL()">إضافة كتاب</button></div>
+ <div id="lst"></div><p id="thst" style="font-weight:600"></p></fieldset>
+ 
+ <div class="note">ملاحظة: لا يأخذ البرنامج حالات السكون في الحساب، يجب الانتباه الى حالات السكون وتعديل المدخلات.<br>ملاحظة: يجب ذكر سبب التغيير اليدوي للمدخلات عند التغيير في الملاحظات.</div>
+ <div class="act"><button class="btn gold" onclick="doCalc()">حسب</button><button class="btn" onclick="addEmp(false)">${id?'حفظ التعديل':'إضافة'}</button><button class="btn alt" onclick="addEmp(true)">إغلاق + إضافة</button></div>`);
+ const sync=()=>{$('#f_sal').value=nf(salary(num($('#f_g').value),num($('#f_s').value)))};
+ ['f_g','f_s'].forEach(i=>$('#'+i).oninput=sync);sync();
+ ['f_g','f_lastA','f_lastP'].forEach(i=>$('#'+i).addEventListener('input',renderL));
+ $('#l_type').onchange=()=>$('#l_m').value=$('#l_type').value=='شكر'?6:1;
+ renderL();if(id)doCalc();
+}
+function addL(){
+ const d=$('#l_date').value;if(!d){toast('أدخل تاريخ الكتاب');return}
+ const b=bA(cur()),old=b&&d<b;
+ if(!old&&curL.filter(l=>!l.used&&l.date>=b).length>=3){toast('الحد 3 كتب لكل علاوة. أضف علاوة أولاً');return}
+ curL.push({id:Date.now(),type:$('#l_type').value,date:d,months:num($('#l_m').value),used:old?'سابق':null});
+ renderL();
+}
+function delL(i){curL.splice(i,1);renderL()}
+function renderL(){
+ const e=cur(),av=avail(e).map(l=>l.id);
+ $('#lst').innerHTML=curL.length?`<div class="tw"><table><thead><tr><th>النوع</th><th>التاريخ</th><th>الأشهر</th><th>الحالة</th><th></th></tr></thead><tbody>${curL.map((l,i)=>`<tr><td>${l.type}</td><td>${fd(pd(l.date))}</td><td>${l.months}</td><td>${l.used?(l.used=='سابق'?'سابق':'مستخدم '+fd(pd(l.used))):av.includes(l.id)?'يُحتسب في العلاوة':'متاح'}</td><td><button class="btn red" onclick="delL(${i})">حذف</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="note" style="color:var(--mut)">لا توجد كتب مضافة.</p>';
+ $('#thst').innerHTML=`كتب الشكر خلال فترة الترفيع الحالية (${S.set.years[num(e.g)-1]||0} سنوات): <b>${thanksIn(e)}</b>`;
+}
+const read=()=>{const o={};document.querySelectorAll('[id^=f_]').forEach(i=>{if(!i.readOnly)o[i.id.slice(2)]=i.value});return o};
+function doCalc(){const c=calc(cur());if(!c){toast('أدخل الدرجة والمرحلة وتاريخ آخر علاوة أو ترفيع');return null}
+ $('#n_g').value=c.ng;$('#n_s').value=c.ns;$('#n_sal').value=nf(c.nsal);$('#n_d').value=fd(c.due);$('#n_amt').value=nf(c.amt);$('#n_st').value=c.status;return c}
+function addEmp(close){
+ const e=cur();if(!e.name.trim()){toast('اسم الموظف مطلوب');return}
+ if(!doCalc())return;
+ if(editId){S.emps=S.emps.map(x=>x.id==editId?{...e,id:editId}:x)}else S.emps.push({...e,id:Date.now()});
+ save();toast(editId?'تم حفظ التعديل':'تمت الإضافة');if(close||editId){list('all')}else empForm();
+}
+const mo=()=>iso(new Date()).slice(0,7);
+function list(mode,focus){
+ const T={a:'مستحقو العلاوات',p:'مستحقو الترفيع',all:'بيانات الموظفين'}[mode];
+ shell(T,`<div class="tools"><div><label>بحث بالاسم أو العنوان<input id="q" ${focus?'autofocus':''}></label></div>
+ ${mode=='all'?'':`<div><label>شهر الاستحقاق<input id="m" type="month" value="${mo()}"></label></div><div><label><input id="allm" type="checkbox" style="width:auto"> كل الأشهر</label></div><button class="btn gold" onclick="exp('${mode}')">تصدير Excel</button>`}</div>
+ <div class="tw"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>`);
+ const draw=()=>{
+  const q=$('#q').value.trim(),m=mode=='all'?'':$('#m').value,am=mode!='all'&&$('#allm').checked;
+  const rows=rowsFor(mode,q,m,am);
+  $('#th').innerHTML='<tr><th>ت</th><th>الاسم</th><th>العنوان الوظيفي</th><th>الدرجة/المرحلة</th><th>الراتب</th><th>الجديد</th><th>الاستحقاق</th><th>الحالة</th><th>كتب الشكر بفترة الترفيع</th><th></th></tr>';
+  $('#tb').innerHTML=rows.map(({e,c},i)=>`<tr style="box-shadow:inset -6px 0 0 hsl(${(i*47)%360} 65% 48%)"><td>${i+1}</td><td>${e.name}</td><td>${e.title||''}</td><td>${e.g}/${e.s}</td><td>${nf(salary(e.g,e.s))}</td><td>${c.ng}/${c.ns} (${nf(c.nsal)})</td><td>${fd(c.due)}</td><td>${c.status}</td><td>${thanksIn(e)}</td><td style="white-space:nowrap"><button class="btn alt" onclick="empForm(${e.id})">تعديل</button> <button class="btn red" onclick="delEmp(${e.id},this)">حذف</button></td></tr>`).join('')||'<tr><td colspan="10">لا توجد بيانات. أضف موظفاً من الشاشة الرئيسية.</td></tr>';
+ };
+ ['q','m','allm'].forEach(i=>{const el=$('#'+i);if(el)el.oninput=draw});draw();
+}
+function rowsFor(mode,q='',m='',am=true){
+ return S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c&&(!q||(x.e.name+x.e.title).includes(q))&&
+  (mode=='all'||(mode=='a'?x.c.status=='علاوة':x.c.status=='ترفيع')&&(am||iso(x.c.due).slice(0,7)==m)));
+}
+function delEmp(id,b){if(b.dataset.c){S.emps=S.emps.filter(x=>x.id!=id);save();list('all');toast('تم الحذف');return}b.dataset.c=1;b.textContent='تأكيد الحذف';setTimeout(()=>{b.dataset.c='';b.textContent='حذف'},4000)}
+function stats(){
+ const n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c),m=mo();
+ const by=Array.from({length:10},(_,i)=>n.filter(x=>x.e.g==i+1).length);
+ shell('احصائيات',`<div class="stat"><div><b>${S.emps.length}</b>عدد الموظفين</div><div><b>${n.filter(x=>x.c.status=='علاوة'&&iso(x.c.due).slice(0,7)==m).length}</b>علاوات هذا الشهر</div><div><b>${n.filter(x=>x.c.status=='ترفيع'&&iso(x.c.due).slice(0,7)==m).length}</b>ترفيعات هذا الشهر</div><div><b>${nf(n.reduce((s,x)=>s+salary(x.e.g,x.e.s),0))}</b>مجموع الرواتب</div></div>
+ <div class="tw"><table><thead><tr><th>الدرجة</th>${by.map((_,i)=>`<th>${i+1}</th>`).join('')}</tr></thead><tbody><tr><td>عدد الموظفين</td>${by.map(v=>`<td>${v}</td>`).join('')}</tr></tbody></table></div>`);
+}
+const BGS={'افتراضي':null,'أبيض':['#ffffff','#f3f5f5'],'أخضر هادئ':['#e3efe6','#f8fcf9'],'كريمي':['#f3ecdd','#fffaf0'],'رمادي':['#e6e8ea','#f8f9fa'],'نقوش':['#eaf1ef','#ffffff'],'داكن':null};
+function applyUI(){
+ const r=document.documentElement,u=S.ui||{},bd=document.body,k=u.bg||'افتراضي';
+ ['--ink','--bg','--card'].forEach(x=>r.style.removeProperty(x));bd.style.backgroundImage='';
+ if(k=='داكن')r.setAttribute('data-theme','dark');else if(k=='افتراضي')r.removeAttribute('data-theme');else{r.setAttribute('data-theme','light');r.style.setProperty('--bg',BGS[k][0]);r.style.setProperty('--card',BGS[k][1])}
+ if(k=='نقوش'){bd.style.backgroundImage='radial-gradient(#0f4c4733 1.6px,transparent 1.6px)';bd.style.backgroundSize='20px 20px'}
+ if(u.color)r.style.setProperty('--ink',u.color);
+ bd.style.fontSize=(u.size||16)+'px';
+}
+function settings(){
+ const u=S.ui;
+ shell('الإعدادات',`<div class="cols"><fieldset><legend>لون الخط</legend><input type="color" id="u_c" value="${u.color||'#16302d'}" style="height:44px"><div class="act"><button class="btn alt" id="u_r">اللون الافتراضي</button></div></fieldset>
+ <fieldset><legend>حجم الخط</legend><select id="u_s">${opt([14,16,18,20,22],u.size||16)}</select></fieldset>
+ <fieldset><legend>شكل الخلفية</legend><select id="u_b">${opt(Object.keys(BGS),u.bg||'افتراضي')}</select></fieldset></div>`);
+ const up=()=>{save();applyUI()};
+ $('#u_c').oninput=()=>{S.ui.color=$('#u_c').value;up()};
+ $('#u_r').onclick=()=>{S.ui.color='';up();settings()};
+ $('#u_s').onchange=()=>{S.ui.size=num($('#u_s').value);up()};
+ $('#u_b').onchange=()=>{S.ui.bg=$('#u_b').value;up()};
+}
+function scalePage(){
+ const s=S.set;
+ shell('سلم الرواتب',`<p style="color:var(--mut)">القيم بالدينار. عدّل أي خانة ثم اضغط حفظ.</p><div class="tw"><table><thead><tr><th>الدرجة</th>${Array.from({length:11},(_,j)=>`<th>م${j+1}</th>`).join('')}<th>العلاوة السنوية</th><th>سنوات الترفيع</th></tr></thead><tbody>${s.grid.map((r,i)=>`<tr><td>${i+1}</td>${r.map((v,j)=>`<td><input type="number" data-sg="${i}" data-ss="${j}" value="${v}"></td>`).join('')}<td><input type="number" data-k="allow" data-i="${i}" value="${s.allow[i]}"></td><td><input type="number" data-k="years" data-i="${i}" value="${s.years[i]}"></td></tr>`).join('')}</tbody></table></div>
+ <div class="cols" style="margin-top:14px"><fieldset><legend>العناوين الوظيفية (سطر لكل عنوان)</legend><textarea id="ttl" rows="6">${s.titles.join('\n')}</textarea></fieldset>
+ <fieldset><legend>التنبيهات</legend><label>قبل استحقاق العلاوة (يوم)<input type="number" id="dA" value="${s.dA}"></label><label>قبل استحقاق الترفيع (يوم)<input type="number" id="dP" value="${s.dP}"></label></fieldset></div>
+ <div class="act"><button class="btn" onclick="saveScale()">حفظ</button></div>`);
+}
+function saveScale(){
+ document.querySelectorAll('[data-sg]').forEach(i=>S.set.grid[i.dataset.sg][i.dataset.ss]=num(i.value));
+ document.querySelectorAll('[data-k]').forEach(i=>S.set[i.dataset.k][i.dataset.i]=num(i.value));
+ S.set.titles=$('#ttl').value.split('\n').map(x=>x.trim()).filter(Boolean);S.set.dA=num($('#dA').value);S.set.dP=num($('#dP').value);save();toast('تم حفظ سلم الرواتب');
+}
+function apPage(kind){
+ const P=kind=='p';
+ shell(P?'إضافة ترفيع جديد':'إضافة علاوة جديدة',`<div class="cols"><fieldset><legend>الموظف</legend><label>اختر الموظف<select id="ap_e"><option value="">— اختر —</option>${S.emps.map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}</select></label><p id="ap_cur" style="color:var(--mut)"></p></fieldset>
+ <fieldset><legend>معلومات ${P?'الترفيع':'العلاوة'} الجديدة</legend><label>الدرجة الجديدة<select id="ap_g">${rng(10,1)}</select></label><label>المرحلة الجديدة<select id="ap_s">${rng(11,1)}</select></label>${P?'<label>العنوان الوظيفي الجديد<select id="ap_t"></select></label>':''}<label>التاريخ<input id="ap_d" type="date"></label><label>الراتب الجديد<input id="ap_sal" readonly></label></fieldset></div>
+ <div class="act"><button class="btn" onclick="apSave('${kind}')">إضافة</button></div>`);
+ const sal=()=>{$('#ap_sal').value=nf(salary(num($('#ap_g').value),num($('#ap_s').value)))};
+ ['ap_g','ap_s'].forEach(i=>$('#'+i).onchange=sal);
+ $('#ap_e').onchange=()=>{const e=S.emps.find(x=>x.id==$('#ap_e').value);if(!e)return;const c=calc(e),g=num(e.g),s=num(e.s);
+  $('#ap_g').value=P?Math.max(g-1,1):g;$('#ap_s').value=P?1:Math.min(s+1,11);
+  const d=c?(P?(c.pDue||c.due):c.aDue):null;$('#ap_d').value=d?iso(d):'';
+  if(P)$('#ap_t').innerHTML=opt([...new Set([e.title,...S.set.titles].filter(Boolean))],e.title);
+  $('#ap_cur').textContent=`الحالي: درجة ${g} مرحلة ${s} (${nf(salary(g,s))}) | آخر علاوة ${fd(pd(e.lastA))||'-'} | آخر ترفيع ${fd(pd(e.lastP))||'-'}`;sal()};
+ sal();
+}
+function apSave(kind){
+ const e=S.emps.find(x=>x.id==$('#ap_e').value),d=$('#ap_d').value;
+ if(!e){toast('اختر الموظف');return}if(!d){toast('اختر التاريخ');return}
+ const c=calc(e);if(c)(e.letters||[]).forEach(l=>{if(c.av.some(a=>a.id==l.id))l.used=d});
+ e.g=$('#ap_g').value;e.s=$('#ap_s').value;
+ if(kind=='p'){e.lastP=d;const t=$('#ap_t').value;if(t)e.title=t}else e.lastA=d;
+ save();toast(kind=='p'?'تمت إضافة الترفيع':'تمت إضافة العلاوة');home();
+}
+const BD={style:'thin',color:{argb:'FF000000'}};
+function xs(c,f,z,fill,al='center',bord=true){c.font={name:f,size:z,bold:true,color:{argb:'FF000000'}};c.alignment={horizontal:al,vertical:'middle',wrapText:true,readingOrder:2};if(fill)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:fill}};if(bord)c.border={top:BD,left:BD,bottom:BD,right:BD}}
+const UD=d=>d?new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())):'';
+async function exp(mode){
+ if(!dl){toast('التصدير غير متاح في هذا العرض');return}
+ if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
+ const m=$('#m').value,rows=rowsFor(mode,'',m,$('#allm').checked),yr=(m||mo()).slice(0,4),A=mode=='a',wb=new ExcelJS.Workbook();
+ const wc=t=>Math.max(4,Math.round((t/15-5)/7*10)/10);
+ const W=A?[540,1890,1260,810,810,1080,810,720,900,1080,1440,2880,1260].map(wc):[8,15.55,16.21,33.21,20.43,12.55,11.99,25.87,23.33,26.88,75.99,10.2,19.77,16.21,16.21,21.32],n=W.length;
+ const ws=wb.addWorksheet(A?'علاوات':'وجبة 4',{views:[{rightToLeft:true}]});ws.columns=W.map(w=>({width:w}));
+ if(A){
+  ws.pageSetup={orientation:'landscape',paperSize:1,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.125,right:.125,top:.06,bottom:0,header:.3,footer:.3}};
+  ws.mergeCells(1,1,1,n);const t=ws.getCell(1,1);t.value=`جدول بأسماء موظفي بلدية (هيت) مستحقي العلاوة السنوية لعام ${yr}`;xs(t,'Arial',12,null,'center',false);ws.getRow(1).height=30;
+  const hr=ws.addRow(['ت','الاسم الثلاثي','العنوان الوظيفي','الدرجة الحالية','المرحلة الحالية','الراتب الحالي','مقدار العلاوة','الدرجة الجديدة','المرحلة الجديدة','الراتب الجديد','تاريخ أخر علاوة أو ترفيع حسب الأمر الصادر من بلديات الانبار','عدد الأوامر الإدارية بالقدم خلال السنة','تاريخ الاستحقاق']);
+  hr.height=60;hr.eachCell(c=>xs(c,'Arial',11,'FFDDD9C3'));
+  rows.forEach(({e,c},i)=>{const r=ws.addRow([i+1,e.name,e.title,+e.g,+e.s,salary(e.g,e.s),c.amt,c.ng,c.ns,c.nsal,fd(c.lastD)+' '+(c.lastT=='ترفيع'?'ترفيع':'علاوة سنوية'),c.usedTxt?`لديه ${c.usedTxt} الصادر من مديرية بلديات الانبار`:'',UD(c.due)]);
+   r.height=55.3;r.eachCell(x=>xs(x,'Arial',11,'FFDDD9C3'));[6,7,10].forEach(k=>r.getCell(k).numFmt='#,##0');r.getCell(13).numFmt='d/m/yyyy'});
+  ws.addRow([]);
+  ['المهندس سنان سعدي مجيد            مدير بلدية هيت            /   /'+yr,'قسمة محمد عبدالله            مسؤولة الشعبة المالية        /    /'+yr,'خالد وليد عبدالجبار        مسؤول شعبة الموارد البشرية       /    /'+yr,'فرقد مقبل قهير        مسؤول شعبة التدقيق        /     /'+yr,'حسان عبدالخالق حنوش        مسؤول الشعبة القانونية      /     /'+yr].forEach(tx=>{const r=ws.addRow([tx]);ws.mergeCells(r.number,1,r.number,n);xs(r.getCell(1),'Arial',11,null,'right',false)});
+ }else{
+  ws.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.25,right:.25,top:0,bottom:0,header:.3,footer:.3},printArea:'A1:P'+(3+rows.length)};
+  ws.mergeCells(1,1,1,16);ws.mergeCells(2,1,2,12);ws.mergeCells(2,13,2,16);
+  ws.getCell(1,1).value=`(( جدول بأسماء الموظفين المشمولين بالترفيع لمديرية بلدية هيت (التمويل الذاتي/ ${yr} ))`;
+  ws.getCell(2,1).value='الدرجة الحالية بجانب الحذف';ws.getCell(2,13).value='جانب الاستحداث';
+  for(let r=1;r<=2;r++){for(let k=1;k<=16;k++)xs(ws.getCell(r,k),'Arial',24,'FFCC99FF');ws.getRow(r).height=100.8}
+  const hr=ws.addRow(['ت','اسم الوزارة','اسم البلدية','الاسم الثلاثي','العنوان الوظيفي','الدرجة الحالية','المرحلة الحالية','الشهادة','تاريخ استحقاق الترفيع السابق','امر اخر ترفيع','اوامر الشكر','العقوبات او إضافة خدمة','العنوان الوظيفي الجديد','الدرجة الجديده','المرحلة الجديده','تاريخ الاستحقاق الجديد']);
+  hr.height=100.8;hr.eachCell(c=>xs(c,'Times New Roman',18,'FFFFFFFF'));
+  rows.forEach(({e,c},i)=>{const v=[i+1,'محافظة الانبار','مديرية بلدية هيت',e.name,e.title,+e.g,+e.s,e.edu,UD(pd(e.lastP)),e.promoOrder||'/',ltxt(perL(e))||'/',num(e.pen)?num(e.pen)+' شهر':'/',e.title,c.ng,c.ns,UD(c.due)];const r=ws.addRow(v);
+   r.eachCell(x=>xs(x,'Times New Roman',20,'FFC0C0C0'));[9,16].forEach(k=>r.getCell(k).numFmt='d/m/yyyy;@');
+   r.height=Math.max(100.8,27*Math.max(...v.map((x,k)=>typeof x=='string'?Math.ceil(x.length/(W[k]*.5)):1)))});
+  ws.addRow([]);const f=ws.addRow([]);f.getCell(1).value='الدرجة الحالية بجانب الحذف';f.getCell(13).value='جانب الاستحداث';[1,13].forEach(k=>{f.getCell(k).font={name:'Times New Roman',size:14,bold:true}});
+ }
+ const buf=await wb.xlsx.writeBuffer();
+ try{await dl.save({filename:(A?'علاوات_':'ترفيعات_')+(m||'الكل')+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
+}
+applyUI();
+(async()=>{try{dl=await claude.use('downloads')}catch(e){}})();
+home();
+</script>
+</body>
+</html>
