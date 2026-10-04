@@ -6,6 +6,9 @@
 <title>وحدة العلاوات والترفيعات - بلدية هيت</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
 :root{--bg:#eaf1ef;--card:#fff;--ink:#16302d;--mut:#5d7471;--pri:#0f4c47;--pri2:#1b6b63;--gold:#c58f2c;--line:#cfdcd9;--red:#b3261e;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -52,9 +55,15 @@ body *,.btn,.tile{font-size:inherit}
 </style>
 </head>
 <body>
+<div id="login" style="display:none;position:fixed;inset:0;z-index:20;background:var(--bg);align-items:center;justify-content:center;padding:16px">
+ <div style="background:var(--card);border:2px solid var(--line);border-radius:20px;padding:22px;width:100%;max-width:360px">
+  <h2 style="margin:0 0 4px;color:var(--pri2)">تسجيل الدخول</h2><p style="margin:0 0 8px;color:var(--mut)">وحدة العلاوات والترفيعات - بلدية هيت</p>
+  <label>البريد الإلكتروني<input id="lg_em" type="email" autocomplete="username" dir="ltr"></label>
+  <label>كلمة المرور<input id="lg_pw" type="password" autocomplete="current-password" dir="ltr" onkeydown="if(event.key=='Enter')doLogin()"></label>
+  <p id="lg_err" class="note"></p><button class="btn" style="width:100%" onclick="doLogin()">دخول</button></div></div>
 <div id="home">
- <div class="hero"><h1>مديرية بلدية هيت</h1><p>وحدة العلاوات والترفيعات</p></div>
- <div class="wrap"><div class="alert" id="alerts"></div>
+ <div class="hero" style="position:relative"><button class="btn alt" id="outb" onclick="doLogout()" style="display:none;position:absolute;top:10px;inset-inline-start:10px;padding:5px 12px">خروج</button><h1>مديرية بلدية هيت</h1><p>وحدة العلاوات والترفيعات</p></div>
+ <div class="wrap"><div class="alert" id="alerts"></div><div class="alert" id="cstat" style="font-size:12px;color:var(--mut)"></div>
  <div class="grid" id="tiles"></div></div>
 </div>
 <div id="view" hidden></div>
@@ -62,12 +71,32 @@ body *,.btn,.tile{font-size:inherit}
 <script>
 const $=s=>document.querySelector(s),KEY='hit-ap-v1';
 const DEF={emps:[],set:{base:[0,0,0,0,429000,362000,0,0,210000,170000],allow:[20,17,10,8,6,6,6,3,3,3].map(x=>x*1000),years:[0,5,5,5,5,4,4,4,4,4],dA:10,dP:30}};
+// ===== إعدادات Firebase: الصق هنا القيم من Firebase Console > Project settings > Your apps =====
+const FB_CONFIG={apiKey:"",authDomain:"",projectId:"",storageBucket:"",messagingSenderId:"",appId:""};
+const FB_ON=!!FB_CONFIG.apiKey;
+let fdb=null,fuser=null,ctimer=null;
 let S=JSON.parse(JSON.stringify(DEF)),editId=null,dl=null;
 try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+const TG0=[
+'خبير/مستشار قانوني في الوزارة/معاون مدير عام (اداري)/معاون مدير عام (فني)/معاون مفتش عام/مدير تنفيذي/مستشار قانوني/رئيس مهندسين بحريين اقدم اول/رئيس اطباء ممارسين اقدم اول/رئيس اطباء اسنان اقدم اول/رئيس صيادلة اقدم اول/رئيس صيادلة اختصاص/رئيس اطباء اسنان اختصاص/رئيس مهندسين اطراف ومساند اقدم اول/رئيس ليزر تطبيقي اقدم اول/ممرض جامعي استشاري/رئيس مدربين رياضي اقدم اول/مستشار سياسي اقدم/مفتش اول اقدم/مدرس اقدم اول/رئيس أطباء عموميين اقدم اول/رئيس اطباء ممارسين بفرع اقدم اول/رئيس اطباء ممارسين تخدير اقدم/رئيس اطباء ممارسين طب عدلي اقدم',
+'رئيس مبرمجين اقدم/رئيس مراقبين اقدم/رئيس مراقبين فنيين اقدم/رئيس مرشدين اقدم/رئيس مهندسين اقدم/رئيس مهندسين زراعيين اقدم/مدير اقدم/مدير تدقيق اقدم/مدير حسابات اقدم/مدير فني اقدم/مستشار قانوني مساعد/رئيس مهندسين بحريين اقدم/رئيس معاون وقائي اقدم اول/رئيس مهندسين اطراف ومساند اقدم/رئيس معاون طبي اطراف ومساند اقدم/رئيس ادلة جنائية/اداري صحي اقدم/رئيس معاون ذوي احتياجات خاصة اقدم/رئيس مساعد مختبر صناعة اسنان اقدم/رئيس ليزر تطبيقي اقدم/ممرض جامعي اختصاص اقدم/رئيس مدربين رياضي اقدم/مستشار سياسي/مفتش اول/مدرس اقدم ثاني',
+'رئيس رسامين اقدم/رئيس رسامين هندسي اقدم/رئيس مبرمجين/رئيس مراقبين/رئيس مساحين اقدم/رئيس مهندسين/رئيس مهندسين زراعيين/مدير/مدير تدقيق/مشاور قانوني اقدم/رئيس مهندسين بحريين/بحار سابع/رئيس معاون وقائي اقدم ثاني/رئيس مهندسين اطراف ومساند/رئيس معاون طبي اطراف ومساند اول/رئيس معاونين طبين اقدم/رئيس معاونين ادلة جنائية اولى/رئيس اداري صحي اول/رئيس معاون ذوي احتياجات خاصة اول/رئيس مساعد مختبر صناعة اسنان اول/رئيس ليزر تطبيقي/ممرض جامعي اختصاص/مشاور سياسي اقدم/رئيس مدربين رياضي/مفتش ثاني/مدرس اقدم/رئيس مشغلي حاسبة اقدم اول',
+'معاون رئيس مبرمجين/معاون رئيس مراقبين فنيين/معاون رئيس مرشدين/معاون رئيس مرشدين زراعيين/معاون رئيس مهندسين/معاون مدير/معاون مدير تدقيق/معاون مدير حسابات/معاون مدير فني/رئيس رسامين/رئيس رسامين هندسي/رئيس مرشدين زراعيين/رئيس مساحين/مشاور قانوني/معاون رئيس مهندسين بحريين/رئيس حرفيين اقدم اول/رئيس كتاب طابعة اقدم/رئيس سواق اقدم اول/رئيس مشغلي حاسبة اقدم/رئيس موظف خدمات اقدم اول/رئيس مامور بدالة اقدم اول/معاون رئيس مهندسين اطراف ومساند/رئيس معاون طبي اطراف ومساند ثاني/طبيب اسنان اختصاص اول/صيدلي اختصاص اول/طبيب اختصاص اول/رئيس معاونين ادلة جنائية ثاني/رئيس اداري صحي ثاني/رئيس معاون ذوي احتياجات خاصة ثاني/رئيس مساعد مختبر صناعة اسنان ثاني/معاون رئيس ليزر تطبيقي/ممرض جامعي اختصاص اول/معاون رئيس مدربين رياضي/مشاور سياسي/مفتش ثالث/مدرس اول/رئيس مشغلي حاسبة اقدم ثاني',
+'مامور تسجيل اقدم/مبرمج اقدم/محاسب اقدم/مدقق اقدم/مراقب اقدم/مراقب فني اقدم/مرشد اقدم/مشاور قانوني مساعد/معاون رئيس رسامين/معاون رئيس رسامين هندسي/معاون رئيس مرشدين زراعيين/معاون رئيس مساحين/مهندس اقدم/مهندس زراعي اقدم/امين مخزن اقدم/رئيس امناء صناديق/رئيس حراس اقدم/رئيس حرفيين اقدم/رئيس سواق اقدم/رئيس كتاب طابعة/رئيس مشغلي حاسبة/رئيس ملاحظين/رئيس ملاحظين فني/مهندس بحري اقدم/رئيس طباخين اقدم/رئيس مأمور مائدة اقدم/طبيب ممارس اول/صيدلي ممارس/مهندس اطراف ومساند اقدم/رئيس معاون طبي اطراف ومساند/رئيس معاون طبي غذائي/رئيس تقني اجهزة طبية/رئيس اداري صحي/رئيس معاون ذوي احتياجات خاصة/رئيس مساعد مختبر صناعة اسنان/رئيس معاون وقائي اسنان/رئيس معاون طبي صحة مجتمع/ليزر تطبيقي اقدم/مدرب رياضي اقدم/مساعد مشاور سياسي/مفتش رابع/مدرس ثاني',
+'امين مخزن/رئيس حراس/رئيس سواق/رئيس حرفيين/رسام هندسي اقدم/مامور تسجيل اول/مبرمج/محاسب/مدقق/مراقب اول/مراقب فني اول/مرشد اول/مرشد زراعي اول/مساح اقدم/مشغل حاسبة اقدم/معاون رئيس امناء صناديق/معاون رئيس كتاب طابعة/معاون مهندس معماري/ملاحظ/مهندس/مهندس زراعي/مهندس بحري/رئيس طباخين/رئيس مأمور مائدة/طبيب ممارس/صيدلي ممارس/رئيس ادلة جنائية/معاون رئيس طبي غذائي/مهندس اطراف ومساند/طبيب اسنان مقيم اقدم/معاون رئيس معاونين ادلة جنائية/معاون رئيس اداري صحي/معاون رئيس معاون طبي اطراف ومساند/معاون رئيس معاون ذوي احتياجات خاصة/معاون رئيس مساعد مختبر صناعة اسنان/معاون رئيس وقائي اسنان/معاون رئيس معاون طبي صحة مجتمع/ليزر تطبيقي/مدرب رياضي/باحث سياسي/قانوني/مفتش خامس/مدرس ثالث',
+'امين صندوق اقدم/رئيس محصلين/رسام/رسام هندسي/كاتب طابعة اقدم/مامور تسجيل ثاني/مراقب/مراقب فني/مرشد/مرشد زراعي/مساح/مشغل حاسبة/معاون امين مخزن/معاون رئيس حراس/معاون رئيس حرفيين/معاون رئيس سواق/معاون قانوني/معاون مبرمج/معاون محاسب/معاون مدقق/معاون مفتش/معاون ملاحظ/معاون ملاحظ فني/معاون مهندس/معاون مهندس زراعي/معاون مهندس بحري/طباخ اقدم/مأمور مائدة اقدم/معاون مهندس اطراف ومساند/معاون مهندس اجهزة طبية/معاون طبي غذائي اقدم/معاون تقني اجهزة طبية اقدم/معاون ادلة جنائية اقدم/معاون صيدلي اقدم/معاون ادلة جنائية/معاون طبي اطراف ومساند اقدم/اداري صحي/معاون طبي ذوي الاحتياجات الخاصة اقدم/مساعد مختبر صناعة اسنان اقدم/معاون وقائي اسنان اقدم/معاون طبي صحة مجتمع اقدم/معاون ليزر تطبيقي/معاون مدرب رياضي/مساعد باحث سياسي/معاون مفتش/مدرس رابع',
+'امين صندوق/حارس اقدم/حرفي اقدم/سائق اقدم/فني/كاتب/كاتب تدقيق/كاتب حسابات/كاتب طابعة اول/مامور تسجيل ثالث/محصل اقدم/مراقب زراعي/معاون رسام هندسي/معاون مراقب/معاون مراقب فني/معاون مرشد/معاون مساح/طباخ اول/مأمور مائدة اول/معاون طبي غذائي متدرب/معاون ادلة جنائية متدرب/اداري صحي متدرب/معاون طبي اطراف ومساند متدرب/معاون طبي ذوي الاحتياجات الخاصة متدرب/معاون وقائي اسنان متدرب/معاون طبي صحة مجتمع',
+'حارس اول/حرفي اول/سائق اول/كاتب طابعة ثان/مامور تسجيل رابع/محصل/معاون امين صندوق/موظف خدمات اقدم/طباخ/مأمور مائدة',
+'حارس ثالث/حارس ثاني/حرفي/سائق ثالث/سائق ثان/كاتب طابعة ثالث/معاون حرفي/معاون موظف خدمات/موظف خدمات/معاون طباخ/معاون مأمور مائدة'];
+const EGD={'دكتوراه':[1,5],'ماجستير':[2,6],'دبلوم عالي':[3,6],'بكالوريوس':[3,8],'دبلوم':[5,9],'اعدادية':[6,10],'متوسطة':[8,10],'ابتدائية':[8,10],'يقرأ ويكتب':[9,10]};
+let tgw=[];
+function migrate(){
 S.emps.forEach(e=>{e.lastA=e.lastA||e.last||'';e.lastP=e.lastP||e.lastPromo||'';e.letters=e.letters||[]});
 if(!S.set.grid)S.set.grid=Array.from({length:10},(_,i)=>Array.from({length:11},(_,j)=>S.set.base[i]?S.set.base[i]+j*S.set.allow[i]:0));
-S.set.titles=S.set.titles||['رئيس ملاحظين فنيين','مأمور تسجيل رابع','سائق ثالث','رئيس حرفيين اقدم','رئيس حرفيين اقدم اول','حرفي','حرفي اول'];S.ui=S.ui||{};
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+S.set.tg=S.set.tg||TG0.map(x=>[...new Set(x.split('/'))]);S.set.eg=Object.assign({},EGD,S.set.eg||{});S.ui=S.ui||{};
+}
+migrate();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}cloudSave()};
 const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2600)};
 const pd=s=>s?new Date(s+'T00:00:00'):null;
 const fd=d=>d?`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:'';
@@ -111,8 +140,8 @@ function empForm(id){
  editId=id??null;const e=id?S.emps.find(x=>x.id==id):{g:5,s:1,edu:'بكالوريوس'};curL=JSON.parse(JSON.stringify(e.letters||[]));
  const f=(k,l,t='text',x='')=>`<label>${l}<input id="f_${k}" type="${t}" value="${e[k]??''}" ${x}></label>`;
  shell(id?'تعديل بيانات موظف':'إضافة موظف',`<div class="cols">
- <fieldset><legend>معلومات عامة</legend>${f('name','اسم الموظف (رباعي)')}<label>العنوان الوظيفي<input id="f_title" list="ttls" value="${e.title||''}"><datalist id="ttls">${S.set.titles.map(t=>`<option>${t}</option>`).join('')}</datalist></label>
- <label>التحصيل الدراسي<select id="f_edu">${opt(EDU,e.edu)}</select></label>
+ <fieldset><legend>معلومات عامة</legend>${f('name','اسم الموظف (رباعي)')}<label>التحصيل الدراسي<select id="f_edu">${opt(EDU,e.edu)}</select></label>${f('eduX','التحصيل الدراسي الدقيق')}
+ <label>العنوان الوظيفي<select id="f_title" data-v="${e.title||''}"></select><input id="f_titleX" placeholder="اكتب العنوان الوظيفي" style="display:none;margin-top:6px"></label>
  <label>ملاحظات<textarea id="f_notes" rows="4">${e.notes||''}</textarea></label></fieldset>
  <fieldset><legend>معلومات العلاوة السابقة</legend>
  <label>الدرجة الوظيفية<select id="f_g">${rng(10,e.g)}</select></label><label>المرحلة<select id="f_s">${rng(11,e.s)}</select></label>
@@ -131,6 +160,12 @@ function empForm(id){
  ['f_g','f_s'].forEach(i=>$('#'+i).oninput=sync);sync();
  ['f_g','f_lastA','f_lastP'].forEach(i=>$('#'+i).addEventListener('input',renderL));
  $('#l_type').onchange=()=>$('#l_m').value=$('#l_type').value=='شكر'?6:1;
+ const refG=()=>{const r=S.set.eg[$('#f_edu').value]||[1,10],c=num($('#f_g').value)||num(e.g),gs=[];for(let i=1;i<=10;i++)if((i>=r[0]&&i<=r[1])||i==c)gs.push(i);$('#f_g').innerHTML=opt(gs,c)};
+ const refT=k=>{const t=$('#f_title'),g=num($('#f_g').value),L=[...(S.set.tg[g-1]||[])];let v=t.dataset.v;if(v&&!L.includes(v)){if(k)L.unshift(v);else v=''}t.dataset.v=v;t.innerHTML='<option value="">— اختر —</option>'+opt(L,v)+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';$('#f_titleX').style.display='none'};
+ $('#f_title').onchange=()=>{const t=$('#f_title');t.dataset.v=t.value;const x=$('#f_titleX');x.style.display=t.value=='__new__'?'':'none';if(t.value=='__new__')x.focus()};
+ $('#f_edu').onchange=()=>{refG();refT(0);sync();renderL()};
+ $('#f_g').addEventListener('input',()=>refT(0));
+ refG();refT(1);sync();
  renderL();if(id)doCalc();
 }
 function addL(){
@@ -151,6 +186,7 @@ function doCalc(){const c=calc(cur());if(!c){toast('أدخل الدرجة وال
  $('#n_g').value=c.ng;$('#n_s').value=c.ns;$('#n_sal').value=nf(c.nsal);$('#n_d').value=fd(c.due);$('#n_amt').value=nf(c.amt);$('#n_st').value=c.status;return c}
 function addEmp(close){
  const e=cur();if(!e.name.trim()){toast('اسم الموظف مطلوب');return}
+ if(e.title=='__new__'){const t=(e.titleX||'').trim();if(!t){toast('اكتب العنوان الوظيفي');return}e.title=t;const L=S.set.tg[num(e.g)-1];if(!L.includes(t))L.push(t)}delete e.titleX;
  if(!doCalc())return;
  if(editId){S.emps=S.emps.map(x=>x.id==editId?{...e,id:editId}:x)}else S.emps.push({...e,id:Date.now()});
  save();toast(editId?'تم حفظ التعديل':'تمت الإضافة');if(close||editId){list('all')}else empForm();
@@ -203,35 +239,41 @@ function settings(){
 function scalePage(){
  const s=S.set;
  shell('سلم الرواتب',`<p style="color:var(--mut)">القيم بالدينار. عدّل أي خانة ثم اضغط حفظ.</p><div class="tw"><table><thead><tr><th>الدرجة</th>${Array.from({length:11},(_,j)=>`<th>م${j+1}</th>`).join('')}<th>العلاوة السنوية</th><th>سنوات الترفيع</th></tr></thead><tbody>${s.grid.map((r,i)=>`<tr><td>${i+1}</td>${r.map((v,j)=>`<td><input type="number" data-sg="${i}" data-ss="${j}" value="${v}"></td>`).join('')}<td><input type="number" data-k="allow" data-i="${i}" value="${s.allow[i]}"></td><td><input type="number" data-k="years" data-i="${i}" value="${s.years[i]}"></td></tr>`).join('')}</tbody></table></div>
- <div class="cols" style="margin-top:14px"><fieldset><legend>العناوين الوظيفية (سطر لكل عنوان)</legend><textarea id="ttl" rows="6">${s.titles.join('\n')}</textarea></fieldset>
+ <div class="cols" style="margin-top:14px"><fieldset><legend>العناوين الوظيفية (سطر لكل عنوان)</legend><label>الدرجة<select id="tg_g">${rng(10,1)}</select></label><textarea id="ttl" rows="8"></textarea></fieldset>
+ <fieldset><legend>الدرجات المسموحة لكل تحصيل دراسي</legend><div class="tw"><table style="min-width:0"><thead><tr><th>التحصيل</th><th>من</th><th>إلى</th></tr></thead><tbody>${EDU.map(x=>`<tr><td>${x}</td><td><input type="number" min="1" max="10" data-eg="${x}" data-p="0" value="${s.eg[x][0]}"></td><td><input type="number" min="1" max="10" data-eg="${x}" data-p="1" value="${s.eg[x][1]}"></td></tr>`).join('')}</tbody></table></div></fieldset>
  <fieldset><legend>التنبيهات</legend><label>قبل استحقاق العلاوة (يوم)<input type="number" id="dA" value="${s.dA}"></label><label>قبل استحقاق الترفيع (يوم)<input type="number" id="dP" value="${s.dP}"></label></fieldset></div>
  <div class="act"><button class="btn" onclick="saveScale()">حفظ</button></div>`);
+ tgw=JSON.parse(JSON.stringify(s.tg));let cg=0;const ld=()=>{$('#ttl').value=tgw[cg].join('\n')};ld();
+ $('#tg_g').onchange=()=>{tgw[cg]=$('#ttl').value.split('\n').map(x=>x.trim()).filter(Boolean);cg=num($('#tg_g').value)-1;ld()};
 }
 function saveScale(){
  document.querySelectorAll('[data-sg]').forEach(i=>S.set.grid[i.dataset.sg][i.dataset.ss]=num(i.value));
  document.querySelectorAll('[data-k]').forEach(i=>S.set[i.dataset.k][i.dataset.i]=num(i.value));
- S.set.titles=$('#ttl').value.split('\n').map(x=>x.trim()).filter(Boolean);S.set.dA=num($('#dA').value);S.set.dP=num($('#dP').value);save();toast('تم حفظ سلم الرواتب');
+ tgw[num($('#tg_g').value)-1]=$('#ttl').value.split('\n').map(x=>x.trim()).filter(Boolean);S.set.tg=tgw;document.querySelectorAll('[data-eg]').forEach(i=>S.set.eg[i.dataset.eg][i.dataset.p]=num(i.value));S.set.dA=num($('#dA').value);S.set.dP=num($('#dP').value);save();toast('تم حفظ سلم الرواتب');
 }
 function apPage(kind){
  const P=kind=='p';
  shell(P?'إضافة ترفيع جديد':'إضافة علاوة جديدة',`<div class="cols"><fieldset><legend>الموظف</legend><label>اختر الموظف<select id="ap_e"><option value="">— اختر —</option>${S.emps.map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}</select></label><p id="ap_cur" style="color:var(--mut)"></p></fieldset>
- <fieldset><legend>معلومات ${P?'الترفيع':'العلاوة'} الجديدة</legend><label>الدرجة الجديدة<select id="ap_g">${rng(10,1)}</select></label><label>المرحلة الجديدة<select id="ap_s">${rng(11,1)}</select></label>${P?'<label>العنوان الوظيفي الجديد<select id="ap_t"></select></label>':''}<label>التاريخ<input id="ap_d" type="date"></label><label>الراتب الجديد<input id="ap_sal" readonly></label></fieldset></div>
+ <fieldset><legend>معلومات ${P?'الترفيع':'العلاوة'} الجديدة</legend><label>الدرجة الجديدة<select id="ap_g">${rng(10,1)}</select></label><label>المرحلة الجديدة<select id="ap_s">${rng(11,1)}</select></label>${P?'<label>العنوان الوظيفي الجديد<select id="ap_t"></select><input id="ap_tx" placeholder="اكتب العنوان الوظيفي" style="display:none;margin-top:6px"></label>':''}<label>التاريخ<input id="ap_d" type="date"></label><label>الراتب الجديد<input id="ap_sal" readonly></label></fieldset></div>
  <div class="act"><button class="btn" onclick="apSave('${kind}')">إضافة</button></div>`);
  const sal=()=>{$('#ap_sal').value=nf(salary(num($('#ap_g').value),num($('#ap_s').value)))};
- ['ap_g','ap_s'].forEach(i=>$('#'+i).onchange=sal);
+ const rt=()=>{if(P)$('#ap_t').innerHTML=opt(S.set.tg[num($('#ap_g').value)-1]||[],'')+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';$('#ap_tx').style.display='none'};
+ if(P)$('#ap_t').onchange=()=>{$('#ap_tx').style.display=$('#ap_t').value=='__new__'?'':'none'};
+ ['ap_g','ap_s'].forEach(i=>$('#'+i).onchange=()=>{sal();rt()});
  $('#ap_e').onchange=()=>{const e=S.emps.find(x=>x.id==$('#ap_e').value);if(!e)return;const c=calc(e),g=num(e.g),s=num(e.s);
   $('#ap_g').value=P?Math.max(g-1,1):g;$('#ap_s').value=P?1:Math.min(s+1,11);
   const d=c?(P?(c.pDue||c.due):c.aDue):null;$('#ap_d').value=d?iso(d):'';
-  if(P)$('#ap_t').innerHTML=opt([...new Set([e.title,...S.set.titles].filter(Boolean))],e.title);
+  rt();
   $('#ap_cur').textContent=`الحالي: درجة ${g} مرحلة ${s} (${nf(salary(g,s))}) | آخر علاوة ${fd(pd(e.lastA))||'-'} | آخر ترفيع ${fd(pd(e.lastP))||'-'}`;sal()};
  sal();
 }
 function apSave(kind){
  const e=S.emps.find(x=>x.id==$('#ap_e').value),d=$('#ap_d').value;
  if(!e){toast('اختر الموظف');return}if(!d){toast('اختر التاريخ');return}
+ let nt='';if(kind=='p'){nt=$('#ap_t').value;if(nt=='__new__'){nt=$('#ap_tx').value.trim();if(!nt){toast('اكتب العنوان الوظيفي');return}const L=S.set.tg[num($('#ap_g').value)-1];if(!L.includes(nt))L.push(nt)}}
  const c=calc(e);if(c)(e.letters||[]).forEach(l=>{if(c.av.some(a=>a.id==l.id))l.used=d});
  e.g=$('#ap_g').value;e.s=$('#ap_s').value;
- if(kind=='p'){e.lastP=d;const t=$('#ap_t').value;if(t)e.title=t}else e.lastA=d;
+ if(kind=='p'){e.lastP=d;if(nt)e.title=nt}else e.lastA=d;
  save();toast(kind=='p'?'تمت إضافة الترفيع':'تمت إضافة العلاوة');home();
 }
 const BD={style:'thin',color:{argb:'FF000000'}};
@@ -261,7 +303,7 @@ async function exp(mode){
   for(let r=1;r<=2;r++){for(let k=1;k<=16;k++)xs(ws.getCell(r,k),'Arial',24,'FFCC99FF');ws.getRow(r).height=100.8}
   const hr=ws.addRow(['ت','اسم الوزارة','اسم البلدية','الاسم الثلاثي','العنوان الوظيفي','الدرجة الحالية','المرحلة الحالية','الشهادة','تاريخ استحقاق الترفيع السابق','امر اخر ترفيع','اوامر الشكر','العقوبات او إضافة خدمة','العنوان الوظيفي الجديد','الدرجة الجديده','المرحلة الجديده','تاريخ الاستحقاق الجديد']);
   hr.height=100.8;hr.eachCell(c=>xs(c,'Times New Roman',18,'FFFFFFFF'));
-  rows.forEach(({e,c},i)=>{const v=[i+1,'محافظة الانبار','مديرية بلدية هيت',e.name,e.title,+e.g,+e.s,e.edu,UD(pd(e.lastP)),e.promoOrder||'/',ltxt(perL(e))||'/',num(e.pen)?num(e.pen)+' شهر':'/',e.title,c.ng,c.ns,UD(c.due)];const r=ws.addRow(v);
+  rows.forEach(({e,c},i)=>{const v=[i+1,'محافظة الانبار','مديرية بلدية هيت',e.name,e.title,+e.g,+e.s,e.eduX||e.edu,UD(pd(e.lastP)),e.promoOrder||'/',ltxt(perL(e))||'/',num(e.pen)?num(e.pen)+' شهر':'/',e.title,c.ng,c.ns,UD(c.due)];const r=ws.addRow(v);
    r.eachCell(x=>xs(x,'Times New Roman',20,'FFC0C0C0'));[9,16].forEach(k=>r.getCell(k).numFmt='d/m/yyyy;@');
    r.height=Math.max(100.8,27*Math.max(...v.map((x,k)=>typeof x=='string'?Math.ceil(x.length/(W[k]*.5)):1)))});
   ws.addRow([]);const f=ws.addRow([]);f.getCell(1).value='الدرجة الحالية بجانب الحذف';f.getCell(13).value='جانب الاستحداث';[1,13].forEach(k=>{f.getCell(k).font={name:'Times New Roman',size:14,bold:true}});
@@ -270,7 +312,31 @@ async function exp(mode){
  try{await dl.save({filename:(A?'علاوات_':'ترفيعات_')+(m||'الكل')+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
 applyUI();
-(async()=>{try{dl=await claude.use('downloads')}catch(e){}})();
+const cstat=t=>{const x=$('#cstat');if(x)x.textContent=t};
+function cloudSave(){
+ if(!fdb||!fuser)return;clearTimeout(ctimer);
+ ctimer=setTimeout(async()=>{try{cstat('جارٍ الحفظ في السحابة...');
+  await fdb.collection('hit_unit').doc('main').set({json:JSON.stringify({emps:S.emps,set:S.set}),by:fuser.email,at:firebase.firestore.FieldValue.serverTimestamp()});
+  cstat('تم الحفظ في السحابة ✓')}catch(e){cstat('تعذّر الحفظ في السحابة');toast('تعذّر الحفظ في Firebase: '+(e.code||e.message))}},600);
+}
+async function cloudLoad(){
+ const d=await fdb.collection('hit_unit').doc('main').get();
+ if(d.exists){const c=JSON.parse(d.data().json);S.emps=c.emps||[];S.set=c.set||S.set;migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}cstat('متصل بالسحابة ✓')}
+ else if(S.emps.length){cstat('رفع البيانات المحلية إلى السحابة...');cloudSave()}
+ else cstat('متصل بالسحابة - لا توجد بيانات بعد');
+ applyUI();home();
+}
+function fbInit(){
+ if(!FB_ON){cstat('وضع محلي: Firebase غير مُعدّ (البيانات على هذا الجهاز فقط)');return}
+ firebase.initializeApp(FB_CONFIG);fdb=firebase.firestore();$('#login').style.display='flex';
+ firebase.auth().onAuthStateChanged(u=>{fuser=u;$('#outb').style.display=u?'':'none';
+  if(u){$('#login').style.display='none';cloudLoad().catch(e=>{cstat('تعذّر التحميل من السحابة');toast('تعذّر التحميل: '+(e.code||e.message))})}
+  else $('#login').style.display='flex'});
+}
+function doLogin(){$('#lg_err').textContent='';firebase.auth().signInWithEmailAndPassword($('#lg_em').value.trim(),$('#lg_pw').value).catch(e=>{$('#lg_err').textContent='تعذّر الدخول: '+(e.code||e.message)})}
+function doLogout(){firebase.auth().signOut().then(()=>location.reload())}
+dl={save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}};
+fbInit();
 home();
 </script>
 </body>
