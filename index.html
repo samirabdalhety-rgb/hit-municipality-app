@@ -72,7 +72,15 @@ body *,.btn,.tile{font-size:inherit}
 const $=s=>document.querySelector(s),KEY='hit-ap-v1';
 const DEF={emps:[],set:{base:[0,0,0,0,429000,362000,0,0,210000,170000],allow:[20,17,10,8,6,6,6,3,3,3].map(x=>x*1000),years:[0,5,5,5,5,4,4,4,4,4],dA:10,dP:30}};
 // ===== إعدادات Firebase: الصق هنا القيم من Firebase Console > Project settings > Your apps =====
-const FB_CONFIG={apiKey:"",authDomain:"",projectId:"",storageBucket:"",messagingSenderId:"",appId:""};
+const FB_CONFIG={
+  apiKey: "AIzaSyAP9BptLEDu8maa8UPtzC6yUNAyZSaIS9c",
+  authDomain: "samir-50cb4.firebaseapp.com",
+  projectId: "samir-50cb4",
+  storageBucket: "samir-50cb4.firebasestorage.app",
+  messagingSenderId: "390072850978",
+  appId: "1:390072850978:web:5a045fed11034e6cce087b",
+  measurementId: "G-18QPEGPBJB"
+};
 const FB_ON=!!FB_CONFIG.apiKey;
 let fdb=null,fuser=null,ctimer=null;
 let S=JSON.parse(JSON.stringify(DEF)),editId=null,dl=null;
@@ -316,7 +324,7 @@ const cstat=t=>{const x=$('#cstat');if(x)x.textContent=t};
 function cloudSave(){
  if(!fdb||!fuser)return;clearTimeout(ctimer);
  ctimer=setTimeout(async()=>{try{cstat('جارٍ الحفظ في السحابة...');
-  await fdb.collection('hit_unit').doc('main').set({json:JSON.stringify({emps:S.emps,set:S.set}),by:fuser.email,at:firebase.firestore.FieldValue.serverTimestamp()});
+  await fdb.collection('hit_unit').doc('main').set({json:JSON.stringify({emps:S.emps,set:S.set}),by:fuser.email||'anonymous',at:firebase.firestore.FieldValue.serverTimestamp()});
   cstat('تم الحفظ في السحابة ✓')}catch(e){cstat('تعذّر الحفظ في السحابة');toast('تعذّر الحفظ في Firebase: '+(e.code||e.message))}},600);
 }
 async function cloudLoad(){
@@ -328,10 +336,10 @@ async function cloudLoad(){
 }
 function fbInit(){
  if(!FB_ON){cstat('وضع محلي: Firebase غير مُعدّ (البيانات على هذا الجهاز فقط)');return}
- firebase.initializeApp(FB_CONFIG);fdb=firebase.firestore();$('#login').style.display='flex';
- firebase.auth().onAuthStateChanged(u=>{fuser=u;$('#outb').style.display=u?'':'none';
+ firebase.initializeApp(FB_CONFIG);fdb=firebase.firestore();
+ firebase.auth().onAuthStateChanged(u=>{fuser=u;$('#outb').style.display=u&&!u.isAnonymous?'':'none';
   if(u){$('#login').style.display='none';cloudLoad().catch(e=>{cstat('تعذّر التحميل من السحابة');toast('تعذّر التحميل: '+(e.code||e.message))})}
-  else $('#login').style.display='flex'});
+  else firebase.auth().signInAnonymously().catch(e=>{cstat('تعذّر الاتصال بالسحابة');toast('تعذّر الدخول المجهول: '+(e.code||e.message))})});
 }
 function doLogin(){$('#lg_err').textContent='';firebase.auth().signInWithEmailAndPassword($('#lg_em').value.trim(),$('#lg_pw').value).catch(e=>{$('#lg_err').textContent='تعذّر الدخول: '+(e.code||e.message)})}
 function doLogout(){firebase.auth().signOut().then(()=>location.reload())}
