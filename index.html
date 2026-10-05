@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>وحدة العلاوات والترفيعات - بلدية هيت</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0f4c47">
+<meta name="apple-mobile-web-app-title" content="علاوات بلدية هيت">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -19,7 +24,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,"Se
 .hero{background:linear-gradient(135deg,#0f4c47,#1b6b63);color:#fff;text-align:center;padding:28px 16px 54px;
 border-bottom:4px solid var(--gold);border-radius:0 0 50% 50%/0 0 28px 28px}
 .hero h1{margin:0;font-size:clamp(22px,5vw,34px);font-weight:800}.hero p{margin:4px 0 0;font-size:clamp(15px,3.5vw,20px);color:#f1d9a3;font-weight:600}
-.wrap{max-width:980px;margin:-30px auto 24px;padding:0 14px}
+.wrap{max-width:980px;margin:-30px auto 24px;padding:0 14px;position:relative;z-index:2}
+.hs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.hs div{background:var(--card);border:1.5px solid var(--gold);border-radius:14px;padding:8px 6px;text-align:center;font-size:13px;line-height:1.3}.hs b{display:block;font-size:26px;color:var(--pri2)}
+.lgbox{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;align-items:end}@media(max-width:560px){.lgbox{grid-template-columns:1fr}}
 .alert{background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:8px 14px;margin-bottom:14px;font-size:14px;text-align:center}
 .grid{background:var(--card);border-radius:28px;border:2px solid var(--line);padding:22px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .tile{border:2px solid var(--pri2);background:var(--bg);color:var(--ink);border-radius:50px;min-height:92px;font:600 16px Cairo,Tahoma,sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px;transition:.15s}
@@ -55,15 +62,15 @@ body *,.btn,.tile{font-size:inherit}
 </style>
 </head>
 <body>
-<div id="login" style="display:none;position:fixed;inset:0;z-index:20;background:var(--bg);align-items:center;justify-content:center;padding:16px">
+<div id="login" style="display:flex;position:fixed;inset:0;z-index:20;background:var(--bg);align-items:center;justify-content:center;padding:16px">
  <div style="background:var(--card);border:2px solid var(--line);border-radius:20px;padding:22px;width:100%;max-width:360px">
-  <h2 style="margin:0 0 4px;color:var(--pri2)">تسجيل الدخول</h2><p style="margin:0 0 8px;color:var(--mut)">وحدة العلاوات والترفيعات - بلدية هيت</p>
-  <label>البريد الإلكتروني<input id="lg_em" type="email" autocomplete="username" dir="ltr"></label>
+  <img src="icon-192.png" alt="" style="display:block;margin:0 auto 8px;width:84px;height:84px;border-radius:50%" onerror="this.remove()"><h2 style="margin:0 0 4px;color:var(--pri2);text-align:center">تسجيل الدخول</h2><p style="margin:0 0 8px;color:var(--mut)">وحدة العلاوات والترفيعات - بلدية هيت</p>
+  <label>اسم المستخدم<input id="lg_em" type="text" autocomplete="username" dir="ltr" autocapitalize="none"></label>
   <label>كلمة المرور<input id="lg_pw" type="password" autocomplete="current-password" dir="ltr" onkeydown="if(event.key=='Enter')doLogin()"></label>
   <p id="lg_err" class="note"></p><button class="btn" style="width:100%" onclick="doLogin()">دخول</button></div></div>
 <div id="home">
  <div class="hero" style="position:relative"><button class="btn alt" id="outb" onclick="doLogout()" style="display:none;position:absolute;top:10px;inset-inline-start:10px;padding:5px 12px">خروج</button><h1>مديرية بلدية هيت</h1><p>وحدة العلاوات والترفيعات</p></div>
- <div class="wrap"><div class="alert" id="alerts"></div><div class="alert" id="cstat" style="font-size:12px;color:var(--mut)"></div>
+ <div class="wrap"><div class="hs" id="alerts"></div><div class="alert" id="cstat" style="font-size:12px;color:var(--mut)"></div>
  <div class="grid" id="tiles"></div></div>
 </div>
 <div id="view" hidden></div>
@@ -98,10 +105,12 @@ const TG0=[
 'حارس ثالث/حارس ثاني/حرفي/سائق ثالث/سائق ثان/كاتب طابعة ثالث/معاون حرفي/معاون موظف خدمات/موظف خدمات/معاون طباخ/معاون مأمور مائدة'];
 const EGD={'دكتوراه':[1,5],'ماجستير':[2,6],'دبلوم عالي':[3,6],'بكالوريوس':[3,8],'دبلوم':[5,9],'اعدادية':[6,10],'متوسطة':[8,10],'ابتدائية':[8,10],'يقرأ ويكتب':[9,10]};
 let tgw=[];
+const SCALE2={grid:[[910,930,950,970,990,1010,1030,1050,1070,1090,1110],[723,740,757,774,791,808,825,842,859,876,893],[600,610,620,630,640,650,660,670,680,690,700],[509,517,525,533,541,549,557,565,573,581,589],[429,435,441,447,453,459,465,471,477,483,489],[362,368,374,380,386,392,398,404,410,416,422],[296,302,308,314,320,326,332,338,344,350,356],[260,263,266,269,272,275,278,281,284,287,290],[210,213,216,219,222,225,228,231,234,237,240],[170,173,176,179,182,185,188,191,194,197,200]].map(r=>r.map(v=>v*1000)),allow:[20,17,10,8,6,6,6,3,3,3].map(x=>x*1000),years:[0,5,5,5,5,4,4,4,4,4]};
 function migrate(){
 S.emps.forEach(e=>{e.lastA=e.lastA||e.last||'';e.lastP=e.lastP||e.lastPromo||'';e.letters=e.letters||[]});
 if(!S.set.grid)S.set.grid=Array.from({length:10},(_,i)=>Array.from({length:11},(_,j)=>S.set.base[i]?S.set.base[i]+j*S.set.allow[i]:0));
-S.set.tg=S.set.tg||TG0.map(x=>[...new Set(x.split('/'))]);S.set.eg=Object.assign({},EGD,S.set.eg||{});S.ui=S.ui||{};
+if(S.set.scaleVer!==2){S.set.grid=JSON.parse(JSON.stringify(SCALE2.grid));S.set.allow=[...SCALE2.allow];S.set.years=[...SCALE2.years];S.set.scaleVer=2}
+ S.set.tg=S.set.tg||TG0.map(x=>[...new Set(x.split('/'))]);S.set.eg=Object.assign({},EGD,S.set.eg||{});S.ui=S.ui||{};
 }
 migrate();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}cloudSave()};
@@ -134,7 +143,8 @@ function home(){
  const t=new Date(),n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c);
  const a=n.filter(x=>x.c.status=='علاوة'&&x.c.due>=t&&x.c.due<=addD(t,S.set.dA)).length;
  const p=n.filter(x=>x.c.status=='ترفيع'&&x.c.due>=t&&x.c.due<=addM(t,1)).length;
- $('#alerts').textContent=`الإشعارات: ${a} علاوة خلال ${S.set.dA} أيام، و${p} ترفيع خلال شهر`;
+ const tm=iso(t).slice(0,7),aM=n.filter(x=>x.c.status=='علاوة'&&iso(x.c.due).slice(0,7)==tm).length,pM=n.filter(x=>x.c.status=='ترفيع'&&iso(x.c.due).slice(0,7)==tm).length;
+ $('#alerts').innerHTML=`<div><b>${a}</b>مستحقو العلاوة خلال ${S.set.dA} أيام</div><div><b>${p}</b>مستحقو الترفيع خلال شهر</div><div><b>${aM} / ${pM}</b>علاوات / ترفيعات هذا الشهر</div>`;
  $('#tiles').innerHTML=TILES.map((x,i)=>`<button class="tile ${x[2]||''}" data-i="${i}"><svg viewBox="0 0 24 24">${ICON[x[0]]}</svg>${x[1]}</button>`).join('');
  document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{$('#home').hidden=true;$('#view').hidden=false;TILES[b.dataset.i][3]();window.scrollTo(0,0)});
 }
@@ -158,7 +168,15 @@ function empForm(id){
  <fieldset><legend>معلومات العلاوة الجديدة</legend>
  <label>الدرجة الوظيفية<input id="n_g" readonly></label><label>المرحلة<input id="n_s" readonly></label><label>الراتب<input id="n_sal" readonly></label>
  <label>التاريخ (الاستحقاق)<input id="n_d" readonly></label><label>مقدار العلاوة<input id="n_amt" readonly></label><label>حالة الاستحقاق<input id="n_st" readonly></label></fieldset></div>
- <fieldset style="margin-top:14px"><legend>كتب القدم والشكر (الحد 3 كتب لكل علاوة، ولا يُستخدم الكتاب في علاوتين)</legend>
+ <fieldset style="margin-top:14px"><legend>القدم القانوني</legend><div class="lgbox">
+  ${f('lg4','عدد القدم القانوني في المرحلة الرابعة','number','min="0" max="3" placeholder="إدخال يدوي"')}
+  ${f('lg3','عدد القدم القانوني في المرحلة الثالثة','number','min="0" max="3" placeholder="إدخال يدوي"')}
+  ${f('lg2','عدد القدم القانوني في المرحلة الثانية','number','min="0" max="3" placeholder="إدخال يدوي"')}
+  ${f('lg1','عدد القدم القانوني في المرحلة الاولى','number','min="0" max="3" placeholder="إدخال يدوي"')}
+  ${f('lgpm','القدم القانوني الممنوح من رئيس الوزراء (6 اشهر)','number','min="0" max="2" placeholder="إدخال يدوي"')}
+  </div>
+  <p class="note">ملاحظة // يمنح الموظف القدم القانوني واحد شهر ثلاث مرات في السنة فقط، ويمنح قدم لمدة ستة اشهر مرتين فقط خلال العمر الوظيفي</p></fieldset>
+  <fieldset style="margin-top:14px"><legend>كتب القدم والشكر (الحد 3 كتب لكل علاوة، ولا يُستخدم الكتاب في علاوتين)</legend>
  <div class="tools"><div><label>النوع<select id="l_type"><option>قدم</option><option>شكر</option></select></label></div><div><label>التاريخ<input id="l_date" type="date"></label></div><div><label>الأشهر<input id="l_m" type="number" value="1" min="0"></label></div><button class="btn" onclick="addL()">إضافة كتاب</button></div>
  <div id="lst"></div><p id="thst" style="font-weight:600"></p></fieldset>
  
@@ -196,6 +214,8 @@ function addEmp(close){
  const e=cur();if(!e.name.trim()){toast('اسم الموظف مطلوب');return}
  if(e.title=='__new__'){const t=(e.titleX||'').trim();if(!t){toast('اكتب العنوان الوظيفي');return}e.title=t;const L=S.set.tg[num(e.g)-1];if(!L.includes(t))L.push(t)}delete e.titleX;
  if(!doCalc())return;
+ if([1,2,3,4].some(i=>num(e['lg'+i])>3||num(e['lg'+i])<0)){toast('القدم القانوني: الحد 3 مرات (شهر لكل مرة) في كل مرحلة');return}
+ if(num(e.lgpm)>2||num(e.lgpm)<0){toast('القدم الممنوح من رئيس الوزراء (6 أشهر): مرتان فقط خلال العمر الوظيفي');return}
  if(editId){S.emps=S.emps.map(x=>x.id==editId?{...e,id:editId}:x)}else S.emps.push({...e,id:Date.now()});
  save();toast(editId?'تم حفظ التعديل':'تمت الإضافة');if(close||editId){list('all')}else empForm();
 }
@@ -335,13 +355,14 @@ async function cloudLoad(){
  applyUI();home();
 }
 function fbInit(){
- if(!FB_ON){cstat('وضع محلي: Firebase غير مُعدّ (البيانات على هذا الجهاز فقط)');return}
+ if(!FB_ON){$('#login').style.display='none';cstat('وضع محلي: Firebase غير مُعدّ (البيانات على هذا الجهاز فقط)');return}
  firebase.initializeApp(FB_CONFIG);fdb=firebase.firestore();
  firebase.auth().onAuthStateChanged(u=>{fuser=u;$('#outb').style.display=u&&!u.isAnonymous?'':'none';
+  if(u&&u.isAnonymous){firebase.auth().signOut();return}
   if(u){$('#login').style.display='none';cloudLoad().catch(e=>{cstat('تعذّر التحميل من السحابة');toast('تعذّر التحميل: '+(e.code||e.message))})}
-  else firebase.auth().signInAnonymously().catch(e=>{cstat('تعذّر الاتصال بالسحابة');toast('تعذّر الدخول المجهول: '+(e.code||e.message))})});
+  else{$('#login').style.display='flex'}});
 }
-function doLogin(){$('#lg_err').textContent='';firebase.auth().signInWithEmailAndPassword($('#lg_em').value.trim(),$('#lg_pw').value).catch(e=>{$('#lg_err').textContent='تعذّر الدخول: '+(e.code||e.message)})}
+function doLogin(){$('#lg_err').textContent='';firebase.auth().signInWithEmailAndPassword((v=>v.includes('@')?v:v+'@hit.local')($('#lg_em').value.trim().toLowerCase()),$('#lg_pw').value).catch(e=>{$('#lg_err').textContent=/invalid|wrong|user-not-found|credential/.test(e.code||'')?'اسم المستخدم أو كلمة المرور غير صحيحة':'تعذّر الدخول: '+(e.code||e.message)})}
 function doLogout(){firebase.auth().signOut().then(()=>location.reload())}
 dl={save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}};
 fbInit();
