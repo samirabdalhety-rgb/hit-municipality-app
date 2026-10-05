@@ -46,7 +46,7 @@ button,.btn{font-family:inherit;cursor:pointer}
 fieldset{border:1.5px solid var(--line);border-radius:14px;background:var(--card);padding:10px 14px 14px;margin:0}
 legend{font-weight:800;color:var(--pri2);padding:0 8px}
 label{display:block;font-size:13px;color:var(--mut);margin-top:8px;font-weight:600}
-input,select,textarea{width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:15px Cairo,Tahoma,sans-serif}
+input,select,textarea{width:100%;padding:8px 10px;border:1.5px solid var(--fbd,var(--line));border-radius:8px;background:var(--fld,var(--bg));color:var(--ink);font:15px Cairo,Tahoma,sans-serif}
 input[readonly]{background:var(--line);font-weight:700}
 .note{color:var(--red);font-size:13px;margin:12px 2px;font-weight:600}
 .act{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
@@ -107,7 +107,7 @@ const EGD={'دكتوراه':[1,5],'ماجستير':[2,6],'دبلوم عالي':[
 let tgw=[];
 const SCALE2={grid:[[910,930,950,970,990,1010,1030,1050,1070,1090,1110],[723,740,757,774,791,808,825,842,859,876,893],[600,610,620,630,640,650,660,670,680,690,700],[509,517,525,533,541,549,557,565,573,581,589],[429,435,441,447,453,459,465,471,477,483,489],[362,368,374,380,386,392,398,404,410,416,422],[296,302,308,314,320,326,332,338,344,350,356],[260,263,266,269,272,275,278,281,284,287,290],[210,213,216,219,222,225,228,231,234,237,240],[170,173,176,179,182,185,188,191,194,197,200]].map(r=>r.map(v=>v*1000)),allow:[20,17,10,8,6,6,6,3,3,3].map(x=>x*1000),years:[0,5,5,5,5,4,4,4,4,4]};
 function migrate(){
-S.emps.forEach(e=>{e.lastA=e.lastA||e.last||'';e.lastP=e.lastP||e.lastPromo||'';e.letters=e.letters||[]});
+S.emps.forEach(e=>{e.lastA=e.lastA||e.last||'';e.lastP=e.lastP||e.lastPromo||'';e.letters=e.letters||[];if(e.lgpm!==undefined){if(e.lgpmPrev===undefined)e.lgpmPrev=e.lgpm;delete e.lgpm}});
 if(!S.set.grid)S.set.grid=Array.from({length:10},(_,i)=>Array.from({length:11},(_,j)=>S.set.base[i]?S.set.base[i]+j*S.set.allow[i]:0));
 if(S.set.scaleVer!==2){S.set.grid=JSON.parse(JSON.stringify(SCALE2.grid));S.set.allow=[...SCALE2.allow];S.set.years=[...SCALE2.years];S.set.scaleVer=2}
  S.set.tg=S.set.tg||TG0.map(x=>[...new Set(x.split('/'))]);S.set.eg=Object.assign({},EGD,S.set.eg||{});S.ui=S.ui||{};
@@ -130,7 +130,7 @@ const thP=e=>perL(e).filter(l=>l.type=='شكر');
 const thanksIn=e=>thP(e).length;
 function calc(e){
  const g=num(e.g),s=num(e.s),b=bA(e),la=pd(b);if(!g||!s||!la)return null;
- const av=avail(e),m=av.reduce((t,l)=>t+num(l.months),0),pen=num(e.pen);
+ const av=avail(e),m=av.reduce((t,l)=>t+num(l.months),0)+num(e.lgpmAct)*6,pen=num(e.pen);
  const aDue=addM(la,12-m+pen),yrs=S.set.years[g-1];
  const promo=!!yrs&&s>=yrs,pDue=promo?aDue:null,due=aDue;
  const ng=promo?Math.max(g-1,1):g,ns=promo?1:Math.min(s+1,11);
@@ -158,7 +158,7 @@ function empForm(id){
  editId=id??null;const e=id?S.emps.find(x=>x.id==id):{g:5,s:1,edu:'بكالوريوس'};curL=JSON.parse(JSON.stringify(e.letters||[]));
  const f=(k,l,t='text',x='')=>`<label>${l}<input id="f_${k}" type="${t}" value="${e[k]??''}" ${x}></label>`;
  shell(id?'تعديل بيانات موظف':'إضافة موظف',`<div class="cols">
- <fieldset><legend>معلومات عامة</legend>${f('name','اسم الموظف (رباعي)')}<label>التحصيل الدراسي<select id="f_edu">${opt(EDU,e.edu)}</select></label>${f('eduX','التحصيل الدراسي الدقيق')}
+ <fieldset><legend>معلومات عامة</legend>${f('name','اسم الموظف (رباعي)')}${f('hireDate','تاريخ التعيين','date')}<label>التحصيل الدراسي<select id="f_edu">${opt(EDU,e.edu)}</select></label>${f('eduX','التحصيل الدراسي الدقيق')}
  <label>العنوان الوظيفي<select id="f_title" data-v="${e.title||''}"></select><input id="f_titleX" placeholder="اكتب العنوان الوظيفي" style="display:none;margin-top:6px"></label>
  <label>ملاحظات<textarea id="f_notes" rows="4">${e.notes||''}</textarea></label></fieldset>
  <fieldset><legend>معلومات العلاوة السابقة</legend>
@@ -173,7 +173,8 @@ function empForm(id){
   ${f('lg3','عدد القدم القانوني في المرحلة الثالثة','number','min="0" max="3" placeholder="إدخال يدوي"')}
   ${f('lg2','عدد القدم القانوني في المرحلة الثانية','number','min="0" max="3" placeholder="إدخال يدوي"')}
   ${f('lg1','عدد القدم القانوني في المرحلة الاولى','number','min="0" max="3" placeholder="إدخال يدوي"')}
-  ${f('lgpm','القدم القانوني الممنوح من رئيس الوزراء (6 اشهر)','number','min="0" max="2" placeholder="إدخال يدوي"')}
+  ${f('lgpmPrev','قدم ستة أشهر الممنوح سابقاً (للملاحظة فقط، لا يُحتسب)','number','min="0" max="2" placeholder="إدخال يدوي"')}
+  ${f('lgpmAct','قدم ستة أشهر الفعلي (1 = 6 أشهر، 2 = 12 شهراً، يُحتسب)','number','min="0" max="2" placeholder="إدخال يدوي"')}
   </div>
   <p class="note">ملاحظة // يمنح الموظف القدم القانوني واحد شهر ثلاث مرات في السنة فقط، ويمنح قدم لمدة ستة اشهر مرتين فقط خلال العمر الوظيفي</p></fieldset>
   <fieldset style="margin-top:14px"><legend>كتب القدم والشكر (الحد 3 كتب لكل علاوة، ولا يُستخدم الكتاب في علاوتين)</legend>
@@ -184,7 +185,7 @@ function empForm(id){
  <div class="act"><button class="btn gold" onclick="doCalc()">حسب</button><button class="btn" onclick="addEmp(false)">${id?'حفظ التعديل':'إضافة'}</button><button class="btn alt" onclick="addEmp(true)">إغلاق + إضافة</button></div>`);
  const sync=()=>{$('#f_sal').value=nf(salary(num($('#f_g').value),num($('#f_s').value)))};
  ['f_g','f_s'].forEach(i=>$('#'+i).oninput=sync);sync();
- ['f_g','f_lastA','f_lastP'].forEach(i=>$('#'+i).addEventListener('input',renderL));
+ ['f_g','f_lastA','f_lastP','f_lgpmAct'].forEach(i=>$('#'+i).addEventListener('input',renderL));
  $('#l_type').onchange=()=>$('#l_m').value=$('#l_type').value=='شكر'?6:1;
  const refG=()=>{const r=S.set.eg[$('#f_edu').value]||[1,10],c=num($('#f_g').value)||num(e.g),gs=[];for(let i=1;i<=10;i++)if((i>=r[0]&&i<=r[1])||i==c)gs.push(i);$('#f_g').innerHTML=opt(gs,c)};
  const refT=k=>{const t=$('#f_title'),g=num($('#f_g').value),L=[...(S.set.tg[g-1]||[])];let v=t.dataset.v;if(v&&!L.includes(v)){if(k)L.unshift(v);else v=''}t.dataset.v=v;t.innerHTML='<option value="">— اختر —</option>'+opt(L,v)+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';$('#f_titleX').style.display='none'};
@@ -215,7 +216,7 @@ function addEmp(close){
  if(e.title=='__new__'){const t=(e.titleX||'').trim();if(!t){toast('اكتب العنوان الوظيفي');return}e.title=t;const L=S.set.tg[num(e.g)-1];if(!L.includes(t))L.push(t)}delete e.titleX;
  if(!doCalc())return;
  if([1,2,3,4].some(i=>num(e['lg'+i])>3||num(e['lg'+i])<0)){toast('القدم القانوني: الحد 3 مرات (شهر لكل مرة) في كل مرحلة');return}
- if(num(e.lgpm)>2||num(e.lgpm)<0){toast('القدم الممنوح من رئيس الوزراء (6 أشهر): مرتان فقط خلال العمر الوظيفي');return}
+ if([e.lgpmPrev,e.lgpmAct].some(v=>num(v)<0||num(v)>2)||num(e.lgpmPrev)+num(e.lgpmAct)>2){toast('قدم الستة أشهر: مرتان فقط خلال العمر الوظيفي (السابق + الفعلي)');return}
  if(editId){S.emps=S.emps.map(x=>x.id==editId?{...e,id:editId}:x)}else S.emps.push({...e,id:Date.now()});
  save();toast(editId?'تم حفظ التعديل':'تمت الإضافة');if(close||editId){list('all')}else empForm();
 }
@@ -223,7 +224,7 @@ const mo=()=>iso(new Date()).slice(0,7);
 function list(mode,focus){
  const T={a:'مستحقو العلاوات',p:'مستحقو الترفيع',all:'بيانات الموظفين'}[mode];
  shell(T,`<div class="tools"><div><label>بحث بالاسم أو العنوان<input id="q" ${focus?'autofocus':''}></label></div>
- ${mode=='all'?'':`<div><label>شهر الاستحقاق<input id="m" type="month" value="${mo()}"></label></div><div><label><input id="allm" type="checkbox" style="width:auto"> كل الأشهر</label></div><button class="btn gold" onclick="exp('${mode}')">تصدير Excel</button>`}</div>
+ ${mode=='all'?`<div style="max-width:110px"><label>عدد الموظفين<input id="cnt" readonly value="${S.emps.length}" style="text-align:center;font-weight:700"></label></div><button class="btn gold" onclick="expNames()">تصدير الأسماء Excel</button>`:`<div><label>شهر الاستحقاق<input id="m" type="month" value="${mo()}"></label></div><div><label><input id="allm" type="checkbox" style="width:auto"> كل الأشهر</label></div><button class="btn gold" onclick="exp('${mode}')">تصدير Excel</button>`}</div>
  <div class="tw"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>`);
  const draw=()=>{
   const q=$('#q').value.trim(),m=mode=='all'?'':$('#m').value,am=mode!='all'&&$('#allm').checked;
@@ -247,20 +248,28 @@ function stats(){
 const BGS={'افتراضي':null,'أبيض':['#ffffff','#f3f5f5'],'أخضر هادئ':['#e3efe6','#f8fcf9'],'كريمي':['#f3ecdd','#fffaf0'],'رمادي':['#e6e8ea','#f8f9fa'],'نقوش':['#eaf1ef','#ffffff'],'داكن':null};
 function applyUI(){
  const r=document.documentElement,u=S.ui||{},bd=document.body,k=u.bg||'افتراضي';
- ['--ink','--bg','--card'].forEach(x=>r.style.removeProperty(x));bd.style.backgroundImage='';
+ ['--ink','--bg','--card','--fld','--fbd'].forEach(x=>r.style.removeProperty(x));bd.style.backgroundImage='';
  if(k=='داكن')r.setAttribute('data-theme','dark');else if(k=='افتراضي')r.removeAttribute('data-theme');else{r.setAttribute('data-theme','light');r.style.setProperty('--bg',BGS[k][0]);r.style.setProperty('--card',BGS[k][1])}
  if(k=='نقوش'){bd.style.backgroundImage='radial-gradient(#0f4c4733 1.6px,transparent 1.6px)';bd.style.backgroundSize='20px 20px'}
  if(u.color)r.style.setProperty('--ink',u.color);
+ if(u.fld)r.style.setProperty('--fld',u.fld);
+ if(u.fbd)r.style.setProperty('--fbd',u.fbd);
  bd.style.fontSize=(u.size||16)+'px';
 }
 function settings(){
  const u=S.ui;
  shell('الإعدادات',`<div class="cols"><fieldset><legend>لون الخط</legend><input type="color" id="u_c" value="${u.color||'#16302d'}" style="height:44px"><div class="act"><button class="btn alt" id="u_r">اللون الافتراضي</button></div></fieldset>
+ <fieldset><legend>لون الحقول</legend><input type="color" id="u_f" value="${u.fld||'#eaf1ef'}" style="height:44px"><div class="act"><button class="btn alt" id="u_fr">اللون الافتراضي</button></div></fieldset>
+ <fieldset><legend>لون إطارات الحقول</legend><input type="color" id="u_e" value="${u.fbd||'#cfdcd9'}" style="height:44px"><div class="act"><button class="btn alt" id="u_er">اللون الافتراضي</button></div></fieldset>
  <fieldset><legend>حجم الخط</legend><select id="u_s">${opt([14,16,18,20,22],u.size||16)}</select></fieldset>
  <fieldset><legend>شكل الخلفية</legend><select id="u_b">${opt(Object.keys(BGS),u.bg||'افتراضي')}</select></fieldset></div>`);
  const up=()=>{save();applyUI()};
  $('#u_c').oninput=()=>{S.ui.color=$('#u_c').value;up()};
  $('#u_r').onclick=()=>{S.ui.color='';up();settings()};
+ $('#u_f').oninput=()=>{S.ui.fld=$('#u_f').value;up()};
+ $('#u_fr').onclick=()=>{S.ui.fld='';up();settings()};
+ $('#u_e').oninput=()=>{S.ui.fbd=$('#u_e').value;up()};
+ $('#u_er').onclick=()=>{S.ui.fbd='';up();settings()};
  $('#u_s').onchange=()=>{S.ui.size=num($('#u_s').value);up()};
  $('#u_b').onchange=()=>{S.ui.bg=$('#u_b').value;up()};
 }
@@ -338,6 +347,16 @@ async function exp(mode){
  }
  const buf=await wb.xlsx.writeBuffer();
  try{await dl.save({filename:(A?'علاوات_':'ترفيعات_')+(m||'الكل')+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
+}
+async function expNames(){
+ if(!dl){toast('التصدير غير متاح في هذا العرض');return}
+ if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
+ if(!S.emps.length){toast('لا يوجد موظفون للتصدير');return}
+ const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('الأسماء',{views:[{rightToLeft:true}]});ws.columns=[{width:50}];
+ const h=ws.addRow(['اسم الموظف']);xs(h.getCell(1),'Arial',12,'FFDDD9C3');h.height=28;
+ S.emps.forEach(e=>{const r=ws.addRow([e.name]);xs(r.getCell(1),'Arial',12,null);r.height=24});
+ const buf=await wb.xlsx.writeBuffer();
+ try{await dl.save({filename:'اسماء_الموظفين.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
 applyUI();
 const cstat=t=>{const x=$('#cstat');if(x)x.textContent=t};
