@@ -65,8 +65,8 @@ body *,.btn,.tile{font-size:inherit}
 <div id="login" style="display:flex;position:fixed;inset:0;z-index:20;background:var(--bg);align-items:center;justify-content:center;padding:16px">
  <div style="background:var(--card);border:2px solid var(--line);border-radius:20px;padding:22px;width:100%;max-width:360px">
   <img src="icon-192.png" alt="" style="display:block;margin:0 auto 8px;width:84px;height:84px;border-radius:50%" onerror="this.remove()"><h2 style="margin:0 0 4px;color:var(--pri2);text-align:center">تسجيل الدخول</h2><p style="margin:0 0 8px;color:var(--mut)">وحدة العلاوات والترفيعات - بلدية هيت</p>
-  <label>اسم المستخدم<input id="lg_em" type="text" autocomplete="username" dir="ltr" autocapitalize="none"></label>
-  <label>كلمة المرور<input id="lg_pw" type="password" autocomplete="current-password" dir="ltr" onkeydown="if(event.key=='Enter')doLogin()"></label>
+  <label>اسم المستخدم<input id="lg_em" type="text" autocomplete="username" autocapitalize="none"></label>
+  <label>رمز الدخول<input id="lg_pw" type="password" inputmode="numeric" autocomplete="current-password" dir="ltr" onkeydown="if(event.key=='Enter')doLogin()"></label>
   <p id="lg_err" class="note"></p><button class="btn" style="width:100%" onclick="doLogin()">دخول</button></div></div>
 <div id="home">
  <div class="hero" style="position:relative"><button class="btn alt" id="outb" onclick="doLogout()" style="display:none;position:absolute;top:10px;inset-inline-start:10px;padding:5px 12px">خروج</button><h1>مديرية بلدية هيت</h1><p>وحدة العلاوات والترفيعات</p></div>
@@ -355,15 +355,19 @@ async function cloudLoad(){
  applyUI();home();
 }
 function fbInit(){
- if(!FB_ON){$('#login').style.display='none';cstat('وضع محلي: Firebase غير مُعدّ (البيانات على هذا الجهاز فقط)');return}
+ if(!FB_ON){if(gateOK())$('#login').style.display='none';cstat('وضع محلي: Firebase غير مُعدّ (البيانات على هذا الجهاز فقط)');return}
  firebase.initializeApp(FB_CONFIG);fdb=firebase.firestore();
- firebase.auth().onAuthStateChanged(u=>{fuser=u;$('#outb').style.display=u&&!u.isAnonymous?'':'none';
-  if(u&&u.isAnonymous){firebase.auth().signOut();return}
-  if(u){$('#login').style.display='none';cloudLoad().catch(e=>{cstat('تعذّر التحميل من السحابة');toast('تعذّر التحميل: '+(e.code||e.message))})}
-  else{$('#login').style.display='flex'}});
+ firebase.auth().onAuthStateChanged(u=>{fuser=u;$('#outb').style.display=gateOK()?'':'none';
+  if(u){if(gateOK())$('#login').style.display='none';cloudLoad().catch(e=>{cstat('تعذّر التحميل من السحابة');toast('تعذّر التحميل: '+(e.code||e.message))})}
+  else firebase.auth().signInAnonymously().catch(e=>{cstat('تعذّر الاتصال بالسحابة');toast('تعذّر الدخول: '+(e.code||e.message))})});
 }
-function doLogin(){$('#lg_err').textContent='';firebase.auth().signInWithEmailAndPassword((v=>v.includes('@')?v:v+'@hit.local')($('#lg_em').value.trim().toLowerCase()),$('#lg_pw').value).catch(e=>{$('#lg_err').textContent=/invalid|wrong|user-not-found|credential/.test(e.code||'')?'اسم المستخدم أو كلمة المرور غير صحيحة':'تعذّر الدخول: '+(e.code||e.message)})}
-function doLogout(){firebase.auth().signOut().then(()=>location.reload())}
+const GU='سامر',GH='33ce62d441d82235a2e4640a3248a3ef5eb45edd095d27fbf880ee97e98d9c38';
+const gateOK=()=>sessionStorage.getItem('hit-ok')=='1';
+async function doLogin(){const u=$('#lg_em').value.replace(/\s/g,''),p=$('#lg_pw').value.trim().replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+ const h=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+ if(u==GU&&h==GH){sessionStorage.setItem('hit-ok','1');$('#lg_err').textContent='';$('#login').style.display='none';$('#outb').style.display='';$('#lg_pw').value=''}
+ else $('#lg_err').textContent='اسم المستخدم أو رمز الدخول غير صحيح'}
+function doLogout(){sessionStorage.removeItem('hit-ok');location.reload()}
 dl={save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}};
 fbInit();
 home();
