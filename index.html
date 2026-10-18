@@ -32,8 +32,8 @@ border-bottom:4px solid var(--gold);border-radius:0 0 50% 50%/0 0 28px 28px}
 .tile{border:2px solid var(--pri2);background:var(--bg);color:var(--ink);border-radius:50px;min-height:92px;font:600 16px Cairo,Tahoma,sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px;transition:.15s}
 .tile:hover,.tile:focus-visible{background:var(--pri);color:#fff;transform:translateY(-2px);outline:3px solid var(--gold)}
 .tile svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8}
-.tile.top{grid-column:2}
-@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr)}.tile.top{grid-column:1/-1}}
+.tile.top{grid-column:2}.tile.last{grid-column:2}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr)}.tile.top{grid-column:1/-1}.tile.last{grid-column:1/-1}}
 .bar{display:flex;align-items:center;gap:10px;background:var(--pri);color:#fff;padding:10px 16px;position:sticky;top:0;z-index:5}
 .bar h2{margin:0;font-size:18px;flex:1}
 button,.btn{font-family:inherit;cursor:pointer}
@@ -64,6 +64,8 @@ body *,.btn,.tile{font-size:inherit}
 .gearb svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .badge{display:inline-block;background:var(--gold);color:#241a05;border-radius:8px;padding:0 8px;font-size:12px;font-weight:800;margin-inline-start:6px;vertical-align:middle}
 tr.stl td{background:rgba(197,143,44,.20)}
+.lvcard{background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:12px 14px;margin:12px 0}.lvcard h3{margin:0;color:var(--pri2)}.lvcard p{margin:2px 0 0;color:var(--mut);font-weight:600}
+.lvres{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -143,10 +145,11 @@ function calc(e){
  const ut=[lgM?`قدم قانوني (${lgM} شهر)`:'',pmM?`قدم ممنوح (${pmM} أشهر)`:''].filter(Boolean).join(' و ');
  return{status:promo?'ترفيع':(st&&s>=11?'نهاية السلم':'علاوة'),aDue,pDue,due,ng,ns,nsal:salary(ng,ns),amt:S.set.allow[g-1],av:[],usedTxt:ut,lastD:la,lastT:(e.lastP&&e.lastP>=(e.lastA||''))?'ترفيع':'علاوة'};
 }
-const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
-const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')]];
+const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',leave:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
+const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية','last',()=>lvPage()]];
 function openSettings(){$('#home').hidden=true;$('#view').hidden=false;settings();window.scrollTo(0,0)}
 function home(){
+ lvSyncAll();
  $('#view').hidden=true;$('#home').hidden=false;
  const t=new Date(),n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c);
  const a=n.filter(x=>x.c.status=='علاوة'&&x.c.due>=t&&x.c.due<=addD(t,S.set.dA)).length;
@@ -219,7 +222,7 @@ function addEmp(close){
  if(!doCalc())return;
  if(Array.from({length:11},(_,i)=>i+1).some(i=>num(e['lg'+i])>3||num(e['lg'+i])<0)){toast('القدم القانوني: الحد 3 مرات (شهر لكل مرة) في كل مرحلة');return}
  if([e.lgpmPrev,e.lgpmAct].some(v=>num(v)<0||num(v)>2)||num(e.lgpmPrev)+num(e.lgpmAct)>2){toast('قدم الستة أشهر: مرتان فقط خلال العمر الوظيفي (السابق + الفعلي)');return}
- if(editId){S.emps=S.emps.map(x=>x.id==editId?{...e,id:editId}:x)}else S.emps.push({...e,id:Date.now()});
+ if(editId){S.emps=S.emps.map(x=>x.id==editId?{...e,id:editId,lv:x.lv}:x)}else S.emps.push({...e,id:Date.now()});
  save();toast(editId?'تم حفظ التعديل':'تمت الإضافة');if(close||editId){list('all')}else empForm();
 }
 const mo=()=>iso(new Date()).slice(0,7);
@@ -322,6 +325,57 @@ function apSave(kind){
  if(kind=='p'){e.lastP=d;if(nt)e.title=nt}else e.lastA=d;
  save();toast(kind=='p'?'تمت إضافة الترفيع':'تمت إضافة العلاوة');home();
 }
+
+/* ===== الاجازات الاعتيادية ===== */
+let lvId=null;
+const lvOf=e=>{e.lv=e.lv||{file:'',reg:'',bal:'',recs:[]};e.lv.recs=e.lv.recs||[];return e.lv};
+const lvUsed=e=>lvOf(e).recs.reduce((a,r)=>a+num(r.days),0);
+const LV_ADD=36;
+const lvAdded=e=>(lvOf(e).adds||[]).reduce((a,r)=>a+num(r.days),0);
+const lvRem=e=>num(lvOf(e).bal)+lvAdded(e)-lvUsed(e);
+/* إضافة 36 يوماً تلقائياً مع بداية كل سنة ميلادية (لكل سنة فائتة إن لم يُفتح البرنامج) */
+function lvSync(e){const v=lvOf(e);if(v.bal===''||v.bal==null||!v.addYear)return false;const Y=new Date().getFullYear();let ch=false;v.adds=v.adds||[];
+ for(let y=v.addYear+1;y<=Y;y++){if(!v.adds.some(a=>a.year==y)){v.adds.push({year:y,days:LV_ADD});ch=true}v.addYear=y;ch=true}
+ return ch}
+function lvSyncAll(){let ch=false;S.emps.forEach(e=>{if(lvSync(e))ch=true});if(ch)save()}
+const nrmA=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
+function lvPage(){
+ shell('الاجازات الاعتيادية',`<fieldset><legend>بحث عن موظف</legend><label>اكتب جزءاً من الاسم<input id="lv_q" type="search" autocomplete="off" autofocus></label><div class="lvres" id="lv_res"></div></fieldset><div id="lv_card"></div>`);
+ const find=()=>{const q=nrmA($('#lv_q').value.trim());
+  const L=q?S.emps.filter(e=>nrmA(e.name).includes(q)):[];
+  $('#lv_res').innerHTML=q?(L.slice(0,30).map(e=>`<button class="btn ${e.id==lvId?'':'alt'}" onclick="lvPick(${e.id})">${e.name}</button>`).join('')||'<span style="color:var(--mut)">لا يوجد موظف بهذا الاسم</span>'):'';
+  if(q&&L.length==1&&L[0].id!=lvId)lvPick(L[0].id)};
+ $('#lv_q').oninput=find;
+ if(lvId&&S.emps.some(e=>e.id==lvId))lvCard();
+}
+function lvPick(id){lvId=id;lvCard()}
+function lvCard(){
+ const e=S.emps.find(x=>x.id==lvId),box=$('#lv_card');if(!box)return;if(!e){box.innerHTML='';return}
+ if(lvSync(e))save();
+ const v=lvOf(e),rem=lvRem(e);
+ box.innerHTML=`<div class="lvcard"><h3>${e.name}${e.settle?' <span class="badge">مُسكَّن</span>':''}</h3><p>${e.title||'—'}</p></div>
+ <div class="cols">
+ <fieldset><legend>بيانات الاضبارة</legend><label>رقم الاضبارة<input id="lv_file" value="${v.file||''}"></label><label>رقم السجل<input id="lv_reg" value="${v.reg||''}"></label><label>الرصيد المتراكم (أيام)<input id="lv_bal" type="number" min="0" step="any" value="${v.bal??''}"></label><div class="act"><button class="btn" onclick="lvSaveInfo()">حفظ البيانات</button></div></fieldset>
+ <fieldset><legend>تسجيل إجازة جديدة</legend><label>من<input id="lv_from" type="date"></label><label>إلى<input id="lv_to" type="date"></label><label>عدد أيام الإجازة<input id="lv_days" type="number" min="0.5" step="any" placeholder="يُحتسب تلقائياً من التاريخين"></label><div class="act"><button class="btn gold" onclick="lvAdd()">تسجيل الإجازة</button></div></fieldset>
+ <fieldset><legend>الرصيد</legend><div class="stat" style="grid-template-columns:1fr;margin:0"><div><b id="lv_s1">${num(v.bal)}</b>الرصيد المتراكم</div><div><b id="lv_s4">${lvAdded(e)}</b>المضاف سنوياً (${LV_ADD} يوماً كل 1 كانون الثاني)</div><div><b id="lv_s2">${lvUsed(e)}</b>المستخدم</div><div><b id="lv_s3" style="color:${rem<0?'var(--red)':'var(--pri2)'}">${rem}</b>المتبقي</div></div></fieldset></div>
+ <p class="note">الرصيد المتراكم يبقى ثابتاً كما أُدخل، وتُضاف إليه ${LV_ADD} يوماً تلقائياً مع بداية كل سنة ميلادية في خانة «المضاف سنوياً» (تبدأ الإضافة من السنة التالية لسنة إدخال الرصيد)، وتُخصم أيام كل إجازة ويظهر الباقي في «المتبقي». العنوان الوظيفي يتغير تلقائياً مع الترفيعات ولا يمكن تعديله من هنا.</p>
+ <div class="tw"><table style="min-width:520px"><thead><tr><th>ت</th><th>من</th><th>إلى</th><th>الأيام</th><th>المتبقي بعدها</th><th></th></tr></thead><tbody>${(()=>{let r=num(v.bal)+lvAdded(e);return v.recs.map((x,i)=>{r-=num(x.days);return`<tr><td>${i+1}</td><td>${fd(pd(x.from))||'-'}</td><td>${fd(pd(x.to))||'-'}</td><td>${x.days}</td><td>${r}</td><td><button class="btn red" onclick="lvDel(${i},this)">حذف</button></td></tr>`}).join('')||'<tr><td colspan="6">لا توجد إجازات مسجلة</td></tr>'})()}</tbody></table></div>`;
+ const calcD=()=>{const a=pd($('#lv_from').value),b=pd($('#lv_to').value);if(a&&b&&b>=a)$('#lv_days').value=Math.round((b-a)/864e5)+1};
+ $('#lv_from').oninput=calcD;$('#lv_to').oninput=calcD;
+ box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function lvSaveInfo(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lvOf(e),b=$('#lv_bal').value;
+ if(b!==''&&num(b)<0){toast('الرصيد لا يكون سالباً');return}
+ v.file=$('#lv_file').value.trim();v.reg=$('#lv_reg').value.trim();v.bal=b===''?'':num(b);if(v.bal!==''&&!v.addYear)v.addYear=new Date().getFullYear();save();toast('تم حفظ البيانات');lvCard()}
+function lvAdd(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lvOf(e),f=$('#lv_from').value,t=$('#lv_to').value,d=num($('#lv_days').value);
+ if(!f||!t){toast('حدد تاريخ البداية والنهاية');return}
+ if(t<f){toast('تاريخ النهاية قبل البداية');return}
+ if(d<=0){toast('أدخل عدد الأيام');return}
+ if(v.bal===''||v.bal==null){toast('أدخل الرصيد المتراكم واحفظه أولاً');return}
+ if(d>lvRem(e)){toast('عدد الأيام ('+d+') أكبر من الرصيد المتبقي ('+lvRem(e)+')');return}
+ v.recs.push({id:Date.now(),from:f,to:t,days:d});save();toast('تم تسجيل الإجازة');lvCard()}
+function lvDel(i,b){if(b.dataset.c){const e=S.emps.find(x=>x.id==lvId);lvOf(e).recs.splice(i,1);save();toast('تم الحذف وأُعيدت الأيام للرصيد');lvCard();return}
+ b.dataset.c=1;b.textContent='تأكيد الحذف';setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent='حذف'}},4000)}
 const BD={style:'thin',color:{argb:'FF000000'}};
 function xs(c,f,z,fill,al='center',bord=true){c.font={name:f,size:z,bold:true,color:{argb:'FF000000'}};c.alignment={horizontal:al,vertical:'middle',wrapText:true,readingOrder:2};if(fill)c.fill={type:'pattern',pattern:'solid',fgColor:{argb:fill}};if(bord)c.border={top:BD,left:BD,bottom:BD,right:BD}}
 const UD=d=>d?new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())):'';
