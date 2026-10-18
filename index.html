@@ -65,7 +65,7 @@ body *,.btn,.tile{font-size:inherit}
 .badge{display:inline-block;background:var(--gold);color:#241a05;border-radius:8px;padding:0 8px;font-size:12px;font-weight:800;margin-inline-start:6px;vertical-align:middle}
 tr.stl td{background:rgba(197,143,44,.20)}
 .lvcard{background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:12px 14px;margin:12px 0}.lvcard h3{margin:0;color:var(--pri2)}.lvcard p{margin:2px 0 0;color:var(--mut);font-weight:600}
-.lvres{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.lvres{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.cols2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-items:start}@media(max-width:820px){.cols2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -340,25 +340,33 @@ function lvSync(e){const v=lvOf(e);if(v.bal===''||v.bal==null||!v.addYear)return
  return ch}
 function lvSyncAll(){let ch=false;S.emps.forEach(e=>{if(lvSync(e))ch=true});if(ch)save()}
 const nrmA=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
+const lvIn=e=>{const v=e.lv;return !!v&&!!(v.added||v.file||v.reg||(v.bal!==''&&v.bal!=null)||(v.recs||[]).length)};
 function lvPage(){
- shell('الاجازات الاعتيادية',`<fieldset><legend>بحث عن موظف</legend><label>اكتب جزءاً من الاسم<input id="lv_q" type="search" autocomplete="off" autofocus></label><div class="lvres" id="lv_res"></div></fieldset><div id="lv_card"></div>`);
+ shell('الاجازات الاعتيادية',`<div class="cols2">
+ <fieldset><legend>بحث عن موظف</legend><label>اكتب جزءاً من الاسم<input id="lv_q" type="search" autocomplete="off"></label><div class="lvres" id="lv_res"></div></fieldset>
+ <fieldset><legend>إضافة موظف</legend><label>بحث في سجل الترفيعات<input id="lv_aq" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="lv_ae"></select></label><label>رقم الاضبارة<input id="lv_file"></label><label>رقم السجل<input id="lv_reg"></label><div class="act"><button class="btn gold" onclick="lvAddEmp()">إضافة الموظف</button></div><p class="note">الاسم والعنوان الوظيفي يُؤخذان من سجل الترفيعات، وتُدخل هنا بيانات الاضبارة يدوياً فقط. لتعديلها اختر الموظف وأعد الحفظ.</p></fieldset></div><fieldset style="margin-top:14px"><legend>تصدير إلى Excel</legend><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end"><label style="flex:1;min-width:160px">اختر السنة<select id="lv_yr">${lvYears().map(y=>`<option value="${y}">${y}</option>`).join('')}</select></label><button class="btn gold" onclick="lvExport()">تصدير الإجازات</button></div></fieldset><div id="lv_card"></div>`);
  const find=()=>{const q=nrmA($('#lv_q').value.trim());
-  const L=q?S.emps.filter(e=>nrmA(e.name).includes(q)):[];
-  $('#lv_res').innerHTML=q?(L.slice(0,30).map(e=>`<button class="btn ${e.id==lvId?'':'alt'}" onclick="lvPick(${e.id})">${e.name}</button>`).join('')||'<span style="color:var(--mut)">لا يوجد موظف بهذا الاسم</span>'):'';
+  const L=q?S.emps.filter(e=>lvIn(e)&&nrmA(e.name).includes(q)):[];
+  $('#lv_res').innerHTML=q?(L.slice(0,30).map(e=>`<button class="btn ${e.id==lvId?'':'alt'}" onclick="lvPick(${e.id})">${e.name}</button>`).join('')||'<span style="color:var(--mut)">لا يوجد موظف بهذا الاسم في الإجازات — أضِفه من «إضافة موظف»</span>'):'';
   if(q&&L.length==1&&L[0].id!=lvId)lvPick(L[0].id)};
  $('#lv_q').oninput=find;
- if(lvId&&S.emps.some(e=>e.id==lvId))lvCard();
+ const fillF=()=>{const e=S.emps.find(x=>x.id==$('#lv_ae').value),v=(e&&e.lv)||{};$('#lv_file').value=v.file||'';$('#lv_reg').value=v.reg||''};
+ const fillS=()=>{const q=nrmA($('#lv_aq').value.trim());const L=S.emps.filter(e=>!q||nrmA(e.name).includes(q));
+  $('#lv_ae').innerHTML=L.map(e=>`<option value="${e.id}">${e.name}${lvIn(e)?' ✓':''}</option>`).join('')||'<option value="">لا يوجد موظف</option>';fillF()};
+ $('#lv_aq').oninput=fillS;$('#lv_ae').onchange=fillF;fillS();
+ const cur=S.emps.find(e=>e.id==lvId);if(cur&&lvIn(cur))lvCard();
 }
+function lvAddEmp(){const e=S.emps.find(x=>x.id==$('#lv_ae').value);if(!e){toast('اختر موظفاً من سجل الترفيعات');return}
+ const v=lvOf(e);v.file=$('#lv_file').value.trim();v.reg=$('#lv_reg').value.trim();v.added=true;save();toast('تم حفظ بيانات الاضبارة');lvId=e.id;lvPage()}
 function lvPick(id){lvId=id;lvCard()}
 function lvCard(){
  const e=S.emps.find(x=>x.id==lvId),box=$('#lv_card');if(!box)return;if(!e){box.innerHTML='';return}
  if(lvSync(e))save();
  const v=lvOf(e),rem=lvRem(e);
- box.innerHTML=`<div class="lvcard"><h3>${e.name}${e.settle?' <span class="badge">مُسكَّن</span>':''}</h3><p>${e.title||'—'}</p></div>
- <div class="cols">
- <fieldset><legend>بيانات الاضبارة</legend><label>رقم الاضبارة<input id="lv_file" value="${v.file||''}"></label><label>رقم السجل<input id="lv_reg" value="${v.reg||''}"></label><label>الرصيد المتراكم (أيام) - تعديل يدوي<input id="lv_bal" type="number" min="0" step="any" value="${v.bal??''}"></label><label>المضاف سنوياً (أيام) - تعديل يدوي<input id="lv_add" type="number" min="0" step="any" value="${lvAdded(e)}"></label><div class="act"><button class="btn" onclick="lvSaveInfo()">حفظ البيانات</button></div></fieldset>
+ box.innerHTML=`<div class="lvcard"><h3>${e.name}${e.settle?' <span class="badge">مُسكَّن</span>':''}</h3><p>${e.title||'—'}</p><p>رقم الاضبارة: ${v.file||'—'} &nbsp;|&nbsp; رقم السجل: ${v.reg||'—'}</p></div>
+ <div class="cols2">
  <fieldset><legend>تسجيل إجازة جديدة</legend><label>من<input id="lv_from" type="date"></label><label>إلى<input id="lv_to" type="date"></label><label>عدد أيام الإجازة<input id="lv_days" type="number" min="0.5" step="any" placeholder="يُحتسب تلقائياً من التاريخين"></label><div class="act"><button class="btn gold" onclick="lvAdd()">تسجيل الإجازة</button></div></fieldset>
- <fieldset><legend>الرصيد</legend><div class="stat" style="grid-template-columns:1fr;margin:0"><div><b id="lv_s1">${num(v.bal)}</b>الرصيد المتراكم</div><div><b id="lv_s4">${lvAdded(e)}</b>المضاف سنوياً (${LV_ADD} يوماً كل 1 كانون الثاني)</div><div><b id="lv_s2">${lvUsed(e)}</b>المستخدم</div><div><b id="lv_s3" style="color:${rem<0?'var(--red)':'var(--pri2)'}">${rem}</b>المتبقي</div></div></fieldset></div>
+ <fieldset><legend>الرصيد</legend><label>الرصيد المتراكم (أيام) - تعديل يدوي<input id="lv_bal" type="number" min="0" step="any" value="${v.bal??''}"></label><label>المضاف سنوياً (أيام) - تعديل يدوي<input id="lv_add" type="number" min="0" step="any" value="${lvAdded(e)}"></label><div class="act"><button class="btn" onclick="lvSaveInfo()">حفظ الرصيد</button></div><div class="stat" style="grid-template-columns:1fr;margin:0"><div><b id="lv_s1">${num(v.bal)}</b>الرصيد المتراكم</div><div><b id="lv_s4">${lvAdded(e)}</b>المضاف سنوياً (${LV_ADD} يوماً كل 1 كانون الثاني)</div><div><b id="lv_s2">${lvUsed(e)}</b>المستخدم</div><div><b id="lv_s3" style="color:${rem<0?'var(--red)':'var(--pri2)'}">${rem}</b>المتبقي</div></div></fieldset></div>
  <p class="note">الرصيد المتراكم يبقى ثابتاً كما أُدخل، (ويمكن تعديله يدوياً) وتُضاف إليه ${LV_ADD} يوماً تلقائياً مع بداية كل سنة ميلادية في خانة «المضاف سنوياً» (تبدأ الإضافة من السنة التالية لسنة إدخال الرصيد)، ويمكن تعديل «المضاف سنوياً» يدوياً أيضاً (تبقى الإضافة التلقائية للسنوات القادمة فوق القيمة المعدّلة)، وتُخصم أيام كل إجازة ويظهر الباقي في «المتبقي». العنوان الوظيفي يتغير تلقائياً مع الترفيعات ولا يمكن تعديله من هنا.</p>
  <div class="tw"><table style="min-width:520px"><thead><tr><th>ت</th><th>من</th><th>إلى</th><th>الأيام</th><th>المتبقي بعدها</th><th></th></tr></thead><tbody>${(()=>{let r=num(v.bal)+lvAdded(e);return v.recs.map((x,i)=>{r-=num(x.days);return`<tr><td>${i+1}</td><td>${fd(pd(x.from))||'-'}</td><td>${fd(pd(x.to))||'-'}</td><td>${x.days}</td><td>${r}</td><td><button class="btn red" onclick="lvDel(${i},this)">حذف</button></td></tr>`}).join('')||'<tr><td colspan="6">لا توجد إجازات مسجلة</td></tr>'})()}</tbody></table></div>`;
  const calcD=()=>{const a=pd($('#lv_from').value),b=pd($('#lv_to').value);if(a&&b&&b>=a)$('#lv_days').value=Math.round((b-a)/864e5)+1};
@@ -367,7 +375,7 @@ function lvCard(){
 }
 function lvSaveInfo(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lvOf(e),b=$('#lv_bal').value;
  if(b!==''&&num(b)<0){toast('الرصيد لا يكون سالباً');return}
- v.file=$('#lv_file').value.trim();v.reg=$('#lv_reg').value.trim();v.bal=b===''?'':num(b);const ad=$('#lv_add').value;if(ad!==''&&num(ad)<0){toast('المضاف سنوياً لا يكون سالباً');return}v.addAdj=ad===''?0:Math.round((num(ad)-lvAddAuto(e))*100)/100;if(v.bal!==''&&!v.addYear)v.addYear=new Date().getFullYear();save();toast('تم حفظ البيانات');lvCard()}
+ v.bal=b===''?'':num(b);const ad=$('#lv_add').value;if(ad!==''&&num(ad)<0){toast('المضاف سنوياً لا يكون سالباً');return}v.addAdj=ad===''?0:Math.round((num(ad)-lvAddAuto(e))*100)/100;if(v.bal!==''&&!v.addYear)v.addYear=new Date().getFullYear();save();toast('تم حفظ الرصيد');lvCard()}
 function lvAdd(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lvOf(e),f=$('#lv_from').value,t=$('#lv_to').value,d=num($('#lv_days').value);
  if(!f||!t){toast('حدد تاريخ البداية والنهاية');return}
  if(t<f){toast('تاريخ النهاية قبل البداية');return}
@@ -421,6 +429,35 @@ async function expNames(){
  S.emps.forEach(e=>{const r=ws.addRow([e.name]);xs(r.getCell(1),'Arial',12,null);r.height=24});
  const buf=await wb.xlsx.writeBuffer();
  try{await dl.save({filename:'اسماء_الموظفين.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
+}
+const lvYears=()=>{const Y=new Date().getFullYear(),set=new Set([Y]);S.emps.forEach(e=>{if(!lvIn(e))return;const v=lvOf(e);(v.recs||[]).forEach(r=>{const y=+String(r.from||'').slice(0,4);if(y)set.add(y)});(v.adds||[]).forEach(a=>{if(+a.year)set.add(+a.year)});if(v.addYear)set.add(+v.addYear)});const mn=Math.min(...set),out=[];for(let y=Y;y>=mn;y--)out.push(y);return out};
+async function lvExport(){
+ if(!dl){toast('التصدير غير متاح في هذا العرض');return}
+ if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
+ const Y=+$('#lv_yr').value,L=S.emps.filter(lvIn);
+ if(!L.length){toast('لا يوجد موظفون في الإجازات للتصدير');return}
+ const yOf=r=>+String(r.from||'').slice(0,4),rnd=n=>Math.round(n*100)/100;
+ const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('الإجازات '+Y,{views:[{rightToLeft:true}]}),n=9;
+ ws.columns=[6,38,28,14,14,16,16,18,16].map(w=>({width:w}));
+ ws.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};
+ ws.mergeCells(1,1,1,n);const t=ws.getCell(1,1);t.value='سجل الإجازات الاعتيادية لموظفي مديرية بلدية هيت لسنة '+Y;xs(t,'Arial',14,null,'center',false);ws.getRow(1).height=32;
+ const hr=ws.addRow(['ت','اسم الموظف','العنوان الوظيفي','رقم الاضبارة','رقم السجل','الرصيد في بداية السنة','المضاف خلال السنة','أيام الإجازات خلال السنة','المتبقي نهاية السنة']);
+ hr.height=45;hr.eachCell(c=>xs(c,'Arial',12,'FFDDD9C3'));
+ const det=[];
+ L.forEach((e,i)=>{const v=lvOf(e),recs=v.recs||[];
+  const usedY=recs.filter(r=>yOf(r)==Y).reduce((a,r)=>a+num(r.days),0),usedB=recs.filter(r=>yOf(r)<Y).reduce((a,r)=>a+num(r.days),0);
+  const addB=(v.adds||[]).filter(a=>+a.year<Y).reduce((a,r)=>a+num(r.days),0),addY=(v.adds||[]).filter(a=>+a.year==Y).reduce((a,r)=>a+num(r.days),0);
+  const open=rnd(num(v.bal)+addB+(+v.addAdj||0)-usedB),end=rnd(open+addY-usedY);
+  const row=ws.addRow([i+1,e.name,e.title||'',v.file||'',v.reg||'',open,addY,usedY,end]);row.height=26;row.eachCell(c=>xs(c,'Arial',12,null));
+  row.getCell(2).alignment={horizontal:'right',vertical:'middle',wrapText:true,readingOrder:2};
+  recs.filter(r=>yOf(r)==Y).forEach(r=>det.push([e.name,v.file||'',r.from,r.to,num(r.days)]))});
+ const w2=wb.addWorksheet('تفاصيل الإجازات',{views:[{rightToLeft:true}]});w2.columns=[6,38,14,16,16,14].map(w=>({width:w}));
+ const h2=w2.addRow(['ت','اسم الموظف','رقم الاضبارة','من','إلى','عدد الأيام']);h2.height=36;h2.eachCell(c=>xs(c,'Arial',12,'FFDDD9C3'));
+ det.sort((a,b)=>String(a[2]).localeCompare(String(b[2])));
+ det.forEach((d,i)=>{const r=w2.addRow([i+1,d[0],d[1],UD(pd(d[2])),UD(pd(d[3])),d[4]]);r.height=24;r.eachCell(c=>xs(c,'Arial',12,null));r.getCell(4).numFmt='d/m/yyyy';r.getCell(5).numFmt='d/m/yyyy'});
+ if(!det.length){w2.addRow(['','لا توجد إجازات مسجلة في هذه السنة']);}
+ const buf=await wb.xlsx.writeBuffer();
+ try{await dl.save({filename:'اجازات_اعتيادية_'+Y+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
 applyUI();
 const cstat=t=>{const x=$('#cstat');if(x)x.textContent=t};
