@@ -331,7 +331,8 @@ let lvId=null;
 const lvOf=e=>{e.lv=e.lv||{file:'',reg:'',bal:'',recs:[]};e.lv.recs=e.lv.recs||[];return e.lv};
 const lvUsed=e=>lvOf(e).recs.reduce((a,r)=>a+num(r.days),0);
 const LV_ADD=36;
-const lvAdded=e=>(lvOf(e).adds||[]).reduce((a,r)=>a+num(r.days),0);
+const lvAddAuto=e=>(lvOf(e).adds||[]).reduce((a,r)=>a+num(r.days),0);
+const lvAdded=e=>Math.round((lvAddAuto(e)+(+lvOf(e).addAdj||0))*100)/100;
 const lvRem=e=>num(lvOf(e).bal)+lvAdded(e)-lvUsed(e);
 /* إضافة 36 يوماً تلقائياً مع بداية كل سنة ميلادية (لكل سنة فائتة إن لم يُفتح البرنامج) */
 function lvSync(e){const v=lvOf(e);if(v.bal===''||v.bal==null||!v.addYear)return false;const Y=new Date().getFullYear();let ch=false;v.adds=v.adds||[];
@@ -355,10 +356,10 @@ function lvCard(){
  const v=lvOf(e),rem=lvRem(e);
  box.innerHTML=`<div class="lvcard"><h3>${e.name}${e.settle?' <span class="badge">مُسكَّن</span>':''}</h3><p>${e.title||'—'}</p></div>
  <div class="cols">
- <fieldset><legend>بيانات الاضبارة</legend><label>رقم الاضبارة<input id="lv_file" value="${v.file||''}"></label><label>رقم السجل<input id="lv_reg" value="${v.reg||''}"></label><label>الرصيد المتراكم (أيام)<input id="lv_bal" type="number" min="0" step="any" value="${v.bal??''}"></label><div class="act"><button class="btn" onclick="lvSaveInfo()">حفظ البيانات</button></div></fieldset>
+ <fieldset><legend>بيانات الاضبارة</legend><label>رقم الاضبارة<input id="lv_file" value="${v.file||''}"></label><label>رقم السجل<input id="lv_reg" value="${v.reg||''}"></label><label>الرصيد المتراكم (أيام) - تعديل يدوي<input id="lv_bal" type="number" min="0" step="any" value="${v.bal??''}"></label><label>المضاف سنوياً (أيام) - تعديل يدوي<input id="lv_add" type="number" min="0" step="any" value="${lvAdded(e)}"></label><div class="act"><button class="btn" onclick="lvSaveInfo()">حفظ البيانات</button></div></fieldset>
  <fieldset><legend>تسجيل إجازة جديدة</legend><label>من<input id="lv_from" type="date"></label><label>إلى<input id="lv_to" type="date"></label><label>عدد أيام الإجازة<input id="lv_days" type="number" min="0.5" step="any" placeholder="يُحتسب تلقائياً من التاريخين"></label><div class="act"><button class="btn gold" onclick="lvAdd()">تسجيل الإجازة</button></div></fieldset>
  <fieldset><legend>الرصيد</legend><div class="stat" style="grid-template-columns:1fr;margin:0"><div><b id="lv_s1">${num(v.bal)}</b>الرصيد المتراكم</div><div><b id="lv_s4">${lvAdded(e)}</b>المضاف سنوياً (${LV_ADD} يوماً كل 1 كانون الثاني)</div><div><b id="lv_s2">${lvUsed(e)}</b>المستخدم</div><div><b id="lv_s3" style="color:${rem<0?'var(--red)':'var(--pri2)'}">${rem}</b>المتبقي</div></div></fieldset></div>
- <p class="note">الرصيد المتراكم يبقى ثابتاً كما أُدخل، وتُضاف إليه ${LV_ADD} يوماً تلقائياً مع بداية كل سنة ميلادية في خانة «المضاف سنوياً» (تبدأ الإضافة من السنة التالية لسنة إدخال الرصيد)، وتُخصم أيام كل إجازة ويظهر الباقي في «المتبقي». العنوان الوظيفي يتغير تلقائياً مع الترفيعات ولا يمكن تعديله من هنا.</p>
+ <p class="note">الرصيد المتراكم يبقى ثابتاً كما أُدخل، (ويمكن تعديله يدوياً) وتُضاف إليه ${LV_ADD} يوماً تلقائياً مع بداية كل سنة ميلادية في خانة «المضاف سنوياً» (تبدأ الإضافة من السنة التالية لسنة إدخال الرصيد)، ويمكن تعديل «المضاف سنوياً» يدوياً أيضاً (تبقى الإضافة التلقائية للسنوات القادمة فوق القيمة المعدّلة)، وتُخصم أيام كل إجازة ويظهر الباقي في «المتبقي». العنوان الوظيفي يتغير تلقائياً مع الترفيعات ولا يمكن تعديله من هنا.</p>
  <div class="tw"><table style="min-width:520px"><thead><tr><th>ت</th><th>من</th><th>إلى</th><th>الأيام</th><th>المتبقي بعدها</th><th></th></tr></thead><tbody>${(()=>{let r=num(v.bal)+lvAdded(e);return v.recs.map((x,i)=>{r-=num(x.days);return`<tr><td>${i+1}</td><td>${fd(pd(x.from))||'-'}</td><td>${fd(pd(x.to))||'-'}</td><td>${x.days}</td><td>${r}</td><td><button class="btn red" onclick="lvDel(${i},this)">حذف</button></td></tr>`}).join('')||'<tr><td colspan="6">لا توجد إجازات مسجلة</td></tr>'})()}</tbody></table></div>`;
  const calcD=()=>{const a=pd($('#lv_from').value),b=pd($('#lv_to').value);if(a&&b&&b>=a)$('#lv_days').value=Math.round((b-a)/864e5)+1};
  $('#lv_from').oninput=calcD;$('#lv_to').oninput=calcD;
@@ -366,7 +367,7 @@ function lvCard(){
 }
 function lvSaveInfo(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lvOf(e),b=$('#lv_bal').value;
  if(b!==''&&num(b)<0){toast('الرصيد لا يكون سالباً');return}
- v.file=$('#lv_file').value.trim();v.reg=$('#lv_reg').value.trim();v.bal=b===''?'':num(b);if(v.bal!==''&&!v.addYear)v.addYear=new Date().getFullYear();save();toast('تم حفظ البيانات');lvCard()}
+ v.file=$('#lv_file').value.trim();v.reg=$('#lv_reg').value.trim();v.bal=b===''?'':num(b);const ad=$('#lv_add').value;if(ad!==''&&num(ad)<0){toast('المضاف سنوياً لا يكون سالباً');return}v.addAdj=ad===''?0:Math.round((num(ad)-lvAddAuto(e))*100)/100;if(v.bal!==''&&!v.addYear)v.addYear=new Date().getFullYear();save();toast('تم حفظ البيانات');lvCard()}
 function lvAdd(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lvOf(e),f=$('#lv_from').value,t=$('#lv_to').value,d=num($('#lv_days').value);
  if(!f||!t){toast('حدد تاريخ البداية والنهاية');return}
  if(t<f){toast('تاريخ النهاية قبل البداية');return}
