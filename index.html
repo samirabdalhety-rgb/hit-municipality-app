@@ -468,12 +468,12 @@ async function lvExportEmp(){
  ws.columns=[8,16,20,20].map(w=>({width:w}));
  ws.pageSetup={orientation:'portrait',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};
  const info=a=>a.forEach(a=>{const r=ws.addRow(a);ws.mergeCells(r.number,1,r.number,4);xs(r.getCell(1),'Arial',12,'FFEFEFEF','right');r.height=26});
- info([['اسم الموظف: '+e.name]]);ws.addRow([]);
+ info([['اسم الموظف: '+e.name],['العنوان الوظيفي: '+(e.title||'')],['رقم الاضبارة: '+(v.file||'')],['رقم السجل: '+(v.reg||'')]]);ws.addRow([]);
  const hr=ws.addRow(['ت','عدد الأيام','من','إلى']);hr.height=30;hr.eachCell(c=>xs(c,'Arial',12,'FFDDD9C3'));
  recs.forEach((x,i)=>{const r=ws.addRow([i+1,num(x.days),UD(pd(x.from)),UD(pd(x.to))]);r.height=24;r.eachCell(c=>xs(c,'Arial',12,null));r.getCell(3).numFmt='d/m/yyyy';r.getCell(4).numFmt='d/m/yyyy'});
  if(recs.length){const r=ws.addRow(['المجموع',Math.round(recs.reduce((a,x)=>a+num(x.days),0)*100)/100,'','']);ws.mergeCells(r.number,3,r.number,4);r.height=24;r.eachCell(c=>xs(c,'Arial',12,'FFEFEFEF'))}
  else{const r=ws.addRow(['لا توجد إجازات مسجلة في هذه السنة']);ws.mergeCells(r.number,1,r.number,4);r.height=24;xs(r.getCell(1),'Arial',12,null)}
- ws.addRow([]);info([['العنوان الوظيفي: '+(e.title||'')],['رقم الاضبارة: '+(v.file||'')],['رقم السجل: '+(v.reg||'')]]);
+ 
  const buf=await wb.xlsx.writeBuffer();
  try{await dl.save({filename:'اجازات_'+String(e.name).replace(/[\\\/:*?"<>|]/g,'').trim()+'_'+Y+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
