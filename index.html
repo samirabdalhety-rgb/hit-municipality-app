@@ -178,6 +178,7 @@ function empForm(id){
  <fieldset><legend>معلومات عامة</legend>${f('name','اسم الموظف (رباعي)')}${f('hireDate','تاريخ التعيين','date')}<label>التحصيل الدراسي<select id="f_edu">${opt(EDU,e.edu)}</select></label>${f('eduX','التحصيل الدراسي الدقيق')}
  <label>العنوان الوظيفي<select id="f_title" data-v="${e.title||''}"></select><input id="f_titleX" placeholder="اكتب العنوان الوظيفي" style="display:none;margin-top:6px"></label>
  <label style="display:flex;align-items:center;gap:8px;color:var(--ink);background:rgba(197,143,44,.18);border:1.5px solid var(--gold);border-radius:10px;padding:8px 10px"><input type="checkbox" id="f_settle" style="width:auto" ${e.settle?'checked':''}> تسكين الموظف (علاوات فقط بدون ترفيع، ضمن نفس الدرجة)</label>
+ <label>نوع الاجازة<select id="f_ltype">${LV_TYPES.map(t=>`<option value="${t[0]}" ${t[0]==((e.lv&&e.lv.ltype)||'')?'selected':''}>${t[1]}</option>`).join('')}</select></label>
  <label>ملاحظات<textarea id="f_notes" rows="2" class="sm">${e.notes||''}</textarea></label></fieldset>
  <fieldset><legend>معلومات العلاوة السابقة</legend>
  <label>الدرجة الوظيفية<select id="f_g">${rng(10,e.g)}</select></label><label>المرحلة<select id="f_s">${rng(11,e.s)}</select></label>
@@ -228,7 +229,8 @@ function addEmp(close){
  if(!doCalc())return;
  if(Array.from({length:11},(_,i)=>i+1).some(i=>num(e['lg'+i])>3||num(e['lg'+i])<0)){toast('القدم القانوني: الحد 3 مرات (شهر لكل مرة) في كل مرحلة');return}
  if([e.lgpmPrev,e.lgpmAct].some(v=>num(v)<0||num(v)>2)||num(e.lgpmPrev)+num(e.lgpmAct)>2){toast('قدم الستة أشهر: مرتان فقط خلال العمر الوظيفي (السابق + الفعلي)');return}
- if(editId){S.emps=S.emps.map(x=>x.id==editId?{...e,id:editId,lv:x.lv}:x)}else S.emps.push({...e,id:Date.now()});
+ const _lt=e.ltype||'';delete e.ltype;
+ if(editId){S.emps=S.emps.map(x=>{if(x.id!=editId)return x;const lv=x.lv||(_lt?lvOf(x):undefined);if(lv)lv.ltype=_lt;return{...e,id:editId,lv}})}else{const ne={...e,id:Date.now()};if(_lt)lvOf(ne).ltype=_lt;S.emps.push(ne)}
  save();toast(editId?'تم حفظ التعديل':'تمت الإضافة');if(close||editId){list('all')}else empForm();
 }
 const mo=()=>iso(new Date()).slice(0,7);
