@@ -151,8 +151,8 @@ function calc(e){
  const ut=[lgM?`قدم قانوني (${lgM} شهر)`:'',pmM?`قدم ممنوح (${pmM} أشهر)`:''].filter(Boolean).join(' و ');
  return{status:promo?'ترفيع':(st&&s>=11?'نهاية السلم':'علاوة'),aDue,pDue,due,ng,ns,nsal:salary(ng,ns),amt:S.set.allow[g-1],av:[],usedTxt:ut,lastD:la,lastT:(e.lastP&&e.lastP>=(e.lastA||''))?'ترفيع':'علاوة'};
 }
-const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',leave:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
-const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية','last',()=>lvPage()]];
+const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',leave:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',maint:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.5 1.5-2 3-2s2.5.5 3 2M14 10h4M14 14h4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
+const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtPage()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية','last',()=>lvPage()]];
 function openSettings(){$('#home').hidden=true;$('#view').hidden=false;settings();window.scrollTo(0,0)}
 function home(){
  lvSyncAll();
@@ -360,7 +360,7 @@ const lvIn=e=>{const v=e.lv;return !!v&&!!(v.added||v.file||v.reg||(v.bal!==''&&
 const lvEs=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let lvMode='full';
 function lvPage(){lvClose();
- const T=[['srch','بحث','s'],['users','إضافة موظف','e'],['leave','إضافة إجازة','l'],['dl','تصدير Excel','x']];
+ const T=[['srch','بحث','s'],['users','إضافة موظف جديد','e'],['leave','إضافة إجازة','l'],['dl','تصدير Excel','x']];
  shell('الاجازات الاعتيادية',`<div class="lvt">${T.map(t=>`<button class="tile" onclick="lvOpen('${t[2]}')"><svg viewBox="0 0 24 24">${t[0]=='dl'?'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>':ICON[t[0]]}</svg>${t[1]}</button>`).join('')}</div>`)}
 const lvEsc=ev=>{if(ev.key=='Escape')lvClose()};
 function lvClose(){const m=$('#lvm');if(m)m.remove();document.removeEventListener('keydown',lvEsc)}
@@ -372,11 +372,11 @@ function lvOpen(k,pick){
   lvModal('بحث عن موظف',`<label>اكتب جزءاً من الاسم<input id="lv_q" type="search" autocomplete="off"></label><div class="lvres" id="lv_res"></div><div id="lv_card"></div>`);
   const find=()=>{const q=nrmA($('#lv_q').value.trim());
    const L=q?S.emps.filter(e=>lvIn(e)&&nrmA(e.name).includes(q)):[];
-   $('#lv_res').innerHTML=q?(L.slice(0,30).map(e=>`<button class="btn ${e.id==lvId?'':'alt'}" onclick="lvPick(${e.id})">${lvEs(e.name)}</button>`).join('')||'<span style="color:var(--mut)">لا يوجد موظف بهذا الاسم في الإجازات — أضِفه من «إضافة موظف»</span>'):'';
+   $('#lv_res').innerHTML=q?(L.slice(0,30).map(e=>`<button class="btn ${e.id==lvId?'':'alt'}" onclick="lvPick(${e.id})">${lvEs(e.name)}</button>`).join('')||'<span style="color:var(--mut)">لا يوجد موظف بهذا الاسم في الإجازات — أضِفه من «إضافة موظف جديد»</span>'):'';
    if(q&&L.length==1&&L[0].id!=lvId)lvPick(L[0].id)};
   $('#lv_q').oninput=find;const cur=S.emps.find(e=>e.id==lvId);if(cur&&lvIn(cur)){$('#lv_q').value=cur.name;lvCard()}else $('#lv_q').focus();
  }else if(k=='e'){
-  lvModal('إضافة موظف',`<label>بحث في سجل الترفيعات<input id="lv_aq" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="lv_ae"></select></label><label>رقم الاضبارة<input id="lv_file"></label><label>رقم السجل<input id="lv_reg"></label><label>مقدار الرصيد السابق (التراكمي) بالأيام<input id="lv_pbal" type="number" min="0" step="any"></label><label>نوع الاجازة<select id="lv_ltype">${LV_TYPES.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('')}</select></label><label>ملاحظات<textarea id="lv_enote" rows="2" class="sm" maxlength="200"></textarea></label><div class="act"><button class="btn gold" onclick="lvAddEmp()">إضافة الموظف</button></div><p class="note">الاسم والعنوان الوظيفي يُؤخذان من سجل الترفيعات، وتُدخل هنا بيانات الاضبارة يدوياً فقط. لتعديلها اختر الموظف وأعد الحفظ.</p>`);
+  lvModal('إضافة موظف جديد',`<label>بحث في سجل الترفيعات<input id="lv_aq" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="lv_ae"></select></label><label>رقم الاضبارة<input id="lv_file"></label><label>رقم السجل<input id="lv_reg"></label><label>مقدار الرصيد السابق (التراكمي) بالأيام<input id="lv_pbal" type="number" min="0" step="any"></label><label>نوع الاجازة<select id="lv_ltype">${LV_TYPES.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('')}</select></label><label>ملاحظات<textarea id="lv_enote" rows="2" class="sm" maxlength="200"></textarea></label><div class="act"><button class="btn gold" onclick="lvAddEmp()">إضافة الموظف</button></div><p class="note">الاسم والعنوان الوظيفي يُؤخذان من سجل الترفيعات، وتُدخل هنا بيانات الاضبارة يدوياً فقط. لتعديلها اختر الموظف وأعد الحفظ.</p>`);
   const fillF=()=>{const e=S.emps.find(x=>x.id==$('#lv_ae').value),v=(e&&e.lv)||{};$('#lv_file').value=v.file||'';$('#lv_reg').value=v.reg||'';$('#lv_pbal').value=v.bal??'';$('#lv_ltype').value=v.ltype||'';$('#lv_enote').value=v.notes||''};
   const fillS=()=>{const q=nrmA($('#lv_aq').value.trim());const L=S.emps.filter(e=>!q||nrmA(e.name).includes(q));
    $('#lv_ae').innerHTML=L.map(e=>`<option value="${e.id}">${lvEs(e.name)}${lvIn(e)?' ✓':''}</option>`).join('')||'<option value="">لا يوجد موظف</option>';fillF()};
@@ -515,6 +515,90 @@ async function lvExport(){
  const buf=await wb.xlsx.writeBuffer();
  try{await dl.save({filename:'اجازات_اعتيادية_'+Y+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
+/* ===== ادامة الموظفين ===== */
+/* المصدر: 'e' = حقل مشترك مع سجل العلاوات والترفيعات (يتحدّث تلقائياً من الطرفين)، 'm' = حقل خاص بالادامة (e.m)، 'x' = محسوب */
+const MF=[
+['empNo','الرقم الوظيفي','m','text'],
+['idNo','رقم الهوية','m','text'],
+['name','اسم الموظف الرباعي','e','text'],
+['surname','اللقب','m','text'],
+['g','الدرجة','e','g'],
+['s','المرحلة','e','s'],
+['sal','الراتب الاسمي','x','sal'],
+['lastA','تاريخ آخر علاوة','e','date'],
+['lastP','تاريخ آخر ترفيع','e','date'],
+['mother','اسم الأم','m','text'],
+['wife','اسم الزوجة','m','text'],
+['birth','تاريخ التولد','m','date'],
+['uniNo','رقم الموحدة','m','text'],
+['uniDate','تاريخ إصدار الموحدة','m','date'],
+['apptNo','رقم كتاب التعيين','m','text'],
+['hireDate','تاريخ التعيين','e','date'],
+['startNo','رقم كتاب المباشرة','m','text'],
+['startDate','تاريخ كتاب المباشرة','m','date'],
+['grad','معلومات وثيقة التخرج','m','text'],
+['gradOk','صحة صدور وثيقة التخرج','m','text'],
+['ageNo','رقم كتاب تثبيت العمر','m','text'],
+['ageDate','تاريخ كتاب تثبيت العمر','m','date'],
+['phone','رقم الهاتف','m','tel'],
+['ration','رقم البطاقة التموينية','m','text'],
+['house','بطاقة السكن','m','text'],
+['alley','الزقاق','m','text'],
+['quarter','المحلة','m','text'],
+['home','الدار','m','text'],
+['notes','ملاحظات','m','area']];
+const mtGet=(e,f)=>f[2]=='e'?(e[f[0]]??''):f[2]=='x'?salary(num(e.g),num(e.s)):((e.m||{})[f[0]]??'');
+function mtPage(){
+ shell('ادامة الموظفين',`<div class="tools"><div><label>بحث بالاسم أو الرقم الوظيفي<input id="mq" type="search" autocomplete="off"></label></div><div style="max-width:110px"><label>عدد الموظفين<input id="mcnt" readonly style="text-align:center;font-weight:700"></label></div><button class="btn gold" onclick="mtForm()">إضافة موظف</button><button class="btn" onclick="mtExport()">تصدير Excel</button></div>
+ <div class="tw"><table><thead><tr><th>ت</th><th>الرقم الوظيفي</th><th>الاسم</th><th>الدرجة/المرحلة</th><th>الراتب الاسمي</th><th>آخر علاوة</th><th>آخر ترفيع</th><th>رقم الهاتف</th><th></th></tr></thead><tbody id="mtb"></tbody></table></div>`);
+ const draw=()=>{const q=nrmA($('#mq').value.trim()),L=S.emps.filter(e=>!q||nrmA(e.name+' '+((e.m||{}).empNo||'')).includes(q));
+  $('#mcnt').value=L.length;
+  $('#mtb').innerHTML=L.map((e,i)=>`<tr><td>${i+1}</td><td>${lvEs((e.m||{}).empNo)}</td><td>${lvEs(e.name)}</td><td>${e.g||''}/${e.s||''}</td><td>${nf(salary(num(e.g),num(e.s)))}</td><td>${fd(pd(e.lastA))}</td><td>${fd(pd(e.lastP))}</td><td>${lvEs((e.m||{}).phone)}</td><td style="white-space:nowrap"><button class="btn alt" onclick="mtForm(${e.id})">تعديل</button></td></tr>`).join('')||'<tr><td colspan="9">لا توجد بيانات. اضغط «إضافة موظف».</td></tr>'};
+ $('#mq').oninput=draw;draw();
+}
+function mtForm(id){
+ const e=id?S.emps.find(x=>x.id==id):{g:5,s:1};if(!e)return;
+ const fld=f=>{const k=f[0],l=f[1],t=f[3],v=mtGet(e,f),i='m_'+k;
+  if(t=='g')return `<label>${l}<select id="${i}">${rng(10,v)}</select></label>`;
+  if(t=='s')return `<label>${l}<select id="${i}">${rng(11,v)}</select></label>`;
+  if(t=='sal')return `<label>${l}<input id="${i}" readonly value="${nf(v)}"></label>`;
+  return `<label>${l}<input id="${i}" type="${t=='date'?'date':t=='tel'?'tel':'text'}" value="${lvEs(v)}"></label>`};
+ const nf_=MF.find(f=>f[3]=='area');
+ shell(id?'تعديل بيانات موظف':'إضافة موظف',`<fieldset><legend>المعلومات العامة</legend><div class="cols">${MF.filter(f=>f[3]!='area').map(fld).join('')}</div></fieldset>
+ <fieldset style="margin-top:14px"><legend>ملاحظات</legend><label>${nf_[1]}<textarea id="m_${nf_[0]}" rows="3">${lvEs(mtGet(e,nf_))}</textarea></label></fieldset>
+ <p class="note">الحقول: الاسم، الدرجة، المرحلة، الراتب الاسمي، تاريخ آخر علاوة، تاريخ آخر ترفيع، تاريخ التعيين — مرتبطة بسجل العلاوات والترفيعات، فأي تغيير في أحدهما (ومنه إضافة علاوة أو ترفيع جديد) ينعكس على الآخر تلقائياً.</p>
+ <div class="act"><button class="btn gold" onclick="mtSave(${id??'null'})">${id?'حفظ التعديل':'إضافة'}</button><button class="btn alt" onclick="mtPage()">إلغاء</button></div>`);
+ const sy=()=>{$('#m_sal').value=nf(salary(num($('#m_g').value),num($('#m_s').value)))};
+ ['m_g','m_s'].forEach(i=>$('#'+i).addEventListener('input',sy));sy();
+}
+function mtSave(id){
+ const g=k=>$('#m_'+k).value,name=g('name').trim();
+ if(!name){toast('اسم الموظف مطلوب');return}
+ const no=g('empNo').trim();
+ if(no&&S.emps.some(x=>x.id!=id&&String((x.m||{}).empNo||'').trim()==no)){toast('الرقم الوظيفي مستخدم لموظف آخر');return}
+ let e=id?S.emps.find(x=>x.id==id):null;
+ if(!e){e={id:Date.now(),edu:'بكالوريوس',letters:[]};S.emps.push(e)}
+ e.name=name;e.g=g('g');e.s=g('s');e.lastA=g('lastA');e.lastP=g('lastP');e.hireDate=g('hireDate');
+ e.m=e.m||{};MF.filter(f=>f[2]=='m').forEach(f=>{e.m[f[0]]=g(f[0]).trim()});
+ save();toast(id?'تم حفظ التعديل':'تمت الإضافة');mtPage();
+}
+async function mtExport(){
+ if(!dl){toast('التصدير غير متاح في هذا العرض');return}
+ if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
+ if(!S.emps.length){toast('لا يوجد موظفون للتصدير');return}
+ const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('ادامة الموظفين',{views:[{rightToLeft:true,state:'frozen',ySplit:1}]});
+ const wide={name:34,grad:28,gradOk:24,notes:40};
+ ws.columns=[{width:6},...MF.map(f=>({width:wide[f[0]]||18}))];
+ const h=ws.addRow(['ت',...MF.map(f=>f[1])]);h.height=42;h.eachCell(c=>xs(c,'Arial',11,'FFDDD9C3'));
+ S.emps.forEach((e,i)=>{
+  const v=MF.map(f=>{const x=mtGet(e,f);if(f[3]=='date')return x?UD(pd(x)):'';if(f[3]=='g'||f[3]=='s'||f[3]=='sal')return x===''?'':+x;return String(x)});
+  const r=ws.addRow([i+1,...v]);r.height=26;r.eachCell(c=>xs(c,'Arial',11,null));
+  MF.forEach((f,k)=>{if(f[3]=='date')r.getCell(k+2).numFmt='d/m/yyyy';if(f[3]=='sal')r.getCell(k+2).numFmt='#,##0'});
+ });
+ const buf=await wb.xlsx.writeBuffer();
+ try{await dl.save({filename:'ادامة_الموظفين.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
+}
+
 applyUI();
 const cstat=t=>{const x=$('#cstat');if(x)x.textContent=t};
 function cloudSave(){
