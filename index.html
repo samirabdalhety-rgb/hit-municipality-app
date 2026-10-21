@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#0f4c47">
 <meta name="apple-mobile-web-app-title" content="علاوات بلدية هيت">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="exceljs.min.js" onerror="var x=document.createElement('script');x.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';document.head.appendChild(x)"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -629,7 +629,12 @@ function cloudSave(){
 }
 async function cloudLoad(){
  const d=await fdb.collection('hit_unit').doc('main').get();
- if(d.exists){const c=JSON.parse(d.data().json);S.emps=c.emps||[];S.set=c.set||S.set;migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}cstat('متصل بالسحابة ✓')}
+ if(d.exists){
+  let c=null;
+  try{c=JSON.parse(d.data().json);if(!c||!Array.isArray(c.emps))throw new Error('bad')}catch(err){
+   /* بيانات السحابة تالفة: نُبقي البيانات المحلية ولا نكتب فوق السحابة */
+   cstat('بيانات السحابة تالفة — تم الاحتفاظ ببيانات هذا الجهاز');toast('تعذّر قراءة بيانات السحابة (تالفة). لم يتم تغيير أي شيء.');applyUI();home();return}
+  try{S.emps=c.emps;S.set=c.set||S.set;migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('تعذّر الحفظ المحلي: الذاكرة ممتلئة أو التصفح خاص')}cstat('متصل بالسحابة ✓')}catch(err){cstat('تعذّر تطبيق بيانات السحابة');toast('خطأ أثناء تحميل البيانات: '+(err.message||err));applyUI();home();return}}
  else if(S.emps.length){cstat('رفع البيانات المحلية إلى السحابة...');cloudSave()}
  else cstat('متصل بالسحابة - لا توجد بيانات بعد');
  applyUI();home();
