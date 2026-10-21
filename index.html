@@ -142,6 +142,7 @@ function perL(e){const lp=pd(e.lastP),y=S.set.years[num(e.g)-1];if(!lp||!y)retur
 const thP=e=>perL(e).filter(l=>l.type=='شكر');
 const thanksIn=e=>thP(e).length;
 function calc(e){
+ if(inactive(e))return null;
  const g=num(e.g),s=num(e.s),b=bA(e),la=pd(b);if(!g||!s||!la)return null;
  /* القدم القانوني مرتبط بالمرحلة: يُحتسب فقط ما أُدخل في المرحلة الحالية للموظف، وبقية المراحل شكلية */
  const lgM=Math.min(Math.max(num(e['lg'+s]),0),3),pmM=num(e.lgpmAct)*6,m=lgM+pmM,pen=num(e.pen);
@@ -152,7 +153,7 @@ function calc(e){
  return{status:promo?'ترفيع':(st&&s>=11?'نهاية السلم':'علاوة'),aDue,pDue,due,ng,ns,nsal:salary(ng,ns),amt:S.set.allow[g-1],av:[],usedTxt:ut,lastD:la,lastT:(e.lastP&&e.lastP>=(e.lastA||''))?'ترفيع':'علاوة'};
 }
 const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',leave:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',maint:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.5 1.5-2 3-2s2.5.5 3 2M14 10h4M14 14h4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
-const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtPage()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية','last',()=>lvPage()]];
+const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية','last',()=>lvPage()]];
 function openSettings(){$('#home').hidden=true;$('#view').hidden=false;settings();window.scrollTo(0,0)}
 function home(){
  lvSyncAll();
@@ -237,7 +238,7 @@ const mo=()=>iso(new Date()).slice(0,7);
 function list(mode,focus){
  const T={a:'مستحقو العلاوات',p:'مستحقو الترفيع',all:'بيانات الموظفين'}[mode];
  shell(T,`<div class="tools"><div><label>بحث بالاسم أو العنوان<input id="q" ${focus?'autofocus':''}></label></div>
- ${mode=='all'?`<div style="max-width:110px"><label>عدد الموظفين<input id="cnt" readonly value="${S.emps.length}" style="text-align:center;font-weight:700"></label></div><button class="btn gold" onclick="expNames()">تصدير الأسماء Excel</button>`:`<div><label>شهر الاستحقاق<input id="m" type="month" value="${mo()}"></label></div><div><label><input id="allm" type="checkbox" style="width:auto"> كل الأشهر</label></div><button class="btn gold" onclick="exp('${mode}')">تصدير Excel</button>`}</div>
+ ${mode=='all'?`<div style="max-width:110px"><label>عدد الموظفين<input id="cnt" readonly value="${S.emps.filter(e=>!inactive(e)).length}" style="text-align:center;font-weight:700"></label></div><button class="btn gold" onclick="expNames()">تصدير الأسماء Excel</button>`:`<div><label>شهر الاستحقاق<input id="m" type="month" value="${mo()}"></label></div><div><label><input id="allm" type="checkbox" style="width:auto"> كل الأشهر</label></div><button class="btn gold" onclick="exp('${mode}')">تصدير Excel</button>`}</div>
  <div class="tw"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>`);
  const draw=()=>{
   const q=$('#q').value.trim(),m=mode=='all'?'':$('#m').value,am=mode!='all'&&$('#allm').checked;
@@ -255,7 +256,8 @@ function delEmp(id,b){if(b.dataset.c){S.emps=S.emps.filter(x=>x.id!=id);save();l
 function stats(){
  const n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c),m=mo();
  const by=Array.from({length:10},(_,i)=>n.filter(x=>x.e.g==i+1).length);
- shell('احصائيات',`<div class="stat"><div><b>${S.emps.length}</b>عدد الموظفين</div><div><b>${n.filter(x=>x.c.status=='علاوة'&&iso(x.c.due).slice(0,7)==m).length}</b>علاوات هذا الشهر</div><div><b>${n.filter(x=>x.c.status=='ترفيع'&&iso(x.c.due).slice(0,7)==m).length}</b>ترفيعات هذا الشهر</div><div><b>${nf(n.reduce((s,x)=>s+salary(x.e.g,x.e.s),0))}</b>مجموع الرواتب</div></div>
+ const A=S.emps.filter(e=>!inactive(e)),gM=A.filter(e=>(e.m||{}).gender=='ذكر').length,gF=A.filter(e=>(e.m||{}).gender=='أنثى').length,mr=A.filter(mtMar).length,sg=A.filter(e=>(e.m||{}).marital=='أعزب').length,nR=S.emps.filter(e=>mtSt(e)=='ret').length,nT=S.emps.filter(e=>mtSt(e)=='trf').length,uG=A.length-gM-gF,uM=A.length-mr-sg;
+ shell('احصائيات',`<div class="stat"><div><b>${A.length}</b>عدد الموظفين الكلي</div><div><b>${gM}</b>الذكور</div><div><b>${gF}</b>الإناث</div><div><b>${mr}</b>المتزوجون</div><div><b>${sg}</b>العزاب</div></div>${uG||uM?`<p class="note">${uG?`غير محدد الجنس: ${uG}. `:''}${uM?`غير محددة الحالة الاجتماعية: ${uM}. `:''}يمكن إكمالها من «ادامة الموظفين».</p>`:''}<div class="stat"><div><b>${nR}</b>المحالون على التقاعد</div><div><b>${nT}</b>المنقولون</div></div><div class="stat"><div><b>${n.filter(x=>x.c.status=='علاوة'&&iso(x.c.due).slice(0,7)==m).length}</b>علاوات هذا الشهر</div><div><b>${n.filter(x=>x.c.status=='ترفيع'&&iso(x.c.due).slice(0,7)==m).length}</b>ترفيعات هذا الشهر</div><div><b>${nf(n.reduce((s,x)=>s+salary(x.e.g,x.e.s),0))}</b>مجموع الرواتب</div></div>
  <div class="tw"><table><thead><tr><th>الدرجة</th>${by.map((_,i)=>`<th>${i+1}</th>`).join('')}</tr></thead><tbody><tr><td>عدد الموظفين</td>${by.map(v=>`<td>${v}</td>`).join('')}</tr></tbody></table></div>`);
 }
 const BGS={'افتراضي':null,'أبيض':['#ffffff','#f3f5f5'],'أخضر هادئ':['#e3efe6','#f8fcf9'],'كريمي':['#f3ecdd','#fffaf0'],'رمادي':['#e6e8ea','#f8f9fa'],'نقوش':['#eaf1ef','#ffffff'],'داكن':null};
@@ -316,7 +318,7 @@ function apPage(kind){
   rt();
   $('#ap_cur').textContent=`الحالي: درجة ${g} مرحلة ${s} (${nf(salary(g,s))}) | آخر علاوة ${fd(pd(e.lastA))||'-'} | آخر ترفيع ${fd(pd(e.lastP))||'-'}`;sal()};
  const nrm=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
- const fe=()=>{const q=nrm($('#ap_q').value.trim()),cv=$('#ap_e').value,L=S.emps.filter(e=>!q||nrm(e.name+' '+(e.title||'')).includes(q));
+ const fe=()=>{const q=nrm($('#ap_q').value.trim()),cv=$('#ap_e').value,L=S.emps.filter(e=>!inactive(e)&&(!q||nrm(e.name+' '+(e.title||'')).includes(q)));
   $('#ap_e').innerHTML='<option value="">— اختر ('+L.length+') —</option>'+L.map(e=>`<option value="${e.id}">${e.name}${e.settle?' (مُسكَّن)':''}</option>`).join('');
   if(q&&L.length==1){$('#ap_e').value=L[0].id;$('#ap_e').onchange()}else if(L.some(e=>e.id==cv))$('#ap_e').value=cv};
  $('#ap_q').oninput=fe;fe();
@@ -463,7 +465,7 @@ async function expNames(){
  if(!S.emps.length){toast('لا يوجد موظفون للتصدير');return}
  const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('الأسماء',{views:[{rightToLeft:true}]});ws.columns=[{width:50}];
  const h=ws.addRow(['اسم الموظف']);xs(h.getCell(1),'Arial',12,'FFDDD9C3');h.height=28;
- S.emps.forEach(e=>{const r=ws.addRow([e.name]);xs(r.getCell(1),'Arial',12,null);r.height=24});
+ S.emps.filter(e=>!inactive(e)).forEach(e=>{const r=ws.addRow([e.name]);xs(r.getCell(1),'Arial',12,null);r.height=24});
  const buf=await wb.xlsx.writeBuffer();
  try{await dl.save({filename:'اسماء_الموظفين.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
@@ -529,6 +531,8 @@ const MF=[
 ['lastP','تاريخ آخر ترفيع','e','date'],
 ['mother','اسم الأم','m','text'],
 ['wife','اسم الزوجة','m','text'],
+['gender','جنس الموظف','m','gender'],
+['marital','الحالة الاجتماعية','m','marital'],
 ['birth','تاريخ التولد','m','date'],
 ['uniNo','رقم الموحدة','m','text'],
 ['uniDate','تاريخ إصدار الموحدة','m','date'],
@@ -548,12 +552,23 @@ const MF=[
 ['home','الدار','m','text'],
 ['notes','ملاحظات','m','area']];
 const mtGet=(e,f)=>f[2]=='e'?(e[f[0]]??''):f[2]=='x'?salary(num(e.g),num(e.s)):((e.m||{})[f[0]]??'');
-function mtPage(){
- shell('ادامة الموظفين',`<div class="tools"><div><label>بحث بالاسم أو الرقم الوظيفي<input id="mq" type="search" autocomplete="off"></label></div><div style="max-width:110px"><label>عدد الموظفين<input id="mcnt" readonly style="text-align:center;font-weight:700"></label></div><button class="btn gold" onclick="mtForm()">إضافة موظف</button><button class="btn" onclick="mtExport()">تصدير Excel</button></div>
- <div class="tw"><table><thead><tr><th>ت</th><th>الرقم الوظيفي</th><th>الاسم</th><th>الدرجة/المرحلة</th><th>الراتب الاسمي</th><th>آخر علاوة</th><th>آخر ترفيع</th><th>رقم الهاتف</th><th></th></tr></thead><tbody id="mtb"></tbody></table></div>`);
- const draw=()=>{const q=nrmA($('#mq').value.trim()),L=S.emps.filter(e=>!q||nrmA(e.name+' '+((e.m||{}).empNo||'')).includes(q));
+const MST={perm:'ملاك دائمي',sec:'منسب',ret:'تقاعد',trf:'نقل'},MSEC={perm:'الملاك الدائم',trf:'النقل',ret:'التقاعد'};
+const mtSt=e=>{const v=(e.m||{}).status;return MST[v]?v:'perm'};
+function inactive(e){const v=mtSt(e);return v=='ret'||v=='trf'}
+const mtSecOf=e=>{const v=mtSt(e);return v=='ret'||v=='trf'?v:'perm'};
+const mtMar=e=>{const m=e.m||{};return m.marital=='متزوج'||(!m.marital&&!!String(m.wife||'').trim())};
+let mtSec='perm';
+function mtHub(){
+ const c=k=>S.emps.filter(e=>mtSecOf(e)==k).length;
+ shell('ادامة الموظفين',`<div class="stat">${['perm','trf','ret'].map(k=>`<button class="tile" style="min-height:120px" onclick="mtPage('${k}')">${MSEC[k]}<span style="font-size:14px;font-weight:400;opacity:.8">${c(k)} موظف</span></button>`).join('')}</div>`);
+}
+function mtPage(sec){
+ if(sec)mtSec=sec;sec=mtSec;
+ shell(MSEC[sec]+' — ادامة الموظفين',`<div class="tools"><div><label>بحث بالاسم أو الرقم الوظيفي<input id="mq" type="search" autocomplete="off"></label></div><div style="max-width:110px"><label>عدد الموظفين<input id="mcnt" readonly style="text-align:center;font-weight:700"></label></div>${sec=='perm'?'<button class="btn gold" onclick="mtForm()">إضافة موظف</button>':''}<button class="btn" onclick="mtExport()">تصدير Excel</button><button class="btn alt" onclick="mtHub()">الأقسام</button></div>
+ <div class="tw"><table><thead><tr><th>ت</th><th>الرقم الوظيفي</th><th>الاسم</th><th>الجنس</th><th>الدرجة/المرحلة</th><th>الراتب الاسمي</th><th>آخر علاوة</th><th>آخر ترفيع</th><th>رقم الهاتف</th><th>الحالة</th><th></th></tr></thead><tbody id="mtb"></tbody></table></div>`);
+ const draw=()=>{const q=nrmA($('#mq').value.trim()),L=S.emps.filter(e=>mtSecOf(e)==sec&&(!q||nrmA(e.name+' '+((e.m||{}).empNo||'')).includes(q)));
   $('#mcnt').value=L.length;
-  $('#mtb').innerHTML=L.map((e,i)=>`<tr><td>${i+1}</td><td>${lvEs((e.m||{}).empNo)}</td><td>${lvEs(e.name)}</td><td>${e.g||''}/${e.s||''}</td><td>${nf(salary(num(e.g),num(e.s)))}</td><td>${fd(pd(e.lastA))}</td><td>${fd(pd(e.lastP))}</td><td>${lvEs((e.m||{}).phone)}</td><td style="white-space:nowrap"><button class="btn alt" onclick="mtForm(${e.id})">تعديل</button></td></tr>`).join('')||'<tr><td colspan="9">لا توجد بيانات. اضغط «إضافة موظف».</td></tr>'};
+  $('#mtb').innerHTML=L.map((e,i)=>`<tr${mtSt(e)=='sec'?' style="background:#fff200;color:#000"':''}><td>${i+1}</td><td>${lvEs((e.m||{}).empNo)}</td><td>${lvEs(e.name)}</td><td>${lvEs((e.m||{}).gender)}</td><td>${e.g||''}/${e.s||''}</td><td>${nf(salary(num(e.g),num(e.s)))}</td><td>${fd(pd(e.lastA))}</td><td>${fd(pd(e.lastP))}</td><td>${lvEs((e.m||{}).phone)}</td><td>${MST[mtSt(e)]}</td><td style="white-space:nowrap"><button class="btn alt" onclick="mtForm(${e.id})">تعديل</button></td></tr>`).join('')||'<tr><td colspan="11">لا توجد بيانات في هذا القسم.</td></tr>'};
  $('#mq').oninput=draw;draw();
 }
 function mtForm(id){
@@ -561,10 +576,13 @@ function mtForm(id){
  const fld=f=>{const k=f[0],l=f[1],t=f[3],v=mtGet(e,f),i='m_'+k;
   if(t=='g')return `<label>${l}<select id="${i}">${rng(10,v)}</select></label>`;
   if(t=='s')return `<label>${l}<select id="${i}">${rng(11,v)}</select></label>`;
+  if(t=='gender')return `<label>${l}<select id="${i}"><option value="">— اختر —</option>${['ذكر','أنثى'].map(o=>`<option${v==o?' selected':''}>${o}</option>`).join('')}</select></label>`;
+  if(t=='marital')return `<label>${l}<select id="${i}"><option value="">— اختر —</option>${['أعزب','متزوج'].map(o=>`<option${v==o?' selected':''}>${o}</option>`).join('')}</select></label>`;
   if(t=='sal')return `<label>${l}<input id="${i}" readonly value="${nf(v)}"></label>`;
   return `<label>${l}<input id="${i}" type="${t=='date'?'date':t=='tel'?'tel':'text'}" value="${lvEs(v)}"></label>`};
  const nf_=MF.find(f=>f[3]=='area');
- shell(id?'تعديل بيانات موظف':'إضافة موظف',`<fieldset><legend>المعلومات العامة</legend><div class="cols">${MF.filter(f=>f[3]!='area').map(fld).join('')}</div></fieldset>
+ shell(id?'تعديل بيانات موظف':'إضافة موظف',`<fieldset><legend>الحالة الوظيفية</legend><label>الموظف<select id="m_status">${Object.keys(MST).map(k=>`<option value="${k}"${mtSt(e)==k?' selected':''}>${MST[k]}</option>`).join('')}</select></label><p class="note">منسب: يُظلَّل باللون الأصفر عند تصدير Excel. تقاعد أو نقل: تُنقل بيانات الموظف إلى قسم التقاعد أو النقل ويُستثنى من قوائم العلاوات والترفيع والإحصاءات.</p></fieldset>
+ <fieldset style="margin-top:14px"><legend>المعلومات العامة</legend><div class="cols">${MF.filter(f=>f[3]!='area').map(fld).join('')}</div></fieldset>
  <fieldset style="margin-top:14px"><legend>ملاحظات</legend><label>${nf_[1]}<textarea id="m_${nf_[0]}" rows="3">${lvEs(mtGet(e,nf_))}</textarea></label></fieldset>
  <p class="note">الحقول: الاسم، الدرجة، المرحلة، الراتب الاسمي، تاريخ آخر علاوة، تاريخ آخر ترفيع، تاريخ التعيين — مرتبطة بسجل العلاوات والترفيعات، فأي تغيير في أحدهما (ومنه إضافة علاوة أو ترفيع جديد) ينعكس على الآخر تلقائياً.</p>
  <div class="act"><button class="btn gold" onclick="mtSave(${id??'null'})">${id?'حفظ التعديل':'إضافة'}</button><button class="btn alt" onclick="mtPage()">إلغاء</button></div>`);
@@ -580,23 +598,25 @@ function mtSave(id){
  if(!e){e={id:Date.now(),edu:'بكالوريوس',letters:[]};S.emps.push(e)}
  e.name=name;e.g=g('g');e.s=g('s');e.lastA=g('lastA');e.lastP=g('lastP');e.hireDate=g('hireDate');
  e.m=e.m||{};MF.filter(f=>f[2]=='m').forEach(f=>{e.m[f[0]]=g(f[0]).trim()});
- save();toast(id?'تم حفظ التعديل':'تمت الإضافة');mtPage();
+ const ns=g('status'),mv=ns=='ret'||ns=='trf';e.m.status=ns;
+ save();toast(mv?'تم نقل الموظف إلى قسم '+MSEC[ns]:id?'تم حفظ التعديل':'تمت الإضافة');mtPage();
 }
 async function mtExport(){
  if(!dl){toast('التصدير غير متاح في هذا العرض');return}
  if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
- if(!S.emps.length){toast('لا يوجد موظفون للتصدير');return}
- const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('ادامة الموظفين',{views:[{rightToLeft:true,state:'frozen',ySplit:1}]});
+ const sec=mtSec,EL=S.emps.filter(e=>mtSecOf(e)==sec);
+ if(!EL.length){toast('لا يوجد موظفون للتصدير في هذا القسم');return}
+ const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet(MSEC[sec],{views:[{rightToLeft:true,state:'frozen',ySplit:1}]});
  const wide={name:34,grad:28,gradOk:24,notes:40};
- ws.columns=[{width:6},...MF.map(f=>({width:wide[f[0]]||18}))];
- const h=ws.addRow(['ت',...MF.map(f=>f[1])]);h.height=42;h.eachCell(c=>xs(c,'Arial',11,'FFDDD9C3'));
- S.emps.forEach((e,i)=>{
+ ws.columns=[{width:6},...MF.map(f=>({width:wide[f[0]]||18})),{width:16}];
+ const h=ws.addRow(['ت',...MF.map(f=>f[1]),'الحالة الوظيفية']);h.height=42;h.eachCell(c=>xs(c,'Arial',11,'FFDDD9C3'));
+ EL.forEach((e,i)=>{
   const v=MF.map(f=>{const x=mtGet(e,f);if(f[3]=='date')return x?UD(pd(x)):'';if(f[3]=='g'||f[3]=='s'||f[3]=='sal')return x===''?'':+x;return String(x)});
-  const r=ws.addRow([i+1,...v]);r.height=26;r.eachCell(c=>xs(c,'Arial',11,null));
+  const r=ws.addRow([i+1,...v,MST[mtSt(e)]]);r.height=26;r.eachCell(c=>xs(c,'Arial',11,mtSt(e)=='sec'?'FFFFFF00':null));
   MF.forEach((f,k)=>{if(f[3]=='date')r.getCell(k+2).numFmt='d/m/yyyy';if(f[3]=='sal')r.getCell(k+2).numFmt='#,##0'});
  });
  const buf=await wb.xlsx.writeBuffer();
- try{await dl.save({filename:'ادامة_الموظفين.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
+ try{await dl.save({filename:'ادامة_'+MSEC[sec].replace(/ /g,'_')+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
 
 applyUI();
