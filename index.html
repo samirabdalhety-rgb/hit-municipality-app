@@ -31,7 +31,7 @@ border-bottom:4px solid var(--gold);border-radius:0 0 50% 50%/0 0 28px 28px}
 .grid{background:var(--card);border-radius:28px;border:2px solid var(--line);padding:22px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .tile{border:2px solid var(--pri2);background:var(--bg);color:var(--ink);border-radius:50px;min-height:92px;font:600 16px Cairo,Tahoma,sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px;transition:.15s}
 .tile:hover,.tile:focus-visible{background:var(--pri);color:#fff;transform:translateY(-2px);outline:3px solid var(--gold)}
-.tile svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tile svg{width:var(--is,26px);height:var(--is,26px);stroke:var(--ic,currentColor);fill:none;stroke-width:1.8}
 .tile.top{grid-column:2}.tile.last{grid-column:2}
 @media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr)}.tile.top{grid-column:1/-1}.tile.last{grid-column:1/-1}}
 .bar{display:flex;align-items:center;gap:10px;background:var(--pri);color:#fff;padding:10px 16px;position:sticky;top:0;z-index:5}
@@ -153,7 +153,7 @@ function calc(e){
  return{status:promo?'ترفيع':(st&&s>=11?'نهاية السلم':'علاوة'),aDue,pDue,due,ng,ns,nsal:salary(ng,ns),amt:S.set.allow[g-1],av:[],usedTxt:ut,lastD:la,lastT:(e.lastP&&e.lastP>=(e.lastA||''))?'ترفيع':'علاوة'};
 }
 const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',leave:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',maint:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.5 1.5-2 3-2s2.5.5 3 2M14 10h4M14 14h4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
-const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية','last',()=>lvPage()]];
+const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية','last',()=>lvPage('act')]];
 function openSettings(){$('#home').hidden=true;$('#view').hidden=false;settings();window.scrollTo(0,0)}
 function home(){
  lvSyncAll();
@@ -163,7 +163,8 @@ function home(){
  const p=n.filter(x=>x.c.status=='ترفيع'&&x.c.due>=t&&x.c.due<=addM(t,1)).length;
  const tm=iso(t).slice(0,7),aM=n.filter(x=>x.c.status=='علاوة'&&iso(x.c.due).slice(0,7)==tm).length,pM=n.filter(x=>x.c.status=='ترفيع'&&iso(x.c.due).slice(0,7)==tm).length;
  $('#alerts').innerHTML=`<div><b>${a}</b>مستحقو العلاوة خلال ${S.set.dA} أيام</div><div><b>${p}</b>مستحقو الترفيع خلال شهر</div><div><b>${aM} / ${pM}</b>علاوات / ترفيعات هذا الشهر</div>`;
- $('#tiles').innerHTML=TILES.map((x,i)=>`<button class="tile ${x[2]||''}" data-i="${i}"><svg viewBox="0 0 24 24">${ICON[x[0]]}</svg>${x[1]}</button>`).join('');
+ const icSt=k=>{const o=((S.ui||{}).ic||{})[k]||{};return(o.size?`--is:${o.size}px;`:'')+(o.color?`--ic:${o.color};`:'')};
+  $('#tiles').innerHTML=TILES.map((x,i)=>`<button class="tile ${x[2]||''}" data-i="${i}"><svg viewBox="0 0 24 24" style="${icSt(x[0])}">${ICON[x[0]]}</svg>${x[1]}</button>`).join('');
  document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{$('#home').hidden=true;$('#view').hidden=false;TILES[b.dataset.i][3]();window.scrollTo(0,0)});
 }
 const shell=(title,body)=>{$('#view').innerHTML=`<div class="bar"><button class="btn alt" onclick="home()">رجوع</button><h2>${title}</h2></div><div class="page">${body}</div>`};
@@ -277,7 +278,8 @@ function settings(){
  <fieldset><legend>لون الحقول</legend><input type="color" id="u_f" value="${u.fld||'#eaf1ef'}" style="height:44px"><div class="act"><button class="btn alt" id="u_fr">اللون الافتراضي</button></div></fieldset>
  <fieldset><legend>لون إطارات الحقول</legend><input type="color" id="u_e" value="${u.fbd||'#cfdcd9'}" style="height:44px"><div class="act"><button class="btn alt" id="u_er">اللون الافتراضي</button></div></fieldset>
  <fieldset><legend>حجم الخط</legend><select id="u_s">${opt([14,16,18,20,22],u.size||16)}</select></fieldset>
- <fieldset><legend>شكل الخلفية</legend><select id="u_b">${opt(Object.keys(BGS),u.bg||'افتراضي')}</select></fieldset></div>`);
+ <fieldset><legend>شكل الخلفية</legend><select id="u_b">${opt(Object.keys(BGS),u.bg||'افتراضي')}</select></fieldset></div>
+  <fieldset style="margin-top:14px"><legend>الأيقونات — الحجم واللون لكل أيقونة</legend><div class="tw"><table style="min-width:0"><thead><tr><th>الأيقونة</th><th>القسم</th><th>الحجم</th><th>اللون</th><th></th></tr></thead><tbody>${TILES.map(x=>{const o=((u.ic||{})[x[0]])||{};return`<tr><td><svg id="pv_${x[0]}" viewBox="0 0 24 24" style="width:${o.size||26}px;height:${o.size||26}px;fill:none;stroke-width:1.8;stroke:${o.color||'currentColor'}">${ICON[x[0]]}</svg></td><td>${x[1]}</td><td style="white-space:nowrap"><input type="range" min="16" max="64" step="2" data-ic="${x[0]}" data-t="size" value="${o.size||26}" style="width:120px"> <span id="sz_${x[0]}">${o.size||26}</span></td><td><input type="color" data-ic="${x[0]}" data-t="color" value="${o.color||u.color||'#16302d'}" style="height:36px;width:60px"></td><td><button class="btn alt" data-icr="${x[0]}">افتراضي</button></td></tr>`}).join('')}</tbody></table></div><div class="act"><button class="btn alt" id="ic_all">إعادة كل الأيقونات للوضع الافتراضي</button></div></fieldset>`);
  const up=()=>{save();applyUI()};
  $('#u_c').oninput=()=>{S.ui.color=$('#u_c').value;up()};
  $('#u_r').onclick=()=>{S.ui.color='';up();settings()};
@@ -287,6 +289,10 @@ function settings(){
  $('#u_er').onclick=()=>{S.ui.fbd='';up();settings()};
  $('#u_s').onchange=()=>{S.ui.size=num($('#u_s').value);up()};
  $('#u_b').onchange=()=>{S.ui.bg=$('#u_b').value;up()};
+ document.querySelectorAll('[data-ic]').forEach(i=>i.oninput=()=>{const k=i.dataset.ic,t=i.dataset.t;S.ui.ic=S.ui.ic||{};const o=S.ui.ic[k]=S.ui.ic[k]||{};
+  const pv=$('#pv_'+k);if(t=='size'){o.size=num(i.value);$('#sz_'+k).textContent=o.size;pv.style.width=pv.style.height=o.size+'px'}else{o.color=i.value;pv.style.stroke=o.color}save()});
+ document.querySelectorAll('[data-icr]').forEach(b=>b.onclick=()=>{if(S.ui.ic)delete S.ui.ic[b.dataset.icr];save();settings()});
+ $('#ic_all').onclick=()=>{S.ui.ic={};save();settings()};
 }
 function scalePage(){
  const s=S.set;
@@ -352,7 +358,7 @@ const lvAddAuto=e=>(lvOf(e).adds||[]).reduce((a,r)=>a+num(r.days),0);
 const lvAdded=e=>Math.round((lvAddAuto(e)+(+lvOf(e).addAdj||0))*100)/100;
 const lvRem=e=>num(lvOf(e).bal)+lvAdded(e)-lvUsed(e);
 /* إضافة 36 يوماً تلقائياً مع بداية كل سنة ميلادية (لكل سنة فائتة إن لم يُفتح البرنامج) */
-function lvSync(e){const v=lvOf(e);if(v.bal===''||v.bal==null||!v.addYear)return false;const Y=new Date().getFullYear();let ch=false;v.adds=v.adds||[];
+function lvSync(e){if(inactive(e))return false;const v=lvOf(e);if(v.bal===''||v.bal==null||!v.addYear)return false;const Y=new Date().getFullYear();let ch=false;v.adds=v.adds||[];
  for(let y=v.addYear+1;y<=Y;y++){if(!v.adds.some(a=>a.year==y)){v.adds.push(LV_NOADD.includes(v.ltype)?{year:y,days:0,z:1}:{year:y,days:LV_ADD});ch=true}v.addYear=y;ch=true}
  if(lvFixAdds(v))ch=true;
  return ch}
@@ -360,10 +366,10 @@ function lvSyncAll(){let ch=false;S.emps.forEach(e=>{if(lvSync(e))ch=true});if(c
 const nrmA=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
 const lvIn=e=>{const v=e.lv;return !!v&&!!(v.added||v.file||v.reg||(v.bal!==''&&v.bal!=null)||(v.recs||[]).length)};
 const lvEs=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let lvMode='full';
-function lvPage(){lvClose();
- const T=[['srch','بحث','s'],['users','إضافة موظف جديد','e'],['leave','إضافة إجازة','l'],['dl','تصدير Excel','x']];
- shell('الاجازات الاعتيادية',`<div class="lvt">${T.map(t=>`<button class="tile" onclick="lvOpen('${t[2]}')"><svg viewBox="0 0 24 24">${t[0]=='dl'?'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>':ICON[t[0]]}</svg>${t[1]}</button>`).join('')}</div>`)}
+let lvMode='full',lvGrp='act';const lvOk=e=>inactive(e)==(lvGrp=='out');
+function lvPage(g){lvClose();if(g)lvGrp=g;const out=lvGrp=='out';
+ const T=[['srch','بحث','s'],['users','إضافة موظف جديد','e'],['leave','إضافة إجازة','l'],['dl','تصدير Excel','x'],['maint',out?'إجازات الموظفين العاملين':'إجازات المتقاعدين والمنقولين','g']];
+ shell(out?'إجازات المتقاعدين والمنقولين':'الاجازات الاعتيادية',`<div class="lvt">${T.map(t=>`<button class="tile" onclick="${t[2]=='g'?`lvPage('${out?'act':'out'}')`:`lvOpen('${t[2]}')`}"><svg viewBox="0 0 24 24">${t[0]=='dl'?'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>':ICON[t[0]]}</svg>${t[1]}</button>`).join('')}</div>`)}
 const lvEsc=ev=>{if(ev.key=='Escape')lvClose()};
 function lvClose(){const m=$('#lvm');if(m)m.remove();document.removeEventListener('keydown',lvEsc)}
 function lvModal(title,body){lvClose();const m=document.createElement('div');m.id='lvm';m.className='ov';
@@ -373,19 +379,19 @@ function lvOpen(k,pick){
  if(k=='s'){lvId=pick??null;lvMode='full';
   lvModal('بحث عن موظف',`<label>اكتب جزءاً من الاسم<input id="lv_q" type="search" autocomplete="off"></label><div class="lvres" id="lv_res"></div><div id="lv_card"></div>`);
   const find=()=>{const q=nrmA($('#lv_q').value.trim());
-   const L=q?S.emps.filter(e=>lvIn(e)&&nrmA(e.name).includes(q)):[];
+   const L=q?S.emps.filter(e=>lvIn(e)&&lvOk(e)&&nrmA(e.name).includes(q)):[];
    $('#lv_res').innerHTML=q?(L.slice(0,30).map(e=>`<button class="btn ${e.id==lvId?'':'alt'}" onclick="lvPick(${e.id})">${lvEs(e.name)}</button>`).join('')||'<span style="color:var(--mut)">لا يوجد موظف بهذا الاسم في الإجازات — أضِفه من «إضافة موظف جديد»</span>'):'';
    if(q&&L.length==1&&L[0].id!=lvId)lvPick(L[0].id)};
   $('#lv_q').oninput=find;const cur=S.emps.find(e=>e.id==lvId);if(cur&&lvIn(cur)){$('#lv_q').value=cur.name;lvCard()}else $('#lv_q').focus();
  }else if(k=='e'){
   lvModal('إضافة موظف جديد',`<label>بحث في سجل الترفيعات<input id="lv_aq" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="lv_ae"></select></label><label>رقم الاضبارة<input id="lv_file"></label><label>رقم السجل<input id="lv_reg"></label><label>مقدار الرصيد السابق (التراكمي) بالأيام<input id="lv_pbal" type="number" min="0" step="any"></label><label>نوع الاجازة<select id="lv_ltype">${LV_TYPES.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('')}</select></label><label>ملاحظات<textarea id="lv_enote" rows="2" class="sm" maxlength="200"></textarea></label><div class="act"><button class="btn gold" onclick="lvAddEmp()">إضافة الموظف</button></div><p class="note">الاسم والعنوان الوظيفي يُؤخذان من سجل الترفيعات، وتُدخل هنا بيانات الاضبارة يدوياً فقط. لتعديلها اختر الموظف وأعد الحفظ.</p>`);
   const fillF=()=>{const e=S.emps.find(x=>x.id==$('#lv_ae').value),v=(e&&e.lv)||{};$('#lv_file').value=v.file||'';$('#lv_reg').value=v.reg||'';$('#lv_pbal').value=v.bal??'';$('#lv_ltype').value=v.ltype||'';$('#lv_enote').value=v.notes||''};
-  const fillS=()=>{const q=nrmA($('#lv_aq').value.trim());const L=S.emps.filter(e=>!q||nrmA(e.name).includes(q));
-   $('#lv_ae').innerHTML=L.map(e=>`<option value="${e.id}">${lvEs(e.name)}${lvIn(e)?' ✓':''}</option>`).join('')||'<option value="">لا يوجد موظف</option>';fillF()};
+  const fillS=()=>{const q=nrmA($('#lv_aq').value.trim());const L=S.emps.filter(e=>lvOk(e)&&(!q||nrmA(e.name).includes(q)));
+    $('#lv_ae').innerHTML=L.map(e=>`<option value="${e.id}">${lvEs(e.name)}${lvIn(e)?' ✓':''}</option>`).join('')||'<option value="">لا يوجد موظف</option>';fillF()};
   $('#lv_aq').oninput=fillS;$('#lv_ae').onchange=fillF;fillS();$('#lv_aq').focus();
  }else if(k=='l'){lvId=null;lvMode='add';
   lvModal('إضافة إجازة',`<label>بحث عن موظف<input id="lv_lq" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="lv_le"></select></label><div id="lv_card"></div>`);
-  const fillL=()=>{const q=nrmA($('#lv_lq').value.trim());const L=S.emps.filter(e=>lvIn(e)&&(!q||nrmA(e.name).includes(q)));
+  const fillL=()=>{const q=nrmA($('#lv_lq').value.trim());const L=S.emps.filter(e=>lvIn(e)&&lvOk(e)&&(!q||nrmA(e.name).includes(q)));
    $('#lv_le').innerHTML='<option value="">— اختر الموظف —</option>'+L.map(e=>`<option value="${e.id}">${lvEs(e.name)}</option>`).join('');
    if(L.length==1){$('#lv_le').value=L[0].id}pickL()};
   const pickL=()=>{lvId=$('#lv_le').value||null;lvCard()};
@@ -492,13 +498,13 @@ async function lvExportEmp(){
 async function lvExport(){
  if(!dl){toast('التصدير غير متاح في هذا العرض');return}
  if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
- const Y=+$('#lv_yr').value,L=S.emps.filter(lvIn);
- if(!L.length){toast('لا يوجد موظفون في الإجازات للتصدير');return}
+ const Y=+$('#lv_yr').value,L=S.emps.filter(e=>lvIn(e)&&lvOk(e));
+ if(!L.length){toast('لا يوجد موظفون في هذا القسم للتصدير');return}
  const yOf=r=>+String(r.from||'').slice(0,4),rnd=n=>Math.round(n*100)/100;
  const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('الإجازات '+Y,{views:[{rightToLeft:true}]}),n=9;
  ws.columns=[6,38,28,14,14,16,16,18,16].map(w=>({width:w}));
  ws.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};
- ws.mergeCells(1,1,1,n);const t=ws.getCell(1,1);t.value='سجل الإجازات الاعتيادية لموظفي مديرية بلدية هيت لسنة '+Y;xs(t,'Arial',14,null,'center',false);ws.getRow(1).height=32;
+ ws.mergeCells(1,1,1,n);const t=ws.getCell(1,1);t.value=(lvGrp=='out'?'سجل إجازات المتقاعدين والمنقولين من موظفي مديرية بلدية هيت لسنة ':'سجل الإجازات الاعتيادية لموظفي مديرية بلدية هيت لسنة ')+Y;xs(t,'Arial',14,null,'center',false);ws.getRow(1).height=32;
  const hr=ws.addRow(['ت','اسم الموظف','العنوان الوظيفي','رقم الاضبارة','رقم السجل','الرصيد في بداية السنة','المضاف خلال السنة','أيام الإجازات خلال السنة','المتبقي نهاية السنة']);
  hr.height=45;hr.eachCell(c=>xs(c,'Arial',12,'FFDDD9C3'));
  const det=[];
@@ -515,7 +521,7 @@ async function lvExport(){
  det.forEach((d,i)=>{const r=w2.addRow([i+1,d[0],d[1],UD(pd(d[2])),UD(pd(d[3])),d[4],d[6],d[5]]);r.height=24;r.eachCell(c=>xs(c,'Arial',12,null));r.getCell(4).numFmt='d/m/yyyy';r.getCell(5).numFmt='d/m/yyyy'});
  if(!det.length){w2.addRow(['','لا توجد إجازات مسجلة في هذه السنة']);}
  const buf=await wb.xlsx.writeBuffer();
- try{await dl.save({filename:'اجازات_اعتيادية_'+Y+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
+ try{await dl.save({filename:(lvGrp=='out'?'اجازات_المتقاعدين_والمنقولين_':'اجازات_اعتيادية_')+Y+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
 /* ===== ادامة الموظفين ===== */
 /* المصدر: 'e' = حقل مشترك مع سجل العلاوات والترفيعات (يتحدّث تلقائياً من الطرفين)، 'm' = حقل خاص بالادامة (e.m)، 'x' = محسوب */
@@ -558,6 +564,10 @@ function inactive(e){const v=mtSt(e);return v=='ret'||v=='trf'}
 const mtSecOf=e=>{const v=mtSt(e);return v=='ret'||v=='trf'?v:'perm'};
 const mtMar=e=>{const m=e.m||{};return m.marital=='متزوج'||(!m.marital&&!!String(m.wife||'').trim())};
 let mtSec='perm';
+const mtQb=e=>{const s=mtSt(e);return s=='ret'||s=='trf'?`<button class="btn alt" onclick="mtQuick(${e.id},'perm',this)">إعادة للملاك</button>`:`<button class="btn alt" onclick="mtQuick(${e.id},'trf',this)">نقل</button> <button class="btn alt" onclick="mtQuick(${e.id},'ret',this)">تقاعد</button> <button class="btn alt" onclick="mtQuick(${e.id},'${s=='sec'?'perm':'sec'}',this)">${s=='sec'?'إلغاء الانتساب':'منسب'}</button>`};
+function mtQuick(id,st,b){const e=S.emps.find(x=>x.id==id);if(!e)return;
+ if((st=='ret'||st=='trf')&&!b.dataset.c){b.dataset.c=1;const t=b.textContent;b.textContent='تأكيد؟';setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent=t}},4000);return}
+ e.m=e.m||{};e.m.status=st;save();toast(st=='ret'||st=='trf'?'تم نقل الموظف إلى قسم '+MSEC[st]:st=='sec'?'تم تحديد الموظف منسباً':'تمت الإعادة إلى الملاك الدائم');mtPage()}
 function mtHub(){
  const c=k=>S.emps.filter(e=>mtSecOf(e)==k).length;
  shell('ادامة الموظفين',`<div class="stat">${['perm','trf','ret'].map(k=>`<button class="tile" style="min-height:120px" onclick="mtPage('${k}')">${MSEC[k]}<span style="font-size:14px;font-weight:400;opacity:.8">${c(k)} موظف</span></button>`).join('')}</div>`);
@@ -568,7 +578,7 @@ function mtPage(sec){
  <div class="tw"><table><thead><tr><th>ت</th><th>الرقم الوظيفي</th><th>الاسم</th><th>الجنس</th><th>الدرجة/المرحلة</th><th>الراتب الاسمي</th><th>آخر علاوة</th><th>آخر ترفيع</th><th>رقم الهاتف</th><th>الحالة</th><th></th></tr></thead><tbody id="mtb"></tbody></table></div>`);
  const draw=()=>{const q=nrmA($('#mq').value.trim()),L=S.emps.filter(e=>mtSecOf(e)==sec&&(!q||nrmA(e.name+' '+((e.m||{}).empNo||'')).includes(q)));
   $('#mcnt').value=L.length;
-  $('#mtb').innerHTML=L.map((e,i)=>`<tr${mtSt(e)=='sec'?' style="background:#fff200;color:#000"':''}><td>${i+1}</td><td>${lvEs((e.m||{}).empNo)}</td><td>${lvEs(e.name)}</td><td>${lvEs((e.m||{}).gender)}</td><td>${e.g||''}/${e.s||''}</td><td>${nf(salary(num(e.g),num(e.s)))}</td><td>${fd(pd(e.lastA))}</td><td>${fd(pd(e.lastP))}</td><td>${lvEs((e.m||{}).phone)}</td><td>${MST[mtSt(e)]}</td><td style="white-space:nowrap"><button class="btn alt" onclick="mtForm(${e.id})">تعديل</button></td></tr>`).join('')||'<tr><td colspan="11">لا توجد بيانات في هذا القسم.</td></tr>'};
+  $('#mtb').innerHTML=L.map((e,i)=>`<tr${mtSt(e)=='sec'?' style="background:#fff200;color:#000"':''}><td>${i+1}</td><td>${lvEs((e.m||{}).empNo)}</td><td>${lvEs(e.name)}</td><td>${lvEs((e.m||{}).gender)}</td><td>${e.g||''}/${e.s||''}</td><td>${nf(salary(num(e.g),num(e.s)))}</td><td>${fd(pd(e.lastA))}</td><td>${fd(pd(e.lastP))}</td><td>${lvEs((e.m||{}).phone)}</td><td>${MST[mtSt(e)]}</td><td style="white-space:nowrap"><button class="btn alt" onclick="mtForm(${e.id})">تعديل</button> ${mtQb(e)}</td></tr>`).join('')||'<tr><td colspan="11">لا توجد بيانات في هذا القسم.</td></tr>'};
  $('#mq').oninput=draw;draw();
 }
 function mtForm(id){
