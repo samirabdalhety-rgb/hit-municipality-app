@@ -72,6 +72,30 @@ tr.stl td{background:rgba(197,143,44,.20)}
 .mh{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--pri);color:#fff;padding:8px 14px}.mh h3{margin:0;font-size:17px}.mh .btn{padding:4px 12px}
 .mb{padding:12px 14px;overflow:auto}.mb .cols2{grid-template-columns:1fr}
 textarea.sm{resize:vertical;min-height:0}
+.ar{display:grid;grid-template-columns:290px 1fr;gap:14px;align-items:start}
+@media(max-width:800px){.ar{grid-template-columns:1fr}}
+.arl{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;max-height:78vh;overflow:auto;position:sticky;top:64px}
+@media(max-width:800px){.arl{position:static;max-height:260px}}
+.are{display:flex;justify-content:space-between;gap:6px;align-items:center;width:100%;text-align:start;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 6px;color:var(--ink);font-family:inherit;font-weight:600;font-size:.92em;line-height:1.3;border-radius:8px;cursor:pointer}
+.are:hover{background:var(--bg)}.are.on{background:var(--pri);color:#fff}
+.are small{opacity:.8;font-weight:600;white-space:nowrap;font-size:.85em}
+.arg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.arc{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.arc .th{height:170px;display:flex;align-items:center;justify-content:center;background:var(--bg);cursor:pointer;position:relative;color:var(--mut);font-weight:700}
+.arc .th img{max-width:100%;max-height:100%;object-fit:contain}
+.arc .mt{padding:6px 8px;font-size:.85em;line-height:1.4;word-break:break-word}
+.arc .bt{display:flex;gap:4px;padding:0 6px 6px}.arc .bt .btn{padding:3px 8px;font-size:.85em;flex:1}
+.arpg{position:absolute;top:6px;right:6px;background:var(--pri);color:#fff;border-radius:8px;padding:1px 8px;font-size:.8em}
+#ar_f1,#ar_f2,#ar_fc{min-width:130px}.drop{border:2px dashed var(--pri2);border-radius:14px;padding:10px;text-align:center;color:var(--mut);margin:10px 0;font-weight:600}
+.drop.on{background:var(--bg);border-color:var(--gold)}
+.arok{background:var(--card);border:1.5px solid var(--pri2);border-radius:12px;padding:8px 12px;margin:8px 0;font-weight:600}
+#arv{position:fixed;inset:0;z-index:20;background:#050d0c;display:flex;flex-direction:column}
+.arvb{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px calc(8px + env(safe-area-inset-right,0px)) 8px 8px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:#0b1c1a}
+.arvb .btn{padding:5px 12px;font-size:.9em}
+.arvs{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;touch-action:none}
+.arvs img{max-width:100%;max-height:100%;transform-origin:center;user-select:none;-webkit-user-drag:none;cursor:grab}
+.arvn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(15,76,71,.85);color:#fff;border:0;border-radius:50%;width:46px;height:46px;font-size:22px;cursor:pointer;z-index:2}
+.arvi{padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));color:#dfeae8;font-size:.9em;max-height:22vh;overflow:auto;background:#0b1c1a;line-height:1.6}
 </style>
 </head>
 <body>
@@ -153,9 +177,300 @@ function calc(e){
  return{status:promo?'ترفيع':(st&&s>=11?'نهاية السلم':'علاوة'),aDue,pDue,due,ng,ns,nsal:salary(ng,ns),amt:S.set.allow[g-1],av:[],usedTxt:ut,lastD:la,lastT:(e.lastP&&e.lastP>=(e.lastA||''))?'ترفيع':'علاوة'};
 }
 const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',leave:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',maint:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.5 1.5-2 3-2s2.5.5 3 2M14 10h4M14 14h4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
-const TILES=[['add','إضافة موظف','top',()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية','last',()=>lvPage('act')]];
+const TILES=[['add','إضافة موظف',0,()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات الاعتيادية',0,()=>lvPage('act')],['arch','ارشفة الاضابير',0,()=>arPage()],['bk','النسخ الاحتياطي','last',()=>bkPage()]];
+/* ===== ارشفة الاضابير ===== */
+ICON.arch='<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M8 13h8M8 16h5"/>';
+const AR_CATS=['أمر تعيين','أمر مباشرة','هوية وجنسية','شهادة دراسية','كتاب شكر','عقوبة','ترفيع','علاوة','إجازة','نقل وانتداب','تقاعد','طبي','أخرى'];
+let arDB=null,AR=[],ARH=new Map(),arUrls=[],arCur=[],arW=null,arV=null,arKeyOn=false,arTess=null;
+const arSt={emp:null,sort:'old',cat:''};
+const arN=t=>nrmA(String(t||'')).replace(/[\u064B-\u0652\u0640]/g,'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).toLowerCase();
+const arKey=f=>f.name+'|'+f.size+'|'+f.lastModified;
+const arStrip=r=>{const{_n,...c}=r;return c};
+function arOpen(){return arDB?Promise.resolve(arDB):new Promise((res,rej)=>{const q=indexedDB.open('hit-archive',1);q.onupgradeneeded=()=>{q.result.createObjectStore('pages',{keyPath:'id'})};q.onsuccess=()=>{arDB=q.result;res(arDB)};q.onerror=()=>rej(q.error)})}
+const arReq=(mode,fn)=>arOpen().then(d=>new Promise((res,rej)=>{const t=d.transaction('pages',mode),r=fn(t.objectStore('pages'));t.oncomplete=()=>res(r.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)}));
+const arPut=r=>arReq('readwrite',s=>s.put(arStrip(r)));
+const arDelDb=id=>arReq('readwrite',s=>s.delete(id));
+function arIndex(r){ARH.set(r.id,arN([r.cat,r.note,r.docDate,r.ocr,r.name].join(' ')))}
+function arNums(){const by={};AR.forEach(r=>(by[r.emp]=by[r.emp]||[]).push(r));for(const k in by){by[k].sort((a,b)=>a.added-b.added).forEach((r,i)=>r._n=i+1)}}
+async function arLoad(){AR=await arReq('readonly',s=>s.getAll());ARH=new Map();AR.forEach(arIndex);arNums()}
+const arRevoke=()=>{arUrls.forEach(u=>URL.revokeObjectURL(u));arUrls=[]};
+const arUrl=b=>{const u=URL.createObjectURL(b);arUrls.push(u);return u};
+const arEmpOf=id=>S.emps.find(e=>e.id==id);
+const arFile=e=>String(((e.lv||{}).file)||'').trim();
+const arEmpHay=e=>arN([e.name,arFile(e),(e.m||{}).empNo].join(' '));
+const arExt=r=>/pdf/i.test(r.mime)?'pdf':/png/i.test(r.mime)?'png':/jpe?g/i.test(r.mime)?'jpg':((r.name.match(/\.(\w+)$/)||[])[1]||'bin');
+const arDay=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+
+async function arPage(){
+ shell('ارشفة الاضابير',`<div class="ar"><div class="arl"><label>الموظفون<input id="ar_eq" type="search" placeholder="اسم / رقم الاضبارة / الرقم الوظيفي" autocomplete="off"></label><div id="ar_list"></div></div>
+ <div><div class="tools"><div style="flex:2 1 220px"><label>بحث متقدم<input id="ar_q" type="search" placeholder="اسم، رقم اضبارة، نوع وثيقة، ملاحظة، نص مستخرج" autocomplete="off"></label></div><div><label>نوع الوثيقة<select id="ar_fc"><option value="">الكل</option>${AR_CATS.map(c=>`<option>${c}</option>`).join('')}</select></label></div><div><label>من تاريخ<input id="ar_f1" type="date"></label></div><div><label>إلى تاريخ<input id="ar_f2" type="date"></label></div></div><div id="ar_main"></div></div></div>`);
+ try{await arLoad()}catch(e){$('#ar_main').innerHTML='<p class="note">تعذّر فتح مخزن الأرشيف في هذا المتصفح (قد يكون التصفح خاصاً).</p>';return}
+ let tm=0;const dr=()=>{clearTimeout(tm);tm=setTimeout(arRender,160)};
+ $('#ar_eq').oninput=arList;$('#ar_q').oninput=dr;['#ar_fc','#ar_f1','#ar_f2'].forEach(k=>$(k).onchange=arRender);
+ arList();arRender()}
+function arList(){
+ const q=arN($('#ar_eq').value.trim()).split(' ').filter(Boolean),cnt={};AR.forEach(r=>cnt[r.emp]=(cnt[r.emp]||0)+1);
+ const L=S.emps.filter(e=>{const h=arEmpHay(e);return q.every(t=>h.includes(t))}).sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
+ $('#ar_list').innerHTML=L.slice(0,300).map(e=>{const st=mtSt(e);return`<button class="are ${arSt.emp==e.id?'on':''}" onclick="arPick(${e.id})"><span>${lvEs(e.name)}${st!='perm'?` <small>(${MST[st]})</small>`:''}</span><small>${cnt[e.id]?cnt[e.id]+' صفحة':'—'}</small></button>`}).join('')||'<p style="color:var(--mut)">لا يوجد موظف</p>'}
+function arPick(id){arSt.emp=arSt.emp==id?null:id;arList();arRender();if(arSt.emp)window.scrollTo(0,0)}
+function arMatch(r,q,fc,f1,f2){
+ if(fc&&r.cat!=fc)return false;const d=r.docDate||arDay(r.added);if(f1&&d<f1)return false;if(f2&&d>f2)return false;
+ if(!q)return true;const eh=arEmpHay(arEmpOf(r.emp)||{name:''}),h=ARH.get(r.id)||'';return q.split(' ').filter(Boolean).every(t=>h.includes(t)||eh.includes(t))}
+function arCard(r,showEmp,i){
+ const e=arEmpOf(r.emp)||{name:'(موظف محذوف)'},th=r.thumb?`<img src="${arUrl(r.thumb)}" alt="">`:r.kind=='img'?`<img src="${arUrl(r.blob)}" alt="">`:r.kind=='pdf'?'PDF':'ملف';
+ return`<div class="arc"><div class="th" onclick="arOpenCard(${i})">${th}<span class="arpg">ص ${r._n||''}</span></div><div class="mt">${showEmp?`<b>${lvEs(e.name)}</b><br>`:''}${r.cat?`<b style="color:var(--pri2)">${lvEs(r.cat)}</b>`:'<span style="color:var(--mut)">بدون نوع</span>'}${r.docDate?` · ${lvEs(fd(pd(r.docDate)))}`:''}${r.note?`<br>${lvEs(r.note)}`:''}${r.ocrDone?'<br><small style="color:var(--mut)">✓ نص مستخرج</small>':''}</div><div class="bt"><button class="btn alt" onclick="arEdit('${r.id}')">تعديل</button>${showEmp?`<button class="btn alt" onclick="arPick(${r.emp})">الاضبارة</button>`:`<button class="btn red" onclick="arDelCard('${r.id}',this)">حذف</button>`}</div></div>`}
+function arOpenCard(i){arView(arCur.slice(),i)}
+function arRender(){
+ arRevoke();const m=$('#ar_main');if(!m)return;
+ const q=arN($('#ar_q').value.trim()),fc=$('#ar_fc').value,f1=$('#ar_f1').value,f2=$('#ar_f2').value,act=!!(q||fc||f1||f2),e=arSt.emp?arEmpOf(arSt.emp):null;
+ if(arSt.emp&&!e)arSt.emp=null;
+ let L=AR.filter(r=>(!e||r.emp==e.id)&&arMatch(r,q,fc,f1,f2));
+ if(e){const so=arSt.sort;L.sort((a,b)=>so=='new'?b.added-a.added:so=='cat'?String(a.cat).localeCompare(String(b.cat),'ar')||a.added-b.added:a.added-b.added)}else L.sort((a,b)=>b.added-a.added);
+ arCur=L.map(r=>r.id);
+ if(!e&&!act){
+  const emps=new Set(AR.map(r=>r.emp)).size,mb=Math.round(AR.reduce((a,r)=>a+(r.size||0),0)/1048576*10)/10;
+  m.innerHTML=`<div class="stat"><div><b>${AR.length}</b>صفحة مؤرشفة</div><div><b>${emps}</b>اضبارة</div><div><b>${mb}</b>ميغابايت</div></div><p class="note" style="color:var(--mut)">اختر موظفاً من القائمة لفتح اضبارته وإضافة صفحات إليها، أو استخدم البحث أعلاه للبحث في كل الاضابير.</p><p class="note" id="ar_sto"></p>`;arSto();return}
+ let h='';
+ if(e){const mine=AR.filter(r=>r.emp==e.id),sz=Math.round(mine.reduce((a,r)=>a+(r.size||0),0)/1048576*10)/10;
+  h+=`<div class="lvcard"><h3>${lvEs(e.name)}${mtSt(e)!='perm'?` <span class="badge">${MST[mtSt(e)]}</span>`:''}</h3><p>${lvEs(e.title)||'—'}</p><p>رقم الاضبارة: ${lvEs(arFile(e))||'—'} &nbsp;|&nbsp; ${mine.length} صفحة (${sz} ميغابايت)</p></div>
+  <div class="tools"><div><label>نوع الوثيقة للصفحات الجديدة<select id="ar_cat"><option value="">— بدون —</option>${AR_CATS.map(c=>`<option${arSt.cat==c?' selected':''}>${c}</option>`).join('')}</select></label></div><button class="btn gold" onclick="$('#ar_fi').click()">إضافة صفحات من ملفات</button><button class="btn" onclick="arCam()">كاميرا</button><button class="btn ${arW?'red':''}" onclick="${arW?'arWatchStop()':'arWatchStart()'}">${arW?'إيقاف مراقبة مجلد السكنر':'ربط مجلد السكنر'}</button></div>
+  <input type="file" id="ar_fi" hidden multiple accept="image/*,.pdf,.tif,.tiff">
+  ${arW?`<div class="arok">● المراقبة تعمل على المجلد «${lvEs(arW.name)}» — كل صفحة جديدة تُمسح تُضاف تلقائياً إلى اضبارة ${lvEs(e.name)} (أُضيف ${arW.n}).</div>`:''}
+  <div class="drop" id="ar_drop">اسحب الصور أو ملفات PDF وأفلتها هنا</div>
+  <div class="tools"><div><label>الترتيب<select id="ar_sort"><option value="old"${arSt.sort=='old'?' selected':''}>حسب التسلسل (الأقدم أولاً)</option><option value="new"${arSt.sort=='new'?' selected':''}>الأحدث أولاً</option><option value="cat"${arSt.sort=='cat'?' selected':''}>حسب نوع الوثيقة</option></select></label></div><button class="btn alt" onclick="arDlAll()">تنزيل الكل</button><button class="btn alt" onclick="arOcrAll()">استخراج النص للكل (OCR)</button><button class="btn alt" onclick="arPick(${e.id})">كل الاضابير</button></div><div id="ar_ocs" class="note" style="color:var(--mut)"></div>`}
+ else h+=`<p class="note" style="color:var(--mut)">نتائج البحث في كل الاضابير: ${L.length}</p>`;
+ h+=`<div class="arg">${L.map((r,i)=>arCard(r,!e,i)).join('')||'<p style="color:var(--mut)">لا توجد صفحات.</p>'}</div>`;
+ m.innerHTML=h;
+ if(e){const fi=$('#ar_fi');fi.onchange=async()=>{const fs=[...fi.files];fi.value='';await arIngest(fs)};
+  $('#ar_cat').onchange=()=>arSt.cat=$('#ar_cat').value;$('#ar_sort').onchange=()=>{arSt.sort=$('#ar_sort').value;arRender()};
+  const dz=$('#ar_drop');['dragenter','dragover'].forEach(v=>dz.addEventListener(v,ev=>{ev.preventDefault();dz.classList.add('on')}));
+  ['dragleave','drop'].forEach(v=>dz.addEventListener(v,ev=>{ev.preventDefault();dz.classList.remove('on')}));
+  dz.addEventListener('drop',ev=>arIngest([...ev.dataTransfer.files]))}}
+async function arSto(){const n=$('#ar_sto');if(!n||!navigator.storage||!navigator.storage.estimate)return;try{const s=await navigator.storage.estimate();n.textContent='المساحة المستخدمة في هذا المتصفح: '+Math.round(s.usage/1048576)+' ميغابايت من نحو '+Math.round(s.quota/1048576)+' ميغابايت. الأرشيف محفوظ على هذا الجهاز فقط ولا يُرفع إلى السحابة.'}catch(e){}}
+async function arIngest(files){
+ if(!arSt.emp||!files.length)return;const r=await arAddFiles(arSt.emp,files,{cat:arSt.cat});
+ toast(r.n?`تمت إضافة ${r.n} صفحة`+(r.skip?` (تخطّي ${r.skip})`:''):'لم تُضف صفحات'+(r.skip?' (مكررة أو نوع غير مدعوم)':''));arList();arRender()}
+async function arPrep(f){
+ if(f.type=='application/pdf'||/\.pdf$/i.test(f.name))return{kind:'pdf',blob:f,thumb:null};
+ let bm=null;try{bm=await createImageBitmap(f,{imageOrientation:'from-image'})}catch(e){try{bm=await createImageBitmap(f)}catch(e2){}}
+ if(!bm)return{kind:'raw',blob:f,thumb:null};
+ const cv=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(bm,0,0,w,h);return c},toB=(c,q)=>new Promise(r=>c.toBlob(r,'image/jpeg',q));
+ const sc=Math.min(1,2400/Math.max(bm.width,bm.height));let blob=f;
+ if(sc<1||f.size>1.5e6||!/jpe?g/i.test(f.type)){const b=await toB(cv(Math.round(bm.width*sc),Math.round(bm.height*sc)),.85);if(b&&(sc<1||b.size<f.size||!/jpe?g/i.test(f.type)))blob=b}
+ const ts=Math.min(1,320/Math.max(bm.width,bm.height)),thumb=await toB(cv(Math.max(1,Math.round(bm.width*ts)),Math.max(1,Math.round(bm.height*ts))),.7);
+ if(bm.close)bm.close();return{kind:'img',blob,thumb}}
+async function arAddFiles(emp,files,o={}){
+ let n=0,skip=0;try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+ for(const f of files){
+  if(!(/^image\//.test(f.type)||f.type=='application/pdf'||/\.(jpe?g|png|bmp|webp|gif|tiff?|pdf)$/i.test(f.name))){skip++;continue}
+  const key=arKey(f);if(AR.some(r=>r.emp==emp&&r.key==key)){skip++;continue}
+  try{const p=await arPrep(f),rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),emp,name:f.name,kind:p.kind,mime:p.blob.type||f.type||'',blob:p.blob,thumb:p.thumb,size:p.blob.size,key,cat:o.cat||'',note:'',docDate:'',added:Date.now(),ocr:'',ocrDone:false};
+   await arPut(rec);AR.push(rec);arIndex(rec);n++;await new Promise(r=>setTimeout(r,2))}
+  catch(e){skip++;toast(e&&e.name=='QuotaExceededError'?'امتلأت مساحة التخزين في المتصفح':'تعذّرت إضافة ملف')}}
+ arNums();return{n,skip}}
+/* ربط مجلد السكنر (Chrome / Edge على الحاسوب) */
+async function arWatchStart(){
+ if(!arSt.emp){toast('اختر موظفاً أولاً');return}
+ if(!window.showDirectoryPicker){toast('ربط المجلد غير مدعوم في هذا المتصفح — استخدم Chrome أو Edge على الحاسوب');return}
+ try{const dir=await showDirectoryPicker({mode:'read'}),seen=new Set();
+  for await(const[n,h]of dir.entries()){if(h.kind=='file'){try{seen.add(arKey(await h.getFile()))}catch(e){}}}
+  arW={dir,seen,pend:new Set(),busy:false,name:dir.name,n:0};arW.timer=setInterval(arTick,2500);toast('بدأت المراقبة: الصفحات الجديدة فقط ستُضاف');arRender()}
+ catch(e){if(e.name!='AbortError')toast('تعذّر ربط المجلد')}}
+function arWatchStop(){if(arW){clearInterval(arW.timer);arW=null}arRender()}
+async function arTick(){
+ if(!arW||arW.busy||!arSt.emp)return;arW.busy=true;
+ try{const fresh=[];
+  for await(const[n,h]of arW.dir.entries()){if(h.kind!='file'||!/\.(jpe?g|png|pdf|bmp|webp|tiff?)$/i.test(n))continue;
+   const f=await h.getFile(),k=arKey(f);if(arW.seen.has(k)||f.size==0)continue;
+   if(!arW.pend.has(k)){arW.pend.add(k);continue}
+   fresh.push([k,f])}
+  fresh.sort((a,b)=>a[1].lastModified-b[1].lastModified);
+  for(const[k,f]of fresh){arW.seen.add(k);arW.pend.delete(k);const r=await arAddFiles(arSt.emp,[f],{cat:arSt.cat});arW.n+=r.n}
+  if(fresh.length){toast('أُضيفت '+fresh.length+' صفحة من السكنر');arList();arRender()}}
+ catch(e){}finally{if(arW)arW.busy=false}}
+function arLeave(){if(arW){clearInterval(arW.timer);arW=null}arRevoke();arVClose();const m=$('#arm');if(m)m.remove()}
+/* كاميرا */
+function arModal(title,body,onClose){const o=$('#arm');if(o)o.remove();const m=document.createElement('div');m.id='arm';m.className='ov';m.style.zIndex=30;
+ const close=()=>{m.remove();if(onClose)onClose()};m.innerHTML=`<div class="mdl" role="dialog" aria-modal="true"><div class="mh"><h3>${title}</h3><button class="btn alt" id="arm_x" aria-label="إغلاق">✕</button></div><div class="mb">${body}</div></div>`;
+ document.body.appendChild(m);$('#arm_x').onclick=close;m.addEventListener('mousedown',ev=>{if(ev.target===m)close()});m._close=close;return close}
+async function arCam(){
+ if(!arSt.emp){toast('اختر موظفاً أولاً');return}
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('الكاميرا غير مدعومة في هذا المتصفح');return}
+ let st;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:2560},height:{ideal:1440}},audio:false})}catch(e){toast('تعذّر تشغيل الكاميرا — تحقق من الصلاحية');return}
+ arModal('التقاط صفحات',`<video id="ar_vd" autoplay playsinline muted style="width:100%;max-height:60vh;background:#000;border-radius:10px"></video><div class="act"><button class="btn gold" id="ar_snap">التقاط وإضافة للاضبارة</button><b id="ar_sn">0</b> صفحة</div><p class="note" style="color:var(--mut)">ضع الورقة أمام الكاميرا ثم اضغط التقاط. تبقى النافذة مفتوحة لالتقاط عدة صفحات.</p>`,()=>{st.getTracks().forEach(t=>t.stop());arList();arRender()});
+ const v=$('#ar_vd');v.srcObject=st;let c=0,busy=false;
+ $('#ar_snap').onclick=async()=>{if(busy||!v.videoWidth)return;busy=true;const cv=document.createElement('canvas');cv.width=v.videoWidth;cv.height=v.videoHeight;cv.getContext('2d').drawImage(v,0,0);
+  const b=await new Promise(r=>cv.toBlob(r,'image/jpeg',.9)),f=new File([b],'cam_'+Date.now()+'.jpg',{type:'image/jpeg',lastModified:Date.now()});
+  const r=await arAddFiles(arSt.emp,[f],{cat:arSt.cat});c+=r.n;$('#ar_sn').textContent=c;busy=false}}
+/* تعديل بيانات الصفحة */
+function arEdit(id){const r=AR.find(x=>x.id==id);if(!r)return;
+ arModal('بيانات الصفحة',`<label>نوع الوثيقة<select id="ae_c"><option value="">— بدون —</option>${AR_CATS.map(c=>`<option${r.cat==c?' selected':''}>${c}</option>`).join('')}</select></label><label>عنوان / ملاحظة<input id="ae_n" maxlength="200" value="${lvEs(r.note)}"></label><label>تاريخ الوثيقة<input id="ae_d" type="date" value="${lvEs(r.docDate)}"></label><label>النص المستخرج / كلمات مفتاحية للبحث (يمكنك تصحيحه أو كتابته)<textarea id="ae_o" rows="5" class="sm">${lvEs(r.ocr)}</textarea></label><div class="act"><button class="btn gold" id="ae_s">حفظ</button></div>`);
+ $('#ae_s').onclick=async()=>{r.cat=$('#ae_c').value;r.note=$('#ae_n').value.trim();r.docDate=$('#ae_d').value;r.ocr=$('#ae_o').value.trim();r.ocrDone=r.ocrDone||!!r.ocr;await arPut(r);arIndex(r);$('#arm')._close();toast('تم الحفظ');arRender();if(arV)arVShow()}}
+function arDelCard(id,b){if(!b.dataset.c){b.dataset.c=1;const t=b.textContent;b.textContent='تأكيد؟';setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent=t}},4000);return}arRemove(id)}
+async function arRemove(id){await arDelDb(id);AR=AR.filter(r=>r.id!=id);ARH.delete(id);arNums();toast('تم حذف الصفحة');arList();arRender()}
+function arDl(r){const e=arEmpOf(r.emp)||{name:'اضبارة'},a=document.createElement('a'),u=URL.createObjectURL(r.blob);a.href=u;a.download=String(e.name).replace(/[\\\/:*?"<>|]/g,'').trim()+'_ص'+(r._n||'')+'.'+arExt(r);document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+async function arDlAll(){const L=AR.filter(r=>r.emp==arSt.emp).sort((a,b)=>a.added-b.added);if(!L.length){toast('لا توجد صفحات');return}toast('جارٍ تنزيل '+L.length+' ملف — اسمح بالتنزيلات المتعددة إن طلب المتصفح');for(const r of L){arDl(r);await new Promise(x=>setTimeout(x,400))}}
+/* OCR (اختياري، يحتاج إنترنت عند أول استخدام) */
+const arLoadTess=()=>window.Tesseract?Promise.resolve():(arTess=arTess||new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=res;s.onerror=()=>{arTess=null;rej(new Error('load'))};document.head.appendChild(s)}));
+async function arOcr(id){const r=AR.find(x=>x.id==id);if(!r||r.kind!='img')return false;
+ try{await arLoadTess();const res=await Tesseract.recognize(r.blob,'ara+eng');r.ocr=(res.data.text||'').replace(/\s+/g,' ').trim();r.ocrDone=true;await arPut(r);arIndex(r);return true}
+ catch(e){return false}}
+async function arOcrAll(){const L=AR.filter(r=>r.emp==arSt.emp&&r.kind=='img'&&!r.ocrDone),n=$('#ar_ocs');if(!L.length){toast('لا توجد صفحات بانتظار الاستخراج');return}
+ let ok=0;for(let i=0;i<L.length;i++){if(n)n.textContent=`استخراج النص ${i+1} / ${L.length} … (أول مرة تحتاج إنترنت وقد تستغرق وقتاً)`;if(await arOcr(L[i].id))ok++;else{toast('تعذّر استخراج النص — تحقق من الإنترنت');break}}
+ toast('تم استخراج النص من '+ok+' صفحة');arRender()}
+/* عارض الصور */
+function arView(ids,i){arV={ids,i,z:1,r:0,x:0,y:0};arVBuild();arVShow()}
+function arVBuild(){if($('#arv'))return;const d=document.createElement('div');d.id='arv';
+ d.innerHTML=`<div class="arvb"><button class="btn alt" onclick="arVClose()">✕ إغلاق</button><button class="btn alt" onclick="arVGo(-1)">السابق</button><span id="arv_c" style="color:#fff;font-weight:700"></span><button class="btn alt" onclick="arVGo(1)">التالي</button><button class="btn alt" onclick="arVZ(1.25)">＋</button><button class="btn alt" onclick="arVZ(.8)">－</button><button class="btn alt" onclick="arVR()">تدوير</button><button class="btn alt" onclick="arVFit()">ملاءمة</button><button class="btn alt" onclick="arVDl()">تنزيل</button><button class="btn alt" onclick="arVEdit()">تعديل البيانات</button><button class="btn alt" onclick="arVOcr(this)">استخراج النص</button><button class="btn red" onclick="arVDel(this)">حذف</button></div><div class="arvs" id="arv_s"></div><div class="arvi" id="arv_i"></div>`;
+ document.body.appendChild(d);
+ const s=$('#arv_s');let dr=null;
+ s.addEventListener('pointerdown',ev=>{if(ev.target.tagName=='IMG'){dr={x:ev.clientX-arV.x,y:ev.clientY-arV.y};s.setPointerCapture(ev.pointerId)}});
+ s.addEventListener('pointermove',ev=>{if(dr&&arV){arV.x=ev.clientX-dr.x;arV.y=ev.clientY-dr.y;arVTf()}});
+ ['pointerup','pointercancel'].forEach(k=>s.addEventListener(k,()=>dr=null));
+ s.addEventListener('wheel',ev=>{if(!arV)return;ev.preventDefault();arVZ(ev.deltaY<0?1.15:.87)},{passive:false});
+ s.addEventListener('dblclick',()=>{if(arV){arV.z=arV.z>1?1:2.2;arV.x=arV.y=0;arVTf()}});
+ if(!arKeyOn){arKeyOn=true;document.addEventListener('keydown',arVKey)}}
+function arVKey(ev){if(!arV||$('#arm'))return;const k=ev.key;if(k=='Escape')arVClose();else if(k=='ArrowLeft')arVGo(1);else if(k=='ArrowRight')arVGo(-1);else if(k=='+'||k=='=')arVZ(1.25);else if(k=='-')arVZ(.8);else if(k=='r'||k=='R')arVR()}
+function arVTf(){const i=$('#arv_img');if(i)i.style.transform=`translate(${arV.x}px,${arV.y}px) rotate(${arV.r}deg) scale(${arV.z})`}
+function arVZ(f){if(!arV)return;arV.z=Math.min(8,Math.max(.2,arV.z*f));arVTf()}
+function arVR(){if(!arV)return;arV.r=(arV.r+90)%360;arVTf()}
+function arVFit(){if(!arV)return;arV.z=1;arV.x=arV.y=0;arVTf()}
+function arVGo(d){if(!arV)return;const n=arV.i+d;if(n<0||n>=arV.ids.length)return;arV.i=n;arV.z=1;arV.r=0;arV.x=arV.y=0;arVShow()}
+let arVU=null;
+function arVShow(){
+ if(!arV)return;const id=arV.ids[arV.i],r=AR.find(x=>x.id==id);if(!r){arVClose();return}
+ if(arVU){URL.revokeObjectURL(arVU);arVU=null}arVU=URL.createObjectURL(r.blob);
+ const s=$('#arv_s');
+ s.innerHTML=(r.kind=='img'?`<img id="arv_img" src="${arVU}" alt="">`:r.kind=='pdf'?`<iframe src="${arVU}" style="width:100%;height:100%;border:0;background:#fff"></iframe>`:`<div style="color:#fff;text-align:center;padding:20px">لا يمكن عرض هذا النوع داخل البرنامج. استخدم زر «تنزيل».</div>`)+(arV.i<arV.ids.length-1?'<button class="arvn" style="left:10px" onclick="arVGo(1)" aria-label="التالي">‹</button>':'')+(arV.i>0?'<button class="arvn" style="right:10px" onclick="arVGo(-1)" aria-label="السابق">›</button>':'');
+ arVTf();const e=arEmpOf(r.emp)||{name:''};$('#arv_c').textContent=(arV.i+1)+' / '+arV.ids.length;
+ $('#arv_i').innerHTML=`<b>${lvEs(e.name)}</b> — صفحة ${r._n||''}${r.cat?' — '+lvEs(r.cat):''}${r.docDate?' — '+lvEs(fd(pd(r.docDate))):''}${r.note?'<br>'+lvEs(r.note):''}${r.kind=='pdf'?`<br><a href="${arVU}" target="_blank" style="color:#9fe3d9">فتح الملف في تبويب جديد</a>`:''}${r.ocr?`<br><span style="opacity:.75">${lvEs(r.ocr.slice(0,260))}${r.ocr.length>260?'…':''}</span>`:''}`}
+function arVClose(){const d=$('#arv');if(d)d.remove();if(arVU){URL.revokeObjectURL(arVU);arVU=null}arV=null}
+function arVCur(){return arV?AR.find(x=>x.id==arV.ids[arV.i]):null}
+function arVDl(){const r=arVCur();if(r)arDl(r)}
+function arVEdit(){const r=arVCur();if(r)arEdit(r.id)}
+async function arVOcr(b){const r=arVCur();if(!r)return;if(r.kind!='img'){toast('استخراج النص متاح للصور فقط');return}const t=b.textContent;b.textContent='جارٍ الاستخراج…';b.disabled=true;
+ const ok=await arOcr(r.id);b.disabled=false;b.textContent=t;toast(ok?'تم استخراج النص':'تعذّر استخراج النص — يحتاج الإنترنت');if(arV)arVShow();arRender()}
+function arVDel(b){if(!b.dataset.c){b.dataset.c=1;const t=b.textContent;b.textContent='تأكيد؟';setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent=t}},4000);return}
+ const r=arVCur();if(!r)return;const id=r.id;arV.ids.splice(arV.i,1);if(!arV.ids.length)arVClose();else{arV.i=Math.min(arV.i,arV.ids.length-1);arVShow()}arRemove(id)}
+/* ===== النسخ الاحتياطي ===== */
+ICON.bk='<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>';
+const BKN={emps:'الموظفين',leave:'الاجازات',maint:'الادامة',settings:'الاعدادات',all:'كل_البيانات',archive:'الارشيف'};
+const BKT={emps:'بيانات الموظفين (الترفيعات والعلاوات)',leave:'الاجازات',maint:'ادامة الموظفين (ملاك/نقل/تقاعد/جنس/...)',settings:'الإعدادات وسلم الرواتب والمظهر',archive:'ارشفة الاضابير (الصور)'};
+const BK_MAGIC='HITARCH1\n';
+let bkDB=null;
+const bkOpen=()=>bkDB?Promise.resolve(bkDB):new Promise((res,rej)=>{const q=indexedDB.open('hit-backup',1);q.onupgradeneeded=()=>{q.result.createObjectStore('snaps',{keyPath:'id'});q.result.createObjectStore('meta')};q.onsuccess=()=>{bkDB=q.result;res(bkDB)};q.onerror=()=>rej(q.error)});
+const bkReq=(st,mode,fn)=>bkOpen().then(d=>new Promise((res,rej)=>{const t=d.transaction(st,mode),r=fn(t.objectStore(st));t.oncomplete=()=>res(r.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)}));
+const bkLast=()=>{try{return JSON.parse(localStorage.getItem('hit-bk-last')||'{}')}catch(e){return{}}};
+function bkMark(k){const o=bkLast(),t=Date.now();(k=='all'?['emps','leave','maint','settings']:[k]).forEach(x=>o[x]=t);try{localStorage.setItem('hit-bk-last',JSON.stringify(o))}catch(e){}}
+const bkParts=()=>({emps:S.emps.map(e=>{const{lv,m,...c}=e;return c}),leave:Object.fromEntries(S.emps.filter(e=>e.lv).map(e=>[e.id,e.lv])),maint:Object.fromEntries(S.emps.filter(e=>e.m).map(e=>[e.id,e.m])),settings:{set:S.set,ui:S.ui||{}}});
+const bkJson=parts=>new Blob([JSON.stringify({app:'hit-backup',v:1,created:Date.now(),parts})],{type:'application/json'});
+const bkCount=(k,p)=>k=='emps'?(p.emps||[]).length+' موظف':k=='leave'||k=='maint'?Object.keys(p[k]||{}).length+' سجل':'—';
+/* نسخ تلقائية داخل المتصفح */
+async function bkSnap(id,label){await bkReq('snaps','readwrite',s=>s.put({id,label,at:Date.now(),n:S.emps.length,parts:bkParts()}));
+ const all=await bkReq('snaps','readonly',s=>s.getAll());all.sort((a,b)=>b.at-a.at);for(const x of all.slice(20))await bkReq('snaps','readwrite',s=>s.delete(x.id))}
+async function bkAuto(){
+ try{if(!S.emps.length){if(!sessionStorage.getItem('hit-bk-empty')){sessionStorage.setItem('hit-bk-empty','1');const a=await bkReq('snaps','readonly',s=>s.count());if(a)toast('لا توجد بيانات في البرنامج — يمكنك الاستعادة من «النسخ الاحتياطي»')}return}
+  const day=arDay(Date.now());
+  if(localStorage.getItem('hit-bk-day')!=day){localStorage.setItem('hit-bk-day',day);await bkSnap(day,'تلقائية يومية')}
+  if(!sessionStorage.getItem('hit-bk-rem')){sessionStorage.setItem('hit-bk-rem','1');const v=Object.values(bkLast()),t=v.length?Math.max(...v):0,d=t?Math.floor((Date.now()-t)/864e5):null;
+   if(d===null||d>7)setTimeout(()=>toast(d===null?'تذكير: لم تأخذ نسخة احتياطية على الحاسوب بعد':'تذكير: آخر نسخة احتياطية على الحاسوب قبل '+d+' يوماً'),3000)}}
+ catch(e){}}
+/* مجلد الحفظ على الحاسوب */
+const bkDirGet=()=>bkReq('meta','readonly',s=>s.get('dir')).catch(()=>null);
+async function bkDirReady(){const h=await bkDirGet();if(!h)return null;try{let p=await h.queryPermission({mode:'readwrite'});if(p!='granted')p=await h.requestPermission({mode:'readwrite'});return p=='granted'?h:null}catch(e){return null}}
+async function bkChooseDir(){if(!window.showDirectoryPicker){toast('اختيار المجلد غير مدعوم في هذا المتصفح — ستُنزَّل الملفات إلى مجلد التنزيلات. استخدم Chrome أو Edge للاختيار');return}
+ try{const h=await showDirectoryPicker({mode:'readwrite',id:'hit-backup'});await bkReq('meta','readwrite',s=>s.put(h,'dir'));toast('تم اختيار مجلد النسخ الاحتياطي');bkRender()}catch(e){if(e.name!='AbortError')toast('تعذّر اختيار المجلد')}}
+async function bkOut(name,blob,dir){
+ if(dir){const fh=await dir.getFileHandle(name,{create:true}),w=await fh.createWritable();await w.write(blob);await w.close();return}
+ const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
+/* حاوية الأرشيف: [HITARCH1\n] ثم لكل صفحة: 4 بايت طول الترويسة + ترويسة JSON + الصورة + المصغّرة */
+function bkArchBlob(){const parts=[BK_MAGIC];
+ for(const r of AR){const{blob,thumb,_n,...m}=r;m.bs=blob.size;m.bt=blob.type||'';m.ts=thumb?thumb.size:0;m.tt=thumb?thumb.type:'';
+  const h=new TextEncoder().encode(JSON.stringify(m)),l=new Uint8Array(4);new DataView(l.buffer).setUint32(0,h.length);parts.push(l,h,blob);if(thumb)parts.push(thumb)}
+ return new Blob(parts,{type:'application/octet-stream'})}
+async function bkReadArch(file){
+ if(await file.slice(0,BK_MAGIC.length).text()!=BK_MAGIC)throw new Error('ملف أرشيف غير صالح');
+ let off=BK_MAGIC.length;const recs=[];
+ while(off<file.size){const len=new DataView(await file.slice(off,off+4).arrayBuffer()).getUint32(0);off+=4;const m=JSON.parse(await file.slice(off,off+len).text());off+=len;
+  const blob=file.slice(off,off+m.bs,m.bt);off+=m.bs;const thumb=m.ts?file.slice(off,off+m.ts,m.tt):null;off+=m.ts;
+  const{bs,bt,ts,tt,...r}=m;r.blob=blob;r.thumb=thumb;recs.push(r)}
+ if(off!=file.size)throw new Error('الملف ناقص أو تالف');return recs}
+/* تنفيذ النسخ */
+async function bkRun(list){
+ const dir=await bkDirReady(),t=new Date(),stamp=arDay(t)+'_'+String(t.getHours()).padStart(2,'0')+String(t.getMinutes()).padStart(2,'0');
+ try{const P=bkParts(),made=[];
+  for(const k of list){
+   if(k=='archive'){await arLoad();if(!AR.length){toast('لا توجد صور في الأرشيف');continue}made.push(['نسخة_'+BKN.archive+'_'+stamp+'.hitarch',bkArchBlob(),k])}
+   else if(k=='all')made.push(['نسخة_'+BKN.all+'_'+stamp+'.json',bkJson({emps:P.emps,leave:P.leave,maint:P.maint,settings:P.settings}),k]);
+   else made.push(['نسخة_'+BKN[k]+'_'+stamp+'.json',bkJson({[k]:P[k]}),k])}
+  for(const[nm,bl,k]of made){await bkOut(nm,bl,dir);bkMark(k);if(!dir)await new Promise(r=>setTimeout(r,600))}
+  if(made.length)toast(dir?`تم حفظ ${made.length} ملف في المجلد «${dir.name}»`:`تم تنزيل ${made.length} ملف إلى مجلد التنزيلات`)}
+ catch(e){toast('تعذّر إنشاء النسخة: '+(e.message||e))}
+ bkRender()}
+/* الاستعادة */
+function bkValid(o){const p=o&&o.parts;if(!o||o.app!='hit-backup'||!p||typeof p!='object')throw new Error('الملف ليس نسخة احتياطية لهذا البرنامج');
+ if(p.emps&&(!Array.isArray(p.emps)||p.emps.some(e=>!e||e.id==null)))throw new Error('بيانات الموظفين في الملف تالفة');
+ ['leave','maint'].forEach(k=>{if(p[k]&&(typeof p[k]!='object'||Array.isArray(p[k])))throw new Error('قسم تالف: '+BKT[k])});
+ if(p.settings&&!(p.settings.set&&Array.isArray(p.settings.set.grid)))throw new Error('قسم الإعدادات تالف');
+ if(!['emps','leave','maint','settings'].some(k=>p[k]))throw new Error('لا يحتوي الملف على أقسام قابلة للاستعادة')}
+async function bkPick(file){
+ if(!file)return;
+ try{if(/\.hitarch$/i.test(file.name)||await file.slice(0,BK_MAGIC.length).text()==BK_MAGIC){const recs=await bkReadArch(file);return bkOpenArch(recs,file.name)}
+  const o=JSON.parse(await file.text());bkValid(o);bkOpenData(o,file.name)}
+ catch(e){toast('تعذّرت قراءة الملف: '+(e.message||'ملف غير صالح'))}}
+function bkOpenData(o,src){
+ const p=o.parts,ks=['emps','leave','maint','settings'].filter(k=>p[k]);
+ arModal('استعادة نسخة احتياطية',`<p><b>المصدر:</b> ${lvEs(src)}<br><b>تاريخ النسخة:</b> ${o.created?lvEs(new Date(o.created).toLocaleString('ar-IQ')):'—'}</p>
+ <fieldset><legend>الأقسام المراد استعادتها</legend>${ks.map(k=>`<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" class="bkc" value="${k}" checked style="width:auto"> ${BKT[k]} — ${bkCount(k,p)}</label>`).join('')}</fieldset>
+ <label>طريقة الاستعادة<select id="bk_m"><option value="merge">دمج: يضيف المفقود ويحدّث الموجود (الأسلم)</option><option value="replace">استبدال كامل: يحذف الحالي ويضع ما في النسخة</option></select></label>
+ <p class="note">قسم الإعدادات يُستبدل دائماً. تُؤخذ نسخة تلقائية من الوضع الحالي قبل الاستعادة. إذا استعدت الاجازات أو الادامة فاستعد بيانات الموظفين معها أو قبلها.</p>
+ <div class="act"><button class="btn gold" id="bk_go">استعادة الآن</button></div>`);
+ $('#bk_go').onclick=async()=>{const w=[...document.querySelectorAll('.bkc:checked')].map(x=>x.value);if(!w.length){toast('اختر قسماً واحداً على الأقل');return}
+  const b=$('#bk_go');b.disabled=true;b.textContent='جارٍ الاستعادة…';
+  try{const r=await bkApply(p,w,$('#bk_m').value);$('#arm')._close();toast('تمت الاستعادة: '+r);if($('#bk_w'))bkRender()}catch(e){b.disabled=false;b.textContent='استعادة الآن';toast('تعذّرت الاستعادة: '+(e.message||e))}}}
+async function bkApply(p,w,mode){
+ try{if(S.emps.length)await bkSnap('pre-'+Date.now(),'قبل الاستعادة')}catch(e){}
+ const msg=[],find=id=>S.emps.find(e=>String(e.id)==String(id)),rep=mode=='replace';
+ if(w.includes('emps')){const old=new Map(S.emps.map(e=>[String(e.id),e]));
+  if(rep)S.emps=p.emps.map(c=>{const o=old.get(String(c.id)),n={...c};if(o){if(o.lv&&!n.lv)n.lv=o.lv;if(o.m&&!n.m)n.m=o.m}return n});
+  else p.emps.forEach(c=>{const o=old.get(String(c.id));if(o){const lv=o.lv,m=o.m;Object.keys(o).forEach(k=>delete o[k]);Object.assign(o,c);if(lv&&!o.lv)o.lv=lv;if(m&&!o.m)o.m=m}else S.emps.push({...c})});
+  msg.push(p.emps.length+' موظف')}
+ for(const k of['leave','maint']){if(!w.includes(k))continue;const f=k=='leave'?'lv':'m',src=p[k]||{};let n=0,sk=0;
+  if(rep)S.emps.forEach(e=>{if(!(e.id in src))delete e[f]});
+  for(const id in src){const e=find(id);if(e){e[f]=src[id];n++}else sk++}
+  msg.push(BKN[k]+': '+n+(sk?' (تخطّي '+sk+' لعدم وجود الموظف)':''))}
+ if(w.includes('settings')){S.set=p.settings.set;S.ui=p.settings.ui||{};msg.push('الإعدادات')}
+ migrate();save();try{applyUI()}catch(e){}
+ return msg.join('، ')}
+function bkOpenArch(recs,src){
+ const mb=Math.round(recs.reduce((a,r)=>a+(r.size||0),0)/1048576*10)/10;
+ arModal('استعادة أرشيف الاضابير',`<p><b>المصدر:</b> ${lvEs(src)}<br><b>المحتوى:</b> ${recs.length} صفحة (${mb} ميغابايت)</p><label>طريقة الاستعادة<select id="bk_m"><option value="merge">دمج: يضيف الصفحات غير الموجودة فقط (الأسلم)</option><option value="replace">استبدال كامل: يحذف الأرشيف الحالي</option></select></label><p class="note">ترتبط الصفحات بالموظفين برقمهم الداخلي، فاستعد بيانات الموظفين أولاً.</p><div class="act"><button class="btn gold" id="bk_go">استعادة الآن</button></div><div id="bk_pg" class="note" style="color:var(--mut)"></div>`);
+ $('#bk_go').onclick=async()=>{const b=$('#bk_go');b.disabled=true;
+  try{await arLoad();const rep=$('#bk_m').value=='replace';if(rep){await arReq('readwrite',s=>s.clear());AR=[]}
+   const have=new Set(AR.map(r=>r.id));let n=0;
+   for(const r of recs){if(have.has(r.id))continue;await arPut(r);n++;if(n%10==0)$('#bk_pg').textContent=n+' / '+recs.length}
+   await arLoad();$('#arm')._close();toast('تمت استعادة '+n+' صفحة');if($('#bk_w'))bkRender()}
+  catch(e){b.disabled=false;toast(e&&e.name=='QuotaExceededError'?'امتلأت مساحة التخزين في المتصفح':'تعذّرت الاستعادة: '+(e.message||e))}}}
+/* الصفحة */
+function bkPage(){shell('النسخ الاحتياطي','<div id="bk_w"></div>');bkRender()}
+async function bkRender(){
+ const w=$('#bk_w');if(!w)return;
+ let na='—';try{await arLoad();na=AR.length+' صفحة'}catch(e){}
+ const L=bkLast(),fmt=k=>{const t=L[k];if(!t)return'<span style="color:var(--red)">لم تُؤخذ</span>';const d=Math.floor((Date.now()-t)/864e5);return lvEs(new Date(t).toLocaleString('ar-IQ'))+(d>7?` <b style="color:var(--red)">(منذ ${d} يوماً)</b>`:'')};
+ const dir=await bkDirGet(),snaps=(await bkReq('snaps','readonly',s=>s.getAll()).catch(()=>[])).sort((a,b)=>b.at-a.at);
+ const cnt={emps:S.emps.length+' موظف',leave:S.emps.filter(e=>e.lv).length+' سجل',maint:S.emps.filter(e=>e.m).length+' سجل',settings:'—',archive:na};
+ if(!$('#bk_w'))return;
+ w.innerHTML=`${S.emps.length?'':'<div class="arok" style="border-color:var(--red)">لا توجد بيانات موظفين الآن. إن فُقدت البيانات فاستعدها من ملف نسخة على الحاسوب أو من النسخ التلقائية أدناه.</div>'}
+ <fieldset><legend>مكان الحفظ على الحاسوب</legend><p style="margin:0 0 8px">${dir?`المجلد المختار: <b>${lvEs(dir.name)}</b> — تُكتب الملفات فيه مباشرة.`:'لم يُختر مجلد: ستُنزَّل الملفات إلى مجلد التنزيلات في المتصفح.'}</p><div class="act"><button class="btn alt" onclick="bkChooseDir()">${dir?'تغيير المجلد':'اختيار مجلد النسخ الاحتياطي'}</button><button class="btn gold" onclick="bkRun(['emps','leave','maint','settings','archive'])">نسخة احتياطية الآن لكل الأقسام</button><button class="btn" onclick="bkRun(['all'])">ملف واحد لكل البيانات (بدون الصور)</button></div></fieldset>
+ <div class="tw" style="margin-top:12px"><table style="min-width:520px"><thead><tr><th>القسم</th><th>المحتوى الحالي</th><th>آخر نسخة على الحاسوب</th><th></th></tr></thead><tbody>${['emps','leave','maint','settings','archive'].map(k=>`<tr><td style="text-align:start">${BKT[k]}</td><td>${cnt[k]}</td><td>${fmt(k)}</td><td><button class="btn alt" onclick="bkRun(['${k}'])">نسخ هذا القسم</button></td></tr>`).join('')}</tbody></table></div>
+ <fieldset style="margin-top:14px"><legend>استعادة من ملف على الحاسوب</legend><p style="margin:0 0 8px;color:var(--mut)">اختر ملف نسخة (‎.json للبيانات أو ‎.hitarch للأرشيف). سترى محتواه وتختار الأقسام قبل التنفيذ.</p><input type="file" id="bk_f" accept=".json,.hitarch"></fieldset>
+ <fieldset style="margin-top:14px"><legend>نسخ تلقائية داخل المتصفح (يومية، آخر 20)</legend>${snaps.length?`<div class="tw"><table style="min-width:420px"><thead><tr><th>التاريخ</th><th>النوع</th><th>الموظفون</th><th></th></tr></thead><tbody>${snaps.map(s=>`<tr><td>${lvEs(new Date(s.at).toLocaleString('ar-IQ'))}</td><td>${lvEs(s.label)}</td><td>${s.n}</td><td><button class="btn alt" onclick="bkSnapOpen('${s.id}')">استعادة</button></td></tr>`).join('')}</tbody></table></div>`:'<p style="color:var(--mut)">لا توجد نسخ تلقائية بعد.</p>'}<p class="note">هذه النسخ داخل المتصفح نفسه وتحميك من خطأ أو تلف في البيانات، لكنها تُمحى إذا مُسحت بيانات المتصفح. فلا تغني عن نسخة الحاسوب.</p></fieldset>`;
+ $('#bk_f').onchange=()=>{const f=$('#bk_f').files[0];$('#bk_f').value='';bkPick(f)}}
+async function bkSnapOpen(id){const s=await bkReq('snaps','readonly',x=>x.get(id));if(s)bkOpenData({app:'hit-backup',created:s.at,parts:s.parts},'نسخة تلقائية — '+s.label)}
 function openSettings(){$('#home').hidden=true;$('#view').hidden=false;settings();window.scrollTo(0,0)}
 function home(){
+ if(typeof arLeave=='function')arLeave();
+ if(typeof bkAuto=='function')bkAuto();
  lvSyncAll();
  $('#view').hidden=true;$('#home').hidden=false;
  const t=new Date(),n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c);
