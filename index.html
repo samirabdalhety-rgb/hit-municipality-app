@@ -220,7 +220,7 @@ async function lgFiles(){const fi=$('#lg_fi'),fs=[...fi.files];fi.value='';if(!f
 const DC={appt:{t:'أمر التعيين',cat:'أمر تعيين'},promo:{t:'أمر آخر ترفيع',cat:'أمر آخر ترفيع'},allow:{t:'أمر آخر علاوة',cat:'أمر آخر علاوة'}};
 let attPend=[],dcFor='';
 const dcRow=k=>`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:-4px 0 10px"><button type="button" class="btn alt" onclick="dcAtt('${k}')">إرفاق ${DC[k].t} (صورة / ملف)</button><span id="dcs_${k}"></span></div>`;
-const dcRecs=k=>AR.filter(r=>r.emp==editId&&r.slot==k).sort((a,b)=>a.added-b.added);
+const dcRecs=(k,emp=editId)=>AR.filter(r=>r.emp==emp&&r.slot==k).sort((a,b)=>a.added-b.added);
 function dcUpd(){Object.keys(DC).forEach(k=>{const sp=$('#dcs_'+k);if(!sp)return;const L=editId?dcRecs(k):[],pn=attPend.filter(p=>p.slot==k).reduce((a,p)=>a+p.files.length,0);
  sp.innerHTML=(L.length?`<button type="button" class="btn alt" onclick="dcView('${k}')">عرض (${L.length})</button> <button type="button" class="btn alt" onclick="dcPrint('${k}')">طباعة</button> `:'')+(pn?`<span style="color:var(--pri2);font-weight:600">${pn} ملف بانتظار حفظ الموظف</span>`:'')+(!L.length&&!pn?'<span style="color:var(--mut)">لا يوجد ملف مرفق</span>':'')})}
 function dcAtt(k){dcFor=k;$('#dc_fi').click()}
@@ -322,7 +322,7 @@ async function arAddFiles(emp,files,o={}){
  for(const f of files){
   if(!(/^image\//.test(f.type)||f.type=='application/pdf'||/\.(jpe?g|png|bmp|webp|gif|tiff?|pdf)$/i.test(f.name))){skip++;continue}
   const key=arKey(f);if(AR.some(r=>r.emp==emp&&r.key==key)){skip++;continue}
-  try{const p=await arPrep(f),rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),emp,name:f.name,kind:p.kind,mime:p.blob.type||f.type||'',blob:p.blob,thumb:p.thumb,size:p.blob.size,key,cat:o.cat||'',stage:o.stage||0,slot:o.slot||'',note:'',docDate:'',added:Date.now(),ocr:'',ocrDone:false};
+  try{const p=await arPrep(f),rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),emp,name:f.name,kind:p.kind,mime:p.blob.type||f.type||'',blob:p.blob,thumb:p.thumb,size:p.blob.size,key,cat:o.cat||'',stage:o.stage||0,slot:o.slot||'',note:'',docDate:o.docDate||'',added:Date.now(),ocr:'',ocrDone:false};
    await arPut(rec);AR.push(rec);arIndex(rec);n++;if(arAutoOn()&&(rec.kind=='img'||rec.kind=='pdf'))arEnqueue(rec.id);await new Promise(r=>setTimeout(r,2))}
   catch(e){skip++;toast(e&&e.name=='QuotaExceededError'?'امتلأت مساحة التخزين في المتصفح':'تعذّرت إضافة ملف')}}
  arNums();return{n,skip}}
@@ -750,16 +750,18 @@ function apPage(kind){
  const P=kind=='p';
  shell(P?'إضافة ترفيع جديد':'إضافة علاوة جديدة',`<div class="cols"><fieldset><legend>الموظف</legend><label>بحث عن موظف<input id="ap_q" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="ap_e"></select></label><p id="ap_cur" style="color:var(--mut)"></p></fieldset>
  <fieldset><legend>معلومات ${P?'الترفيع':'العلاوة'} الجديدة</legend><label>الدرجة الجديدة<select id="ap_g">${rng(10,1)}</select></label><label>المرحلة الجديدة<select id="ap_s">${rng(11,1)}</select></label>${P?'<label>العنوان الوظيفي الجديد<select id="ap_t"></select><input id="ap_tx" placeholder="اكتب العنوان الوظيفي" style="display:none;margin-top:6px"></label>':''}<label>التاريخ<input id="ap_d" type="date"></label><label>الراتب الجديد<input id="ap_sal" readonly></label></fieldset></div>
+ <fieldset style="margin-top:14px"><legend>أمر ${P?'الترفيع':'العلاوة'} (صورة أو ملف)</legend><div class="act"><button type="button" class="btn alt" onclick="$('#ap_fi').click()">إرفاق صورة / ملف</button></div><input type="file" id="ap_fi" hidden multiple accept="image/*,.pdf"><div id="ap_pf" style="margin-top:6px"></div><div id="ap_old" style="margin-top:6px"></div><p class="note">يُحفظ الملف تلقائياً في أرشيف الموظف المختار عند الضغط على «إضافة»، ويمكن عرضه وطباعته لاحقاً من هنا أو من «ارشفة الاضابير» أو من نموذج الموظف.</p></fieldset>
  <div class="act"><button class="btn" onclick="apSave('${kind}')">إضافة</button></div>`);
+ apFiles=[];$('#ap_fi').onchange=()=>{const fi=$('#ap_fi');apFiles.push(...fi.files);fi.value='';apUpd(P?'promo':'allow')};arLoad().then(()=>apUpd(P?'promo':'allow')).catch(()=>{});
  const sal=()=>{$('#ap_sal').value=nf(salary(num($('#ap_g').value),num($('#ap_s').value)))};
- const rt=()=>{if(P)$('#ap_t').innerHTML=opt(S.set.tg[num($('#ap_g').value)-1]||[],'')+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';$('#ap_tx').style.display='none'};
+ const rt=()=>{if(P)$('#ap_t').innerHTML=opt(S.set.tg[num($('#ap_g').value)-1]||[],'')+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';const x=$('#ap_tx');if(x)x.style.display='none'};
  if(P)$('#ap_t').onchange=()=>{$('#ap_tx').style.display=$('#ap_t').value=='__new__'?'':'none'};
  ['ap_g','ap_s'].forEach(i=>$('#'+i).onchange=()=>{sal();rt()});
  $('#ap_e').onchange=()=>{const e=S.emps.find(x=>x.id==$('#ap_e').value);if(!e)return;const c=calc(e),g=num(e.g),s=num(e.s);
   $('#ap_g').value=P?Math.max(g-1,1):g;$('#ap_s').value=P?1:Math.min(s+1,11);
   const d=c?(P?(c.pDue||c.due):c.aDue):null;$('#ap_d').value=d?iso(d):'';
   rt();
-  $('#ap_cur').textContent=`الحالي: درجة ${g} مرحلة ${s} (${nf(salary(g,s))}) | آخر علاوة ${fd(pd(e.lastA))||'-'} | آخر ترفيع ${fd(pd(e.lastP))||'-'}`;sal()};
+  $('#ap_cur').textContent=`الحالي: درجة ${g} مرحلة ${s} (${nf(salary(g,s))}) | آخر علاوة ${fd(pd(e.lastA))||'-'} | آخر ترفيع ${fd(pd(e.lastP))||'-'}`;sal();apUpd(P?'promo':'allow')};
  const nrm=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
  const fe=()=>{const q=nrm($('#ap_q').value.trim()),cv=$('#ap_e').value,L=S.emps.filter(e=>!inactive(e)&&(!q||nrm(e.name+' '+(e.title||'')).includes(q)));
   $('#ap_e').innerHTML='<option value="">— اختر ('+L.length+') —</option>'+L.map(e=>`<option value="${e.id}">${e.name}${e.settle?' (مُسكَّن)':''}</option>`).join('');
@@ -767,6 +769,16 @@ function apPage(kind){
  $('#ap_q').oninput=fe;fe();
  sal();
 }
+/* مرفقات أمر الترفيع/العلاوة من صفحة الإضافة → تذهب إلى أرشيف الموظف */
+let apFiles=[];
+function apUpd(slot){const pf=$('#ap_pf'),od=$('#ap_old');if(!pf)return;
+ pf.innerHTML=apFiles.length?`<b>ملفات جاهزة للحفظ مع هذا ${slot=='promo'?'الترفيع':'العلاوة'} (${apFiles.length}):</b> `+apFiles.map((f,i)=>`<span style="display:inline-flex;gap:4px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 8px;margin:2px">${lvEs(f.name)} <button type="button" class="btn red" style="padding:0 8px" onclick="apRm(${i},'${slot}')" aria-label="حذف">✕</button></span>`).join(''):'<span style="color:var(--mut)">لم تُرفق ملفات بعد</span>';
+ const id=$('#ap_e')&&$('#ap_e').value,L=id?dcRecs(slot,id):[];
+ od.innerHTML=L.length?`مرفقات سابقة لهذا الموظف (${L.length}): <button type="button" class="btn alt" onclick="apView('${slot}')">عرض</button> <button type="button" class="btn alt" onclick="apPrint('${slot}')">طباعة</button>`:''}
+function apRm(i,slot){apFiles.splice(i,1);apUpd(slot)}
+function apView(slot){const id=$('#ap_e').value,L=id?dcRecs(slot,id):[];if(L.length)arView(L.map(r=>r.id),0)}
+function apPrint(slot){const id=$('#ap_e').value,e=arEmpOf(id);if(e)prPrint(dcRecs(slot,id),r=>e.name+' — '+DC[slot].t+(r.docDate?' — '+fd(pd(r.docDate)):''))}
+async function apFlush(id,slot,d,files){try{await arLoad()}catch(e){}const r=await arAddFiles(id,files,{cat:DC[slot].cat,slot,docDate:d});setTimeout(()=>toast(r.n?'حُفظ '+r.n+' ملف في أرشيف الموظف ('+DC[slot].t+')':'لم يُحفظ المرفق في الأرشيف'+(r.skip?' (مكرر أو نوع غير مدعوم)':'')),900)}
 function apSave(kind){
  const e=S.emps.find(x=>x.id==$('#ap_e').value),d=$('#ap_d').value;
  if(!e){toast('اختر الموظف');return}if(!d){toast('اختر التاريخ');return}
@@ -776,7 +788,7 @@ function apSave(kind){
  if(kind=='p')for(let i=1;i<=11;i++)delete e['lg'+i];
  e.g=$('#ap_g').value;e.s=$('#ap_s').value;
  if(kind=='p'){e.lastP=d;if(nt)e.title=nt}else e.lastA=d;
- save();toast(kind=='p'?'تمت إضافة الترفيع':'تمت إضافة العلاوة');home();
+ save();const af=apFiles;apFiles=[];if(af.length)apFlush(e.id,kind=='p'?'promo':'allow',d,af);toast(kind=='p'?'تمت إضافة الترفيع':'تمت إضافة العلاوة');home();
 }
 
 /* ===== الاجازات الاعتيادية ===== */
