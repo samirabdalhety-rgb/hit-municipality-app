@@ -882,24 +882,31 @@ function lvOpen(k,pick){
    if(q&&L.length==1&&L[0].id!=lvId)lvPick(L[0].id)};
   $('#lv_q').oninput=find;const cur=S.emps.find(e=>e.id==lvId);if(cur&&lvSel(cur)){$('#lv_q').value=cur.name;lvCard()}else $('#lv_q').focus();
  }else if(k=='e'){
-  lvModal('إضافة موظف جديد',`<label>بحث في سجل الترفيعات<input id="lv_aq" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="lv_ae"></select></label><label>رقم الاضبارة<input id="lv_file"></label><label>رقم السجل<input id="lv_reg"></label><label>مقدار الرصيد السابق (التراكمي) بالأيام<input id="lv_pbal" type="number" min="0" step="any"></label><label>نوع الاجازة<select id="lv_ltype">${LV_TYPES.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('')}</select></label><label>ملاحظات<textarea id="lv_enote" rows="2" class="sm" maxlength="200"></textarea></label><div class="act"><button class="btn gold" onclick="lvAddEmp()">إضافة الموظف</button></div><p class="note">الموظفون الذين تُضيفهم من «إضافة موظف» يظهرون في الإجازات تلقائياً بالاسم والعنوان الوظيفي، وتُكمل هنا رقم الاضبارة والسجل والرصيد فقط. هذه النافذة لموظفين قدامى لم يظهروا بعد. لتعديلها اختر الموظف وأعد الحفظ.</p>`);
-  const fillF=()=>{const e=S.emps.find(x=>x.id==$('#lv_ae').value),v=(e&&e.lv)||{};$('#lv_file').value=v.file||'';$('#lv_reg').value=v.reg||'';$('#lv_pbal').value=v.bal??'';$('#lv_ltype').value=v.ltype||'';$('#lv_enote').value=v.notes||''};
+  lvModal('إضافة موظف جديد',`<label>بحث في سجل الترفيعات<input id="lv_aq" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="lv_ae"></select></label>${lvGrp=='out'?`<div id="lv_newb" style="display:none"><fieldset style="margin-bottom:10px"><legend>بيانات الموظف الجديد (غير مسجل في البرنامج)</legend><label>الاسم الرباعي واللقب<input id="lv_nn" maxlength="120"></label><label>العنوان الوظيفي<input id="lv_nt" maxlength="120"></label><label>الحالة<select id="lv_ns"><option value="ret">متقاعد</option><option value="trf">منقول</option></select></label></fieldset></div>`:''}<label>رقم الاضبارة<input id="lv_file"></label><label>رقم السجل<input id="lv_reg"></label><label>مقدار الرصيد السابق (التراكمي) بالأيام<input id="lv_pbal" type="number" min="0" step="any"></label><label>نوع الاجازة<select id="lv_ltype">${LV_TYPES.map(t=>`<option value="${t[0]}">${t[1]}</option>`).join('')}</select></label><label>ملاحظات<textarea id="lv_enote" rows="2" class="sm" maxlength="200"></textarea></label><div class="act"><button class="btn gold" onclick="lvAddEmp()">إضافة الموظف</button></div><p class="note">الموظفون الذين تُضيفهم من «إضافة موظف» يظهرون في الإجازات تلقائياً بالاسم والعنوان الوظيفي، وتُكمل هنا رقم الاضبارة والسجل والرصيد فقط. هذه النافذة لموظفين قدامى لم يظهروا بعد. لتعديلها اختر الموظف وأعد الحفظ.</p>`);
+  const fillF=()=>{const nb=$('#lv_newb');if(nb)nb.style.display=$('#lv_ae').value=='__new__'?'':'none';const e=S.emps.find(x=>x.id==$('#lv_ae').value),v=(e&&e.lv)||{};$('#lv_file').value=v.file||'';$('#lv_reg').value=v.reg||'';$('#lv_pbal').value=v.bal??'';$('#lv_ltype').value=v.ltype||'';$('#lv_enote').value=v.notes||''};
   const fillS=()=>{const q=nrmA($('#lv_aq').value.trim());const L=S.emps.filter(e=>lvOk(e)&&(!q||nrmA(e.name).includes(q)));
-    $('#lv_ae').innerHTML=L.map(e=>`<option value="${e.id}">${lvEs(e.name)}${lvIn(e)?' ✓':''}</option>`).join('')||'<option value="">لا يوجد موظف</option>';fillF()};
+    $('#lv_ae').innerHTML=(lvGrp=='out'?'<option value="__new__">＋ موظف جديد (غير مسجل في البرنامج)</option>':'')+(L.map(e=>`<option value="${e.id}">${lvEs(e.name)}${lvIn(e)?' ✓':''}</option>`).join('')||(lvGrp=='out'?'':'<option value="">لا يوجد موظف</option>'));fillF()};
   $('#lv_aq').oninput=fillS;$('#lv_ae').onchange=fillF;fillS();$('#lv_aq').focus();
  }else if(k=='l'){lvId=null;lvMode='add';
   lvModal('إضافة إجازة',`<label>بحث عن موظف<input id="lv_lq" type="search" placeholder="اكتب جزءاً من الاسم" autocomplete="off"></label><label>اختر الموظف<select id="lv_le"></select></label><div id="lv_card"></div>`);
   const fillL=()=>{const q=nrmA($('#lv_lq').value.trim());const L=S.emps.filter(e=>lvSel(e)&&(!q||nrmA(e.name).includes(q)));
-   $('#lv_le').innerHTML='<option value="">— اختر الموظف —</option>'+L.map(e=>`<option value="${e.id}">${lvEs(e.name)}</option>`).join('');
+   $('#lv_le').innerHTML=`<option value="">${L.length||lvGrp!='out'?'— اختر الموظف —':'— لا يوجد موظف، أضفه أولاً من «إضافة موظف جديد» —'}</option>`+L.map(e=>`<option value="${e.id}">${lvEs(e.name)}</option>`).join('');
    if(L.length==1){$('#lv_le').value=L[0].id}pickL()};
   const pickL=()=>{lvId=$('#lv_le').value||null;lvCard()};
   $('#lv_lq').oninput=fillL;$('#lv_le').onchange=pickL;fillL();$('#lv_lq').focus();
  }else if(k=='x'){
   lvModal('تصدير الإجازات إلى Excel',`<p style="margin:0 0 8px;color:var(--mut);font-weight:600">جدول عام بجميع الموظفين لسنة محددة. لتصدير إجازات موظف واحد افتح «بحث» واختر الموظف.</p><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end"><label style="flex:1;min-width:160px">اختر السنة<select id="lv_yr">${lvYears().map(y=>`<option value="${y}">${y}</option>`).join('')}</select></label><button class="btn gold" onclick="lvExport()">تصدير الإجازات</button></div>`);
  }}
-function lvAddEmp(){const e=S.emps.find(x=>x.id==$('#lv_ae').value);if(!e){toast('اختر موظفاً من سجل الترفيعات');return}
- const v=lvOf(e);v.file=$('#lv_file').value.trim();v.reg=$('#lv_reg').value.trim();const pb=$('#lv_pbal').value;if(pb!==''&&num(pb)<0){toast('الرصيد لا يكون سالباً');return}
- if(pb!==''){v.bal=num(pb);if(!v.addYear)v.addYear=new Date().getFullYear()}v.notes=$('#lv_enote').value.trim();v.ltype=$('#lv_ltype').value;v.added=true;save();toast('تم حفظ بيانات الاضبارة');lvOpen('s',e.id)}
+function lvAddEmp(){const sv=$('#lv_ae').value,pb=$('#lv_pbal').value;
+ if(pb!==''&&num(pb)<0){toast('الرصيد لا يكون سالباً');return}
+ let e;
+ if(sv=='__new__'){const nm=($('#lv_nn')||{value:''}).value.trim();if(!nm){toast('اكتب اسم الموظف');return}e={id:Date.now(),name:nm,title:$('#lv_nt').value.trim(),g:'',s:'',letters:[],m:{status:$('#lv_ns').value}};S.emps.push(e)}
+ else e=S.emps.find(x=>x.id==sv);
+ if(!e){toast('اختر موظفاً من سجل الترفيعات');return}
+ const v=lvOf(e);v.file=$('#lv_file').value.trim();v.reg=$('#lv_reg').value.trim();
+ if(pb!==''){v.bal=num(pb);if(!v.addYear)v.addYear=new Date().getFullYear()}v.notes=$('#lv_enote').value.trim();v.ltype=$('#lv_ltype').value;v.added=true;save();
+ toast(sv=='__new__'?'تمت إضافة الموظف إلى قسم '+MSEC[mtSt(e)]:'تم حفظ بيانات الاضبارة');
+ if($('#lo_b')){lvClose();lvOutDraw();lvOutPick(e.id)}else lvOpen('s',e.id)}
 /* صفحة إجازات المتقاعدين والمنقولين: قائمة بالجميع مع كمية إجازاتهم، والنقر على موظف يفتح بطاقته */
 function lvOut(){lvClose();lvGrp='out';lvMode='full';lvId=null;
  shell('إجازات المتقاعدين والمنقولين',`<div class="tools"><div style="flex:2 1 200px"><label>بحث عن موظف بالاسم<input id="lo_q" type="search" autocomplete="off" placeholder="اكتب جزءاً من الاسم"></label></div><div><label>الحالة<select id="lo_s"><option value="">الكل</option><option value="ret">متقاعد</option><option value="trf">منقول</option></select></label></div></div>
@@ -918,7 +925,7 @@ function lvCard(){
  if(lvSync(e))save();
  const v=lvOf(e),rem=lvRem(e),add=lvMode=='add';
  const head=`<div class="lvcard"><h3>${lvEs(e.name)}${isStl(e)?' <span class="badge">مُسكَّن</span>':''}</h3><p>${lvEs(e.title)||'—'}</p>${v.ltype?`<p>نوع الإجازة: <b>${lvEs(lvTN(v.ltype))}</b></p>`:''}<p>رقم الاضبارة: ${lvEs(v.file)||'—'} &nbsp;|&nbsp; رقم السجل: ${lvEs(v.reg)||'—'}</p>${v.notes?`<p>ملاحظات: ${lvEs(v.notes)}</p>`:''}${add?`<p>الرصيد المتبقي: <b style="color:${rem<0?'var(--red)':'var(--pri2)'}">${rem}</b> يوم</p>`:''}</div>`;
- const form=`<fieldset><legend>تسجيل إجازة جديدة</legend><label>نوع الإجازة<select id="lv_type"><option value="">اعتيادية</option><option value="five">إجازة الخمس سنوات</option></select></label><label>من<input id="lv_from" type="date"></label><label>إلى<input id="lv_to" type="date"></label><label>عدد أيام الإجازة<input id="lv_days" type="number" min="0.5" step="any" placeholder="يُحتسب تلقائياً من التاريخين"></label><label>ملاحظات<textarea id="lv_note" rows="2" class="sm" maxlength="200"></textarea></label><div class="act"><button class="btn gold" onclick="lvAdd()">تسجيل الإجازة</button></div></fieldset>`;
+ const form=`<fieldset><legend>تسجيل إجازة جديدة</legend><label>نوع الإجازة<select id="lv_type"><option value="">اعتيادية</option><option value="five">إجازة الخمس سنوات</option></select></label><label>من<input id="lv_from" type="date"></label><label>إلى<input id="lv_to" type="date"></label>${(v.bal===''||v.bal==null)?'<label>الرصيد المتراكم (أيام) — مطلوب في أول مرة<input id="lv_bal0" type="number" min="0" step="any"></label>':''}<label>عدد أيام الإجازة<input id="lv_days" type="number" min="0.5" step="any" placeholder="يُحتسب تلقائياً من التاريخين"></label><label>ملاحظات<textarea id="lv_note" rows="2" class="sm" maxlength="200"></textarea></label><div class="act"><button class="btn gold" onclick="lvAdd()">تسجيل الإجازة</button></div></fieldset>`;
  if(add)box.innerHTML=head+form;
  else box.innerHTML=head+`<div class="cols2">
  <fieldset><legend>الرصيد</legend><label>الرصيد المتراكم (أيام) - تعديل يدوي<input id="lv_bal" type="number" min="0" step="any" value="${v.bal??''}"></label><label>المضاف سنوياً (أيام) - تعديل يدوي<input id="lv_add" type="number" min="0" step="any" value="${lvAdded(e)}"></label><div class="act"><button class="btn" onclick="lvSaveInfo()">حفظ الرصيد</button></div><div class="stat" style="grid-template-columns:1fr;margin:0"><div><b id="lv_s1">${num(v.bal)}</b>الرصيد المتراكم</div><div><b id="lv_s4">${lvAdded(e)}</b>المضاف سنوياً (${LV_ADD} يوماً كل 1 كانون الثاني)</div><div><b id="lv_s2">${lvUsed(e)}</b>المستخدم</div><div><b id="lv_s3" style="color:${rem<0?'var(--red)':'var(--pri2)'}">${rem}</b>المتبقي</div></div></fieldset></div>
@@ -933,6 +940,7 @@ function lvSaveInfo(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lv
  if(b!==''&&num(b)<0){toast('الرصيد لا يكون سالباً');return}
  v.bal=b===''?'':num(b);const ad=$('#lv_add').value;if(ad!==''&&num(ad)<0){toast('المضاف سنوياً لا يكون سالباً');return}v.addAdj=ad===''?0:Math.round((num(ad)-lvAddAuto(e))*100)/100;if(v.bal!==''&&!v.addYear)v.addYear=new Date().getFullYear();save();toast('تم حفظ الرصيد');lvCard()}
 function lvAdd(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lvOf(e),f=$('#lv_from').value,t=$('#lv_to').value,d=num($('#lv_days').value),ty=$('#lv_type').value=='five'?'five':'';
+ const b0=$('#lv_bal0');if(b0&&b0.value!==''){if(num(b0.value)<0){toast('الرصيد لا يكون سالباً');return}v.bal=num(b0.value);if(!v.addYear)v.addYear=new Date().getFullYear()}
  if(!f||!t){toast('حدد تاريخ البداية والنهاية');return}
  if(t<f){toast('تاريخ النهاية قبل البداية');return}
  if(d<=0){toast('أدخل عدد الأيام');return}
