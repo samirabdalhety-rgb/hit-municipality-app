@@ -865,7 +865,7 @@ const nrmA=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/
 const lvIn=e=>{const v=e.lv;return !!v&&!!(v.added||v.file||v.reg||(v.bal!==''&&v.bal!=null)||(v.recs||[]).length)};
 const lvEs=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let lvMode='full',lvGrp='act';const lvOk=e=>inactive(e)==(lvGrp=='out'),lvSel=e=>lvGrp=='out'?inactive(e):(lvIn(e)&&!inactive(e));
-function lvPage(g){lvClose();if(g)lvGrp=g;const out=lvGrp=='out';
+function lvPage(g){lvClose();if(g)lvGrp=g;if(lvGrp=='out'){lvOut();return}const out=lvGrp=='out';
  const T=[['srch','بحث','s'],['users','إضافة موظف جديد','e'],['leave','إضافة إجازة','l'],['dl','تصدير Excel','x'],['maint',out?'إجازات الموظفين العاملين':'إجازات المتقاعدين والمنقولين','g']];
  shell(out?'إجازات المتقاعدين والمنقولين':'الاجازات الاعتيادية',`<div class="lvt">${T.map(t=>`<button class="tile" onclick="${t[2]=='g'?`lvPage('${out?'act':'out'}')`:`lvOpen('${t[2]}')`}"><svg viewBox="0 0 24 24">${t[0]=='dl'?'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>':ICON[t[0]]}</svg>${t[1]}</button>`).join('')}</div>`)}
 const lvEsc=ev=>{if(ev.key=='Escape')lvClose()};
@@ -900,6 +900,18 @@ function lvOpen(k,pick){
 function lvAddEmp(){const e=S.emps.find(x=>x.id==$('#lv_ae').value);if(!e){toast('اختر موظفاً من سجل الترفيعات');return}
  const v=lvOf(e);v.file=$('#lv_file').value.trim();v.reg=$('#lv_reg').value.trim();const pb=$('#lv_pbal').value;if(pb!==''&&num(pb)<0){toast('الرصيد لا يكون سالباً');return}
  if(pb!==''){v.bal=num(pb);if(!v.addYear)v.addYear=new Date().getFullYear()}v.notes=$('#lv_enote').value.trim();v.ltype=$('#lv_ltype').value;v.added=true;save();toast('تم حفظ بيانات الاضبارة');lvOpen('s',e.id)}
+/* صفحة إجازات المتقاعدين والمنقولين: قائمة بالجميع مع كمية إجازاتهم، والنقر على موظف يفتح بطاقته */
+function lvOut(){lvClose();lvGrp='out';lvMode='full';lvId=null;
+ shell('إجازات المتقاعدين والمنقولين',`<div class="tools"><div style="flex:2 1 200px"><label>بحث عن موظف بالاسم<input id="lo_q" type="search" autocomplete="off" placeholder="اكتب جزءاً من الاسم"></label></div><div><label>الحالة<select id="lo_s"><option value="">الكل</option><option value="ret">متقاعد</option><option value="trf">منقول</option></select></label></div></div>
+ <div class="act" style="margin:0 0 10px"><button class="btn gold" onclick="lvOpen('x')">تصدير Excel</button><button class="btn" onclick="lvOpen('l')">إضافة إجازة</button><button class="btn" onclick="lvOpen('e')">إضافة موظف جديد</button><button class="btn alt" onclick="lvPage('act')">إجازات الموظفين العاملين</button></div>
+ <div class="stat" id="lo_st"></div><div class="tw"><table style="min-width:760px"><thead><tr><th>ت</th><th>الاسم</th><th>العنوان الوظيفي</th><th>الحالة</th><th>رقم الاضبارة</th><th>الرصيد المتراكم</th><th>المضاف</th><th>المستخدم</th><th>المتبقي</th><th>عدد الإجازات</th></tr></thead><tbody id="lo_b"></tbody></table></div><div id="lv_card" style="margin-top:12px"></div>`);
+ $('#lo_q').oninput=lvOutDraw;$('#lo_s').onchange=lvOutDraw;lvOutDraw()}
+function lvOutDraw(){const qe=$('#lo_q');if(!qe)return;
+ const q=nrmA(qe.value.trim()),st=$('#lo_s').value,all=S.emps.filter(inactive),L=all.filter(e=>(!st||mtSt(e)==st)&&(!q||nrmA(e.name).includes(q))).sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
+ $('#lo_st').innerHTML=`<div><b>${all.length}</b>الإجمالي</div><div><b>${all.filter(e=>mtSt(e)=='ret').length}</b>المتقاعدون</div><div><b>${all.filter(e=>mtSt(e)=='trf').length}</b>المنقولون</div>`;
+ $('#lo_b').innerHTML=L.map((e,i)=>{const v=e.lv||{},has=v.bal!==''&&v.bal!=null,used=e.lv?lvUsed(e):0,rem=has?lvRem(e):null;
+  return`<tr onclick="lvOutPick(${e.id})" style="cursor:pointer${e.id==lvId?';background:var(--bg);font-weight:700':''}"><td>${i+1}</td><td style="text-align:start">${lvEs(e.name)}</td><td>${lvEs(e.title)}</td><td>${MST[mtSt(e)]}</td><td>${lvEs(v.file)||'—'}</td><td>${has?num(v.bal):'—'}</td><td>${has?lvAdded(e):'—'}</td><td>${used}</td><td style="font-weight:700;color:${rem!=null&&rem<0?'var(--red)':'var(--pri2)'}">${rem==null?'لم يُدخل رصيد':rem}</td><td>${(v.recs||[]).length}</td></tr>`}).join('')||'<tr><td colspan="10">لا يوجد متقاعدون أو منقولون.</td></tr>'}
+function lvOutPick(id){lvId=id;lvCard();lvOutDraw();const c=$('#lv_card');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})}
 function lvPick(id){lvId=id;lvCard()}
 function lvCard(){
  const e=S.emps.find(x=>x.id==lvId),box=$('#lv_card');if(!box)return;if(!e){box.innerHTML='';return}
@@ -915,6 +927,7 @@ function lvCard(){
  <div class="tw"><table style="min-width:520px"><thead><tr><th>ت</th><th>من</th><th>إلى</th><th>الأيام</th><th>النوع</th><th>المتبقي بعدها</th><th>ملاحظات</th><th></th></tr></thead><tbody>${(()=>{let r=num(v.bal)+lvAdded(e);return v.recs.map((x,i)=>{if(lvIsReg(x))r-=num(x.days);return`<tr><td>${i+1}</td><td>${fd(pd(x.from))||'-'}</td><td>${fd(pd(x.to))||'-'}</td><td>${x.days}</td><td>${lvIsReg(x)?'اعتيادية':'الخمس سنوات'}</td><td>${lvIsReg(x)?r:'—'}</td><td style="text-align:start">${lvEs(x.note)}</td><td><button class="btn red" onclick="lvDel(${i},this)">حذف</button></td></tr>`}).join('')||'<tr><td colspan="8">لا توجد إجازات مسجلة</td></tr>'})()}</tbody></table></div>`;
  const calcD=()=>{const a=pd($('#lv_from').value),b=pd($('#lv_to').value);if(a&&b&&b>=a)$('#lv_days').value=Math.round((b-a)/864e5)+1};
  if($('#lv_from')){$('#lv_from').oninput=calcD;$('#lv_to').oninput=calcD}
+ if($('#lo_b'))lvOutDraw();
 }
 function lvSaveInfo(){const e=S.emps.find(x=>x.id==lvId);if(!e)return;const v=lvOf(e),b=$('#lv_bal').value;
  if(b!==''&&num(b)<0){toast('الرصيد لا يكون سالباً');return}
