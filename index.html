@@ -315,12 +315,13 @@ function arRender(){
   <input type="file" id="ar_fi" hidden multiple accept="image/*,.pdf,.tif,.tiff">
   ${arW?`<div class="arok">● المراقبة تعمل على المجلد «${lvEs(arW.name)}» — كل صفحة جديدة تُمسح تُضاف تلقائياً إلى اضبارة ${lvEs(e.name)} (أُضيف ${arW.n}).</div>`:''}
   <div class="drop" id="ar_drop">اسحب الصور أو ملفات PDF وأفلتها هنا</div>
-  <div class="tools"><div><label>الترتيب<select id="ar_sort"><option value="old"${arSt.sort=='old'?' selected':''}>حسب التسلسل (الأقدم أولاً)</option><option value="new"${arSt.sort=='new'?' selected':''}>الأحدث أولاً</option><option value="cat"${arSt.sort=='cat'?' selected':''}>حسب نوع الوثيقة</option></select></label></div><button class="btn alt" onclick="arDlAll()">تنزيل الكل</button><button class="btn alt" onclick="arPrintAll()">طباعة الاضبارة</button><button class="btn alt" onclick="arOcrAll()">استخراج النص للصفحات الجديدة</button><button class="btn alt" onclick="arOcrAll(true)">إعادة استخراج النص للكل (استبدال)</button><button class="btn alt" onclick="arTestEngine()">اختبار محرك الاستخراج</button><button class="btn alt" onclick="arPick(${e.id})">كل الاضابير</button></div><label style="display:flex;gap:8px;align-items:center;font-weight:600;margin:6px 0"><input type="checkbox" id="ar_auto" ${arAutoOn()?'checked':''} style="width:auto"> استخراج النص من الصورة تلقائياً عند إضافتها (يُوضع في خانة النص المستخرج / الكلمات المفتاحية)</label><div id="ar_ocs" class="note" style="color:var(--mut)"></div>`}
+  <div class="tools"><div><label>الترتيب<select id="ar_sort"><option value="old"${arSt.sort=='old'?' selected':''}>حسب التسلسل (الأقدم أولاً)</option><option value="new"${arSt.sort=='new'?' selected':''}>الأحدث أولاً</option><option value="cat"${arSt.sort=='cat'?' selected':''}>حسب نوع الوثيقة</option></select></label></div><button class="btn alt" onclick="arDlAll()">تنزيل الكل</button><button class="btn alt" onclick="arPrintAll()">طباعة الاضبارة</button><button class="btn alt" onclick="arOcrAll()">استخراج النص للصفحات الجديدة</button><button class="btn alt" onclick="arOcrAll(true)">إعادة استخراج النص للكل (استبدال)</button><button class="btn alt" onclick="arTestEngine()">اختبار محرك الاستخراج</button>
+  <div><label>نمط قراءة الصفحة<select id="ar_psm"><option value="4"${arOcrPsm()=='4'?' selected':''}>عمود واحد (كتب رسمية)</option><option value="6"${arOcrPsm()=='6'?' selected':''}>كتلة نص واحدة</option><option value="3"${arOcrPsm()=='3'?' selected':''}>تلقائي</option></select></label></div><div><label>تحسين الصورة قبل القراءة<select id="ar_pre"><option value="gray"${arOcrPre()=='gray'?' selected':''}>تدرّج رمادي وتباين (الأفضل غالباً)</option><option value="bw"${arOcrPre()=='bw'?' selected':''}>أبيض وأسود</option><option value="none"${arOcrPre()=='none'?' selected':''}>بدون تحسين</option></select></label></div><button class="btn alt" onclick="arPick(${e.id})">كل الاضابير</button></div><label style="display:flex;gap:8px;align-items:center;font-weight:600;margin:6px 0"><input type="checkbox" id="ar_auto" ${arAutoOn()?'checked':''} style="width:auto"> استخراج النص من الصورة تلقائياً عند إضافتها (يُوضع في خانة النص المستخرج / الكلمات المفتاحية)</label><div id="ar_ocs" class="note" style="color:var(--mut)"></div>`}
  else h+=`<p class="note" style="color:var(--mut)">نتائج البحث في كل الاضابير: ${L.length}</p>`;
  h+=`<div class="arg">${L.map((r,i)=>arCard(r,!e,i)).join('')||'<p style="color:var(--mut)">لا توجد صفحات.</p>'}</div>`;
  m.innerHTML=h;
  if(e){const fi=$('#ar_fi');fi.onchange=async()=>{const fs=[...fi.files];fi.value='';await arIngest(fs)};
-  $('#ar_cat').onchange=()=>{const v=$('#ar_cat').value,o=$('#ar_cato');o.style.display=v=='أخرى'?'':'none';arSt.cat=v=='أخرى'?(o.value.trim()||'أخرى'):v;if(v=='أخرى')o.focus()};$('#ar_cato').oninput=()=>{arSt.cat=$('#ar_cato').value.trim()||'أخرى'};$('#ar_sort').onchange=()=>{arSt.sort=$('#ar_sort').value;arRender()};$('#ar_auto').onchange=()=>{localStorage.setItem('hit-ar-auto',$('#ar_auto').checked?'1':'0');if($('#ar_auto').checked)arOcrOff=false};arQStat();
+  $('#ar_cat').onchange=()=>{const v=$('#ar_cat').value,o=$('#ar_cato');o.style.display=v=='أخرى'?'':'none';arSt.cat=v=='أخرى'?(o.value.trim()||'أخرى'):v;if(v=='أخرى')o.focus()};$('#ar_cato').oninput=()=>{arSt.cat=$('#ar_cato').value.trim()||'أخرى'};$('#ar_sort').onchange=()=>{arSt.sort=$('#ar_sort').value;arRender()};$('#ar_psm').onchange=()=>localStorage.setItem('hit-ocr-psm',$('#ar_psm').value);$('#ar_pre').onchange=()=>localStorage.setItem('hit-ocr-pre',$('#ar_pre').value);$('#ar_auto').onchange=()=>{localStorage.setItem('hit-ar-auto',$('#ar_auto').checked?'1':'0');if($('#ar_auto').checked)arOcrOff=false};arQStat();
   const dz=$('#ar_drop');['dragenter','dragover'].forEach(v=>dz.addEventListener(v,ev=>{ev.preventDefault();dz.classList.add('on')}));
   ['dragleave','drop'].forEach(v=>dz.addEventListener(v,ev=>{ev.preventDefault();dz.classList.remove('on')}));
   dz.addEventListener('drop',ev=>arIngest([...ev.dataTransfer.files]))}}
@@ -333,8 +334,8 @@ async function arPrep(f){
  let bm=null;try{bm=await createImageBitmap(f,{imageOrientation:'from-image'})}catch(e){try{bm=await createImageBitmap(f)}catch(e2){}}
  if(!bm)return{kind:'raw',blob:f,thumb:null};
  const cv=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(bm,0,0,w,h);return c},toB=(c,q)=>new Promise(r=>c.toBlob(r,'image/jpeg',q));
- const sc=Math.min(1,2400/Math.max(bm.width,bm.height));let blob=f;
- if(sc<1||f.size>1.5e6||!/jpe?g/i.test(f.type)){const b=await toB(cv(Math.round(bm.width*sc),Math.round(bm.height*sc)),.85);if(b&&(sc<1||b.size<f.size||!/jpe?g/i.test(f.type)))blob=b}
+ const sc=Math.min(1,3508/Math.max(bm.width,bm.height));let blob=f;
+ if(sc<1||f.size>3e6||!/jpe?g/i.test(f.type)){const b=await toB(cv(Math.round(bm.width*sc),Math.round(bm.height*sc)),.9);if(b&&(sc<1||b.size<f.size||!/jpe?g/i.test(f.type)))blob=b}
  const ts=Math.min(1,320/Math.max(bm.width,bm.height)),thumb=await toB(cv(Math.max(1,Math.round(bm.width*ts)),Math.max(1,Math.round(bm.height*ts))),.7);
  if(bm.close)bm.close();return{kind:'img',blob,thumb}}
 async function arAddFiles(emp,files,o={}){
@@ -397,17 +398,25 @@ const arLoadScript=u=>new Promise((res,rej)=>{const s=document.createElement('sc
 const arLoadTess=()=>window.Tesseract?Promise.resolve():(arTess=arTess||arLoadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js').catch(e=>{arTess=null;throw e}));
 const arLoadPdf=()=>window.pdfjsLib?Promise.resolve():arLoadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js').then(()=>{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'});
 let arEng='idle',arEngErr='';
-/* تهيئة الصورة قبل القراءة: تكبير إلى نحو 300 نقطة/بوصة، تدرّج رمادي، ثم عتبة تكيّفية لإبراز الحروف */
+/* تهيئة الصورة قبل القراءة. الأنماط: gray = تدرّج رمادي مع تمديد التباين (الافتراضي، الأنسب للعربية)، bw = أبيض وأسود تكيّفي، none = بلا تعديل */
+const arOcrPre=()=>localStorage.getItem('hit-ocr-pre')||'gray',arOcrPsm=()=>localStorage.getItem('hit-ocr-psm')||'4';
 async function arPre(src){
- const bm=src instanceof HTMLCanvasElement?src:await createImageBitmap(src);
- const sc=Math.min(2.5,3300/Math.max(bm.width,bm.height)),W=Math.max(1,Math.round(bm.width*sc)),H=Math.max(1,Math.round(bm.height*sc));
+ const bm=src instanceof HTMLCanvasElement?src:await createImageBitmap(src),L0=Math.max(bm.width,bm.height),sc=L0>4500?4500/L0:Math.min(2,Math.max(1,3300/L0)),W=Math.max(1,Math.round(bm.width*sc)),H=Math.max(1,Math.round(bm.height*sc));
  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(bm,0,0,W,H);if(bm.close)bm.close();
+ const mode=arOcrPre();if(mode=='none')return c;
  const im=x.getImageData(0,0,W,H),p=im.data,g=new Uint8ClampedArray(W*H);
  for(let i=0,j=0;i<p.length;i+=4,j++)g[j]=(p[i]*299+p[i+1]*587+p[i+2]*114)/1000;
- const I=new Float64Array((W+1)*(H+1));
- for(let y=0;y<H;y++){let r=0;for(let xx=0;xx<W;xx++){r+=g[y*W+xx];I[(y+1)*(W+1)+xx+1]=I[y*(W+1)+xx+1]+r}}
- const k=Math.max(15,(Math.min(W,H)>>4)|1),h=k>>1;
- for(let y=0;y<H;y++){const y0=Math.max(0,y-h),y1=Math.min(H,y+h+1);for(let xx=0;xx<W;xx++){const x0=Math.max(0,xx-h),x1=Math.min(W,xx+h+1),n=(x1-x0)*(y1-y0),sum=I[y1*(W+1)+x1]-I[y0*(W+1)+x1]-I[y1*(W+1)+x0]+I[y0*(W+1)+x0],v=g[y*W+xx]<sum/n*0.88?0:255,o=(y*W+xx)*4;p[o]=p[o+1]=p[o+2]=v;p[o+3]=255}}
+ if(mode=='bw'){
+  const I=new Float64Array((W+1)*(H+1));
+  for(let y=0;y<H;y++){let r=0;for(let xx=0;xx<W;xx++){r+=g[y*W+xx];I[(y+1)*(W+1)+xx+1]=I[y*(W+1)+xx+1]+r}}
+  const k=Math.max(15,(Math.min(W,H)>>4)|1),h=k>>1;
+  for(let y=0;y<H;y++){const y0=Math.max(0,y-h),y1=Math.min(H,y+h+1);for(let xx=0;xx<W;xx++){const x0=Math.max(0,xx-h),x1=Math.min(W,xx+h+1),n=(x1-x0)*(y1-y0),sum=I[y1*(W+1)+x1]-I[y0*(W+1)+x1]-I[y1*(W+1)+x0]+I[y0*(W+1)+x0],v=g[y*W+xx]<sum/n*0.9?0:255,o=(y*W+xx)*4;p[o]=p[o+1]=p[o+2]=v;p[o+3]=255}}
+ }else{
+  const hist=new Uint32Array(256);for(let j=0;j<g.length;j++)hist[g[j]]++;
+  const tot=g.length;let a=0,lo=0,hi=255;for(let v=0;v<256;v++){a+=hist[v];if(a>=tot*.01){lo=v;break}}a=0;for(let v=255;v>=0;v--){a+=hist[v];if(a>=tot*.01){hi=v;break}}
+  const rg=Math.max(40,hi-lo);
+  for(let i=0,j=0;i<p.length;i+=4,j++){const v=Math.max(0,Math.min(255,(g[j]-lo)*255/rg));p[i]=p[i+1]=p[i+2]=v;p[i+3]=255}
+ }
  x.putImageData(im,0,0);return c}
 /* تنظيف الناتج: حذف الرموز والرُّموز المقطّعة غير المفهومة وإبقاء الكلمات */
 const arClean=t=>String(t||'').split(/\n+/).map(l=>l.replace(/[\u064B-\u065F\u0670\u0640]/g,'').split(/\s+/).filter(w=>{const a=(w.match(/[\u0621-\u063A\u0641-\u064A\u066E\u066F\u0671-\u06D3\u06FA-\u06FF]/g)||[]).length,la=(w.match(/[A-Za-z]/g)||[]).length,d=(w.match(/[0-9\u0660-\u0669\u06F0-\u06F9]/g)||[]).length;return a>=2||(la>=3&&la>=w.length*.6)||(d>=1&&d>=w.length*.6)}).join(' ')).filter(l=>l.length>=3).join(' ').replace(/\s+/g,' ').trim();
@@ -417,9 +426,15 @@ function arGetWorker(){if(!arWorker)arWorker=(async()=>{arEng='loading';await ar
   let w;try{w=await mk('https://tessdata.projectnaptha.com/4.0.0_best')}catch(e1){w=await mk('')}
   arEng='ready';arEngErr='';return w})().catch(e=>{arWorker=null;arEng='fail';arEngErr=(e&&e.message)||String(e);throw e});return arWorker}
 async function arOcrText(r,w){let src=[r.blob];
- if(r.kind=='pdf'){await arLoadPdf();const pdf=await pdfjsLib.getDocument({data:await r.blob.arrayBuffer()}).promise;src=[];for(let i=1;i<=Math.min(pdf.numPages,8);i++){const pg=await pdf.getPage(i),vp=pg.getViewport({scale:2}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;src.push(c)}}
- let t='',cf=0,n=0;for(const x of src){const res=await w.recognize(await arPre(x));t+='\n'+((res&&res.data&&res.data.text)||'');if(res&&res.data&&typeof res.data.confidence=='number'){cf+=res.data.confidence;n++}}
- return{text:arClean(t).slice(0,20000),conf:n?Math.round(cf/n):0}}
+ if(r.kind=='pdf'){await arLoadPdf();const pdf=await pdfjsLib.getDocument({data:await r.blob.arrayBuffer()}).promise;src=[];for(let i=1;i<=Math.min(pdf.numPages,8);i++){const pg=await pdf.getPage(i),vp=pg.getViewport({scale:3}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;src.push(c)}}
+ try{await w.setParameters({tessedit_pageseg_mode:arOcrPsm()})}catch(e){}
+ let t='',cf=0,n=0;
+ for(const x of src){const res=await w.recognize(await arPre(x)),d=(res&&res.data)||{};
+  const ws=d.words||[].concat(...(d.blocks||[]).map(b=>[].concat(...(b.paragraphs||[]).map(p=>[].concat(...(p.lines||[]).map(l=>l.words||[]))))));
+  /* نُبقي الكلمات التي ثقة المحرك بها 60% فأكثر فقط، حتى لا تدخل كلمات مشوّشة في البحث */
+  t+='\n'+(ws.length?ws.filter(w2=>(w2.confidence||0)>=60).map(w2=>w2.text).join(' '):(d.text||''));
+  if(typeof d.confidence=='number'){cf+=d.confidence;n++}}
+ const clean=arClean(t);return{text:clean.split(' ').filter(Boolean).length>=3?clean.slice(0,20000):'',conf:n?Math.round(cf/n):0}}
 async function arOcr(id){const r=AR.find(x=>x.id==id);if(!r||(r.kind!='img'&&r.kind!='pdf'))return'fail';
  let w;try{w=await arGetWorker()}catch(e){return'net'}
  try{const o=await arOcrText(r,w);r.ocr=(!r.ocr||r.ocrDone)?o.text:(r.ocr+' '+o.text).trim();r.conf=o.conf;r.ocrDone=true;await arPut(r);arIndex(r);return o.text?'ok':'empty'}catch(e){arEngErr=(e&&e.message)||String(e);return'fail'}}
