@@ -225,6 +225,19 @@ function ttSuggest(inp,getList,onPick){
 /* ===== الكفالات: كفالة لكل موظف (e.kf)، مرتبطة بأسماء وعناوين قسم الترفيعات ===== */
 ICON.kaf='<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>';
 const kfList=e=>e.kf||[],kfN=t=>nrmA(String(t||'')).toLowerCase();
+let kfFiles=[],kfTarget=null;
+const kfRecs=kid=>AR.filter(r=>r.slot=='kaf'&&r.kf==kid).sort((a,b)=>a.added-b.added);
+function kfAttCell(eid,kid){const L=kfRecs(kid);return(L.length?`<button class="btn alt" onclick="kfAttView(${kid})">عرض (${L.length})</button> <button class="btn alt" onclick="kfAttPrint(${eid},${kid})">طباعة</button> `:'')+`<button class="btn alt" onclick="kfAttach(${eid},${kid})">إرفاق</button>`}
+const kfAttView=kid=>{const L=kfRecs(kid);if(L.length)arView(L.map(r=>r.id),0)};
+const kfAttPrint=(eid,kid)=>prPrint(kfRecs(kid),()=>'');
+function kfAttach(eid,kid){kfTarget={eid,kid};$('#kf_fi2').click()}
+async function kfAttachFiles(){const fi=$('#kf_fi2'),fs=[...fi.files];fi.value='';if(!fs.length||!kfTarget)return;const{eid,kid}=kfTarget,e=S.emps.find(x=>x.id==eid),k=e&&kfList(e).find(x=>x.id==kid);
+ const r=await arAddFiles(eid,fs,{cat:'كتاب كفالة',slot:'kaf',kf:kid,docDate:k?k.date:''});toast(r.n?'تم إرفاق '+r.n+' ملف وحُفظ في أرشيف الموظف (مؤرشف)':'لم يُرفق شيء'+(r.skip?' (مكرر أو نوع غير مدعوم)':''));kfCard(eid)}
+function kfUpd(kid){const pf=$('#kf_pf'),od=$('#kf_old');if(!pf)return;
+ pf.innerHTML=kfFiles.length?`<b>ملفات جاهزة للحفظ مع هذه الكفالة (${kfFiles.length}):</b> `+kfFiles.map((f,i)=>`<span style="display:inline-flex;gap:4px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2px 8px;margin:2px">${lvEs(f.name)} <button type="button" class="btn red" style="padding:0 8px" onclick="kfRm(${i},${kid||0})" aria-label="حذف">✕</button></span>`).join(''):'<span style="color:var(--mut)">لم تُرفق ملفات بعد</span>';
+ const L=kid?kfRecs(kid):[];od.innerHTML=L.length?`مرفقات محفوظة سابقاً لهذه الكفالة (${L.length}): <button type="button" class="btn alt" onclick="kfAttView(${kid})">عرض</button>`:''}
+function kfRm(i,kid){kfFiles.splice(i,1);kfUpd(kid)}
+async function kfFlush(eid,kid,files,date){try{await arLoad()}catch(e){}const r=await arAddFiles(eid,files,{cat:'كتاب كفالة',slot:'kaf',kf:kid,docDate:date});setTimeout(()=>toast(r.n?'حُفظ '+r.n+' ملف من كتاب الكفالة في أرشيف الموظف (مؤرشف)':'لم يُحفظ الكتاب في الأرشيف'+(r.skip?' (مكرر أو نوع غير مدعوم)':'')),900);if($('#kf_card'))kfCard(eid)}
 function kfPage(){shell('الكفالات',`<div class="lvt"><button class="tile" onclick="kfSearch()"><svg viewBox="0 0 24 24">${ICON.srch}</svg>بحث</button><button class="tile" onclick="kfForm()"><svg viewBox="0 0 24 24">${ICON.plus||ICON.add}</svg>إضافة كفالة</button><button class="tile" onclick="kfExportDlg()"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>تصدير Excel</button></div><div id="kf_c" style="margin-top:14px"></div>`);kfSearch()}
 function kfSearch(){
  $('#kf_c').innerHTML=`<div class="tools"><div style="flex:2 1 220px"><label>بحث (اسم الموظف أو المكفول أو الجهة أو رقم الكتاب)<input id="kf_q" type="search" autocomplete="off" placeholder="اكتب جزءاً من الاسم"></label></div></div><div id="kf_res"></div><div id="kf_card" style="margin-top:12px"></div>`;
@@ -232,12 +245,14 @@ function kfSearch(){
 function kfDraw(){const box=$('#kf_res');if(!box)return;const q=kfN($('#kf_q').value.trim()).split(' ').filter(Boolean);
  const L=S.emps.map(e=>{const ks=kfList(e),hay=kfN(e.name+' '+(e.title||'')),mk=ks.filter(k=>q.every(t=>kfN([k.who,k.to,k.no,k.note,e.name,e.title].join(' ')).includes(t)));return{e,ks,mk,hit:q.every(t=>hay.includes(t))}}).filter(x=>q.length?(x.hit||x.mk.length):x.ks.length).sort((a,b)=>String(a.e.name).localeCompare(String(b.e.name),'ar')).slice(0,100);
  box.innerHTML=L.length?`<p class="note" style="color:var(--mut)">${q.length?'نتائج البحث':'الموظفون الذين لديهم كفالات'}: ${L.length}</p>`+L.map(x=>`<button class="btn alt" style="display:flex;justify-content:space-between;width:100%;margin:4px 0;text-align:start" onclick="kfCard(${x.e.id})"><span>${lvEs(x.e.name)} <small style="opacity:.75">— ${lvEs(x.e.title)||'—'}</small></span><b>${x.ks.length} كفالة</b></button>`).join(''):`<p style="color:var(--mut)">${q.length?'لا توجد نتائج.':'لا توجد كفالات مسجلة بعد. أضف كفالة من «إضافة كفالة».'}</p>`}
-function kfCard(id){const e=S.emps.find(x=>x.id==id);if(!e)return;const c=$('#kf_card');if(!c)return;const L=[...kfList(e)].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+async function kfCard(id){try{await arLoad()}catch(e){}kfCardDraw(id)}
+function kfCardDraw(id){const e=S.emps.find(x=>x.id==id);if(!e)return;const c=$('#kf_card');if(!c)return;const L=[...kfList(e)].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
  c.innerHTML=`<div class="lvcard"><h3>${lvEs(e.name)}</h3><p>${lvEs(e.title)||'—'}</p><p>عدد الكفالات: <b>${L.length}</b></p></div><div class="act" style="margin:8px 0"><button class="btn gold" onclick="kfForm(${e.id})">إضافة كفالة لهذا الموظف</button><button class="btn" onclick="kfExport(${e.id})">تصدير كفالات هذا الموظف Excel</button></div>
- <div class="tw"><table style="min-width:680px"><thead><tr><th>ت</th><th>اسم المكفول</th><th>الجهة المرسل لها كتاب الكفالة</th><th>رقم الكتاب</th><th>تاريخ الكتاب</th><th>ملاحظات</th><th></th></tr></thead><tbody>${L.map((k,i)=>`<tr><td>${i+1}</td><td style="text-align:start">${lvEs(k.who)}</td><td style="text-align:start">${lvEs(k.to)}</td><td>${lvEs(k.no)||'—'}</td><td>${fd(pd(k.date))||'—'}</td><td style="text-align:start">${lvEs(k.note)}</td><td style="white-space:nowrap"><button class="btn alt" onclick="kfForm(${e.id},${k.id})">تعديل</button> <button class="btn red" onclick="kfDel(${e.id},${k.id},this)">حذف</button></td></tr>`).join('')||'<tr><td colspan="7">لا توجد كفالات</td></tr>'}</tbody></table></div>`;
+ <div class="tw"><table style="min-width:860px"><thead><tr><th>ت</th><th>اسم المكفول</th><th>الجهة المرسل لها كتاب الكفالة</th><th>رقم الكتاب</th><th>تاريخ الكتاب</th><th>ملاحظات</th><th>الكتاب المؤرشف</th><th></th></tr></thead><tbody>${L.map((k,i)=>`<tr><td>${i+1}</td><td style="text-align:start">${lvEs(k.who)}</td><td style="text-align:start">${lvEs(k.to)}</td><td>${lvEs(k.no)||'—'}</td><td>${fd(pd(k.date))||'—'}</td><td style="text-align:start">${lvEs(k.note)}</td><td style="white-space:nowrap">${kfAttCell(e.id,k.id)}</td><td style="white-space:nowrap"><button class="btn alt" onclick="kfForm(${e.id},${k.id})">تعديل</button> <button class="btn red" onclick="kfDel(${e.id},${k.id},this)">حذف</button></td></tr>`).join('')||'<tr><td colspan="8">لا توجد كفالات</td></tr>'}</tbody></table></div><input type="file" id="kf_fi2" hidden multiple accept="image/*,.pdf">`;
+ $('#kf_fi2').onchange=kfAttachFiles;
  c.scrollIntoView({behavior:'smooth',block:'start'})}
 function kfDel(eid,kid,b){if(!b.dataset.c){b.dataset.c=1;const t=b.textContent;b.textContent='تأكيد؟';setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent=t}},4000);return}
- const e=S.emps.find(x=>x.id==eid);if(!e)return;e.kf=kfList(e).filter(k=>k.id!=kid);if(!e.kf.length)delete e.kf;save();toast('تم حذف الكفالة');kfCard(eid);kfDraw()}
+ const e=S.emps.find(x=>x.id==eid);if(!e)return;const had=kfRecs(kid).length;e.kf=kfList(e).filter(k=>k.id!=kid);if(!e.kf.length)delete e.kf;save();toast('تم حذف الكفالة'+(had?' (ما زال كتابها المرفق محفوظاً في أرشيف الموظف)':''));kfCard(eid);kfDraw()}
 function kfForm(eid,kid){
  const k=kid?kfList(S.emps.find(x=>x.id==eid)||{}).find(x=>x.id==kid):null,all=[...S.emps].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
  $('#kf_c').innerHTML=`<fieldset><legend>${k?'تعديل كفالة':'إضافة كفالة جديدة'}</legend>
@@ -249,11 +264,13 @@ function kfForm(eid,kid){
  <label>رقم الكتاب المرسل<input id="kf_no" maxlength="60" value="${lvEs(k?k.no:'')}"></label>
  <label>تاريخ الكتاب المرسل<input id="kf_d" type="date" value="${lvEs(k?k.date:'')}"></label>
  <label>ملاحظات<textarea id="kf_n" rows="3" class="sm" maxlength="300">${lvEs(k?k.note:'')}</textarea></label>
+ <fieldset style="margin:10px 0"><legend>نسخة من الكتاب المرسل (تُحفظ في أرشيف الموظف — مؤرشف)</legend><div class="act"><button type="button" class="btn alt" onclick="$('#kf_fi').click()">إرفاق صورة / ملف</button></div><input type="file" id="kf_fi" hidden multiple accept="image/*,.pdf"><div id="kf_pf" style="margin-top:6px"></div><div id="kf_old" style="margin-top:6px"></div></fieldset>
  <div class="act"><button class="btn gold" onclick="kfSave(${eid||0},${kid||0})">${k?'حفظ التعديل':'حفظ الكفالة'}</button><button class="btn alt" onclick="kfSearch()">إلغاء</button></div></fieldset>`;
  const fill=()=>{const q=kfN($('#kf_eq').value.trim()).split(' ').filter(Boolean),cur=$('#kf_e').value||eid,L=all.filter(e=>!q.length||q.every(t=>kfN(e.name+' '+(e.title||'')).includes(t)));
   $('#kf_e').innerHTML='<option value="">— اختر الموظف ('+L.length+') —</option>'+L.map(e=>`<option value="${e.id}">${lvEs(e.name)}${inactive(e)?' ('+MST[mtSt(e)]+')':''}</option>`).join('');
   if(q.length&&L.length==1)$('#kf_e').value=L[0].id;else if(L.some(e=>e.id==cur))$('#kf_e').value=cur;sh()},
  sh=()=>{const e=S.emps.find(x=>x.id==$('#kf_e').value);$('#kf_t').value=e?(e.title||''):''};
+ kfFiles=[];$('#kf_fi').onchange=()=>{const fi=$('#kf_fi');kfFiles.push(...fi.files);fi.value='';kfUpd(kid)};arLoad().then(()=>kfUpd(kid)).catch(()=>{});kfUpd(kid);
  $('#kf_eq').oninput=fill;$('#kf_e').onchange=sh;fill();if(eid){$('#kf_e').value=eid;sh();if(kid)$('#kf_e').disabled=true}
  $('#kf_c').scrollIntoView({behavior:'smooth',block:'start'})}
 function kfSave(eid0,kid){const eid=eid0||+$('#kf_e').value,e=S.emps.find(x=>x.id==(kid?eid0:$('#kf_e').value));
@@ -261,9 +278,10 @@ function kfSave(eid0,kid){const eid=eid0||+$('#kf_e').value,e=S.emps.find(x=>x.i
  const who=$('#kf_who').value.trim(),to=$('#kf_to').value.trim();
  if(!who){toast('اكتب اسم المكفول');return}if(!to){toast('اكتب الجهة المرسل لها كتاب الكفالة');return}
  const rec={who,to,no:$('#kf_no').value.trim(),date:$('#kf_d').value,note:$('#kf_n').value.trim()};
- e.kf=kfList(e);
- if(kid){const k=e.kf.find(x=>x.id==kid);if(k)Object.assign(k,rec)}else e.kf.push({id:Date.now(),...rec});
- save();toast(kid?'تم حفظ التعديل':'تمت إضافة الكفالة');kfSearch();kfCard(e.id);kfDraw()}
+ e.kf=kfList(e);let rid=kid;
+ if(kid){const k=e.kf.find(x=>x.id==kid);if(k)Object.assign(k,rec)}else{rid=Date.now();e.kf.push({id:rid,...rec})}
+ save();const af=kfFiles;kfFiles=[];if(af.length)kfFlush(e.id,rid,af,rec.date);
+ toast(kid?'تم حفظ التعديل':'تمت إضافة الكفالة');kfSearch();kfCard(e.id);kfDraw()}
 function kfExportDlg(){const withK=S.emps.filter(e=>kfList(e).length).sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
  $('#kf_c').innerHTML=`<fieldset><legend>تصدير الكفالات إلى Excel</legend><label>اختر الموظف<select id="kf_xe"><option value="">جميع الموظفين (جدول واحد)</option>${withK.map(e=>`<option value="${e.id}">${lvEs(e.name)} (${kfList(e).length})</option>`).join('')}</select></label><div class="act"><button class="btn gold" onclick="kfExport($('#kf_xe').value?+$('#kf_xe').value:0)">تصدير</button></div></fieldset>`}
 async function kfExport(eid){
@@ -271,13 +289,14 @@ async function kfExport(eid){
  if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
  const emps=eid?S.emps.filter(e=>e.id==eid):S.emps.filter(e=>kfList(e).length),rows=[];emps.forEach(e=>kfList(e).forEach(k=>rows.push({e,k})));
  if(!rows.length){toast('لا توجد كفالات للتصدير');return}
+ try{await arLoad()}catch(e){}
  rows.sort((a,b)=>String(a.e.name).localeCompare(String(b.e.name),'ar')||String(a.k.date||'').localeCompare(String(b.k.date||'')));
- const single=!!eid,wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('الكفالات',{views:[{rightToLeft:true}]}),W=single?[6,30,40,16,16,36]:[6,32,26,30,40,16,16,36],n=W.length;ws.columns=W.map(w=>({width:w}));
+ const single=!!eid,wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('الكفالات',{views:[{rightToLeft:true}]}),W=single?[6,30,40,16,16,36,16]:[6,32,26,30,40,16,16,36,16],n=W.length;ws.columns=W.map(w=>({width:w}));
  ws.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};
  ws.mergeCells(1,1,1,n);const t=ws.getCell(1,1);t.value=single?'كفالات الموظف — مديرية بلدية هيت':'سجل الكفالات لموظفي مديرية بلدية هيت';xs(t,'Arial',14,null,'center',false);ws.getRow(1).height=32;
  if(single){const e=emps[0];[['اسم الموظف: '+e.name],['العنوان الوظيفي: '+(e.title||'')]].forEach(a=>{const r=ws.addRow(a);ws.mergeCells(r.number,1,r.number,n);xs(r.getCell(1),'Arial',12,'FFEFEFEF','right');r.height=26});ws.addRow([])}
- const hr=ws.addRow(single?['ت','اسم المكفول','الجهة المرسل لها كتاب الكفالة','رقم الكتاب','تاريخ الكتاب','ملاحظات']:['ت','اسم الموظف','العنوان الوظيفي','اسم المكفول','الجهة المرسل لها كتاب الكفالة','رقم الكتاب','تاريخ الكتاب','ملاحظات']);hr.height=36;hr.eachCell(c=>xs(c,'Arial',12,'FFDDD9C3'));
- rows.forEach(({e,k},i)=>{const r=ws.addRow(single?[i+1,k.who,k.to,k.no||'',UD(pd(k.date)),k.note||'']:[i+1,e.name,e.title||'',k.who,k.to,k.no||'',UD(pd(k.date)),k.note||'']);r.height=26;r.eachCell(c=>xs(c,'Arial',12,null));r.getCell(single?5:7).numFmt='yyyy/mm/dd'});
+ const hr=ws.addRow(single?['ت','اسم المكفول','الجهة المرسل لها كتاب الكفالة','رقم الكتاب','تاريخ الكتاب','ملاحظات','الكتاب المؤرشف']:['ت','اسم الموظف','العنوان الوظيفي','اسم المكفول','الجهة المرسل لها كتاب الكفالة','رقم الكتاب','تاريخ الكتاب','ملاحظات','الكتاب المؤرشف']);hr.height=36;hr.eachCell(c=>xs(c,'Arial',12,'FFDDD9C3'));
+ rows.forEach(({e,k},i)=>{const r=ws.addRow(single?[i+1,k.who,k.to,k.no||'',UD(pd(k.date)),k.note||'',kfRecs(k.id).length?'نعم ('+kfRecs(k.id).length+')':'—']:[i+1,e.name,e.title||'',k.who,k.to,k.no||'',UD(pd(k.date)),k.note||'',kfRecs(k.id).length?'نعم ('+kfRecs(k.id).length+')':'—']);r.height=26;r.eachCell(c=>xs(c,'Arial',12,null));r.getCell(single?5:7).numFmt='yyyy/mm/dd'});
  const buf=await wb.xlsx.writeBuffer();
  try{await dl.save({filename:single?'كفالات_'+String(emps[0].name).replace(/[\\\/:*?"<>|]/g,'').trim()+'.xlsx':'سجل_الكفالات.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}}
 /* ===== الطباعة / السكنر / كتب القدم القانوني ===== */
@@ -295,9 +314,9 @@ function prFrame(html,after){
 function prPrint(recs,subFn){
  const imgs=recs.filter(r=>r.kind=='img'),pdfs=recs.filter(r=>r.kind=='pdf');
  if(!imgs.length&&!pdfs.length){toast('لا توجد صور أو ملفات PDF قابلة للطباعة');return}
- const c=prCfg(),[w,h]=PR_SZ[c.paper]||PR_SZ.A4,L=c.orient=='landscape',W=(L?h:w)-2*c.margin,H=(L?w:h)-2*c.margin-26;
+ const c=prCfg(),[w,h]=PR_SZ[c.paper]||PR_SZ.A4,L=c.orient=='landscape',W=(L?h:w)-2*c.margin,H=(L?w:h)-2*c.margin-(c.header?16:0)-2;
  if(imgs.length){const us=imgs.map(r=>URL.createObjectURL(r.blob));
-  prFrame(prHtml(imgs.map((r,i)=>`<div class="pg"><div class="hdr"><div class="nm">${lvEs((arEmpOf(r.emp)||{}).name||'')}<br>(مؤرشف)</div><div class="cn">${c.header?`<div class="hd">${lvEs(prName())}</div><div class="sb">${lvEs(subFn?subFn(r):'')}</div>`:''}</div><div></div></div><img src="${us[i]}" style="max-width:${W}mm;max-height:${H}mm"></div>`).join('')),()=>us.forEach(u=>URL.revokeObjectURL(u)))}
+  prFrame(prHtml(imgs.map((r,i)=>`<div class="pg">${c.header?`<div class="hdr"><div class="nm">${lvEs((arEmpOf(r.emp)||{}).name||'')}<br>(مؤرشف)</div><div></div><div></div></div>`:''}<img src="${us[i]}" style="max-width:${W}mm;max-height:${H}mm"></div>`).join('')),()=>us.forEach(u=>URL.revokeObjectURL(u)))}
  pdfs.forEach(r=>{const u=URL.createObjectURL(r.blob),f=document.createElement('iframe');f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';f.src=u;
   f.onload=()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){window.open(u,'_blank')}};document.body.appendChild(f);setTimeout(()=>{f.remove();URL.revokeObjectURL(u)},120000)})}
 function prTest(){const c=prCfg();prFrame(prHtml(`<div class="pg"><div class="hd">${lvEs(prName())}</div><div class="sb">صفحة اختبار الطباعة</div><p style="font-size:12pt">المقاس: ${c.paper} — الاتجاه: ${c.orient=='landscape'?'أفقي':'عمودي'} — الهامش: ${c.margin} ملم</p><div style="border:2px solid #000;height:60mm;margin:10mm auto;width:80%"></div><p style="font-size:11pt">إذا ظهر الإطار كاملاً بلا قص فالإعدادات مناسبة لطابعتك.</p></div>`))}
@@ -336,7 +355,7 @@ async function dcFlush(id){const L=attPend;attPend=[];if(!L.length)return;try{aw
 ICON.time='<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
 ICON.sick='<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/>';
 ICON.arch='<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M8 13h8M8 16h5"/>';
-const AR_CATS=['كتاب القدم القانوني','كتاب قدم الستة أشهر','أمر تعيين','أمر آخر ترفيع','أمر آخر علاوة','أمر مباشرة','هوية وجنسية','شهادة دراسية','كتاب شكر','عقوبة','ترفيع','علاوة','إجازة','نقل وانتداب','تقاعد','طبي','أخرى'];
+const AR_CATS=['كتاب القدم القانوني','كتاب قدم الستة أشهر','كتاب كفالة','أمر تعيين','أمر آخر ترفيع','أمر آخر علاوة','أمر مباشرة','هوية وجنسية','شهادة دراسية','كتاب شكر','عقوبة','ترفيع','علاوة','إجازة','نقل وانتداب','تقاعد','طبي','أخرى'];
 let arDB=null,AR=[],ARH=new Map(),arUrls=[],arCur=[],arW=null,arV=null,arKeyOn=false,arTess=null;
 const arSt={emp:null,sort:'old',cat:''};
 const arCatList=()=>{const base=AR_CATS.filter(c=>c!='أخرى'),cu=[...new Set(AR.map(r=>r.cat).filter(c=>c&&!AR_CATS.includes(c)))].sort((a,b)=>a.localeCompare(b,'ar'));return[...base,...cu,'أخرى']};
@@ -428,7 +447,7 @@ async function arAddFiles(emp,files,o={}){
  for(const f of files){
   if(!(/^image\//.test(f.type)||f.type=='application/pdf'||/\.(jpe?g|png|bmp|webp|gif|tiff?|pdf)$/i.test(f.name))){skip++;continue}
   const key=arKey(f);if(AR.some(r=>r.emp==emp&&r.key==key)){skip++;continue}
-  try{const p=await arPrep(f),rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),emp,name:f.name,kind:p.kind,mime:p.blob.type||f.type||'',blob:p.blob,thumb:p.thumb,size:p.blob.size,key,cat:o.cat||'',stage:o.stage||0,slot:o.slot||'',note:'',docDate:o.docDate||'',added:Date.now(),ocr:'',ocrDone:false};
+  try{const p=await arPrep(f),rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),emp,name:f.name,kind:p.kind,mime:p.blob.type||f.type||'',blob:p.blob,thumb:p.thumb,size:p.blob.size,key,cat:o.cat||'',stage:o.stage||0,slot:o.slot||'',kf:o.kf||0,note:'',docDate:o.docDate||'',added:Date.now(),ocr:'',ocrDone:false};
    await arPut(rec);AR.push(rec);arIndex(rec);n++;if(arAutoOn()&&(rec.kind=='img'||rec.kind=='pdf'))arEnqueue(rec.id);await new Promise(r=>setTimeout(r,2))}
   catch(e){skip++;toast(e&&e.name=='QuotaExceededError'?'امتلأت مساحة التخزين في المتصفح':'تعذّرت إضافة ملف')}}
  arNums();return{n,skip}}
@@ -859,7 +878,7 @@ function settings(){
   <fieldset style="margin-top:14px"><legend>الأيقونات — الحجم واللون لكل أيقونة</legend><div class="tw"><table style="min-width:0"><thead><tr><th>الأيقونة</th><th>القسم</th><th>الحجم</th><th>اللون</th><th></th></tr></thead><tbody>${TILES.map(x=>{const o=((u.ic||{})[x[0]])||{};return`<tr><td><svg id="pv_${x[0]}" viewBox="0 0 24 24" style="width:${o.size||26}px;height:${o.size||26}px;fill:none;stroke-width:1.8;stroke:${o.color||'currentColor'}">${ICON[x[0]]}</svg></td><td>${x[1]}</td><td style="white-space:nowrap"><input type="range" min="16" max="64" step="2" data-ic="${x[0]}" data-t="size" value="${o.size||26}" style="width:120px"> <span id="sz_${x[0]}">${o.size||26}</span></td><td><input type="color" data-ic="${x[0]}" data-t="color" value="${o.color||u.color||'#16302d'}" style="height:36px;width:60px"></td><td><button class="btn alt" data-icr="${x[0]}">افتراضي</button></td></tr>`}).join('')}</tbody></table></div><div class="act"><button class="btn alt" id="ic_all">إعادة كل الأيقونات للوضع الافتراضي</button></div></fieldset>
   <fieldset style="margin-top:14px"><legend>الطباعة والسكنر</legend>
   <div class="cols"><label>مقاس الورق<select id="pr_p">${Object.keys(PR_SZ).map(k=>`<option${prCfg().paper==k?' selected':''}>${k}</option>`).join('')}</select></label><label>اتجاه الورقة<select id="pr_o"><option value="portrait"${prCfg().orient=='portrait'?' selected':''}>عمودي</option><option value="landscape"${prCfg().orient=='landscape'?' selected':''}>أفقي</option></select></label><label>الهامش (ملم)<input type="number" id="pr_m" min="0" max="40" value="${prCfg().margin}"></label></div>
-  <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="pr_h" ${prCfg().header?'checked':''} style="width:auto"> طباعة اسم المديرية والشعبة وبيانات الموظف أعلى كل ورقة</label>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="pr_h" ${prCfg().header?'checked':''} style="width:auto"> طباعة اسم الموظف و«(مؤرشف)» أعلى يسار كل صفحة مؤرشفة</label>
   <div class="act"><button class="btn gold" id="pr_t">طباعة صفحة اختبار</button></div>
   <p class="note">اختيار الطابعة (سلكية USB أو لاسلكية/شبكة) يتم من نافذة الطباعة التي تظهر عند الضغط على أي زر «طباعة»، لأن المتصفح لا يسمح لأي موقع بقراءة قائمة الطابعات أو اختيار واحدة بنفسه. لتظهر طابعتك أولاً اجعلها «الطابعة الافتراضية» في إعدادات الطابعات في ويندوز. وللطباعة المباشرة بلا نافذة: انسخ اختصار Chrome وأضف في آخر خانة «الهدف» ‎--kiosk-printing‎ ثم افتح البرنامج منه، فيطبع على الطابعة الافتراضية فوراً.</p>
   <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
@@ -911,7 +930,7 @@ function apPage(kind){
  <div class="act"><button class="btn" onclick="apSave('${kind}')">إضافة</button></div>`);
  apFiles=[];$('#ap_fi').onchange=()=>{const fi=$('#ap_fi');apFiles.push(...fi.files);fi.value='';apUpd(P?'promo':'allow')};arLoad().then(()=>apUpd(P?'promo':'allow')).catch(()=>{});
  const sal=()=>{$('#ap_sal').value=nf(salary(num($('#ap_g').value),num($('#ap_s').value)))};
- const rt=()=>{if(P){const t=$('#ap_t'),cv=t.value,L=S.set.tg[num($('#ap_g').value)-1]||[];t.innerHTML=opt(L,'')+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';if(cv&&[...t.options].some(o=>o.value==cv))t.value=cv}const x=$('#ap_tx');if(x)x.style.display='none'};
+ const rt=()=>{if(P){const t=$('#ap_t'),cv=t.value,L=S.set.tg[num($('#ap_g').value)-1]||[];t.innerHTML='<option value="">— اختر العنوان الوظيفي —</option>'+opt(L,'')+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';if(cv&&[...t.options].some(o=>o.value==cv))t.value=cv}const x=$('#ap_tx');if(x)x.style.display='none'};
  if(P)ttSuggest($('#ap_tq'),()=>S.set.tg[num($('#ap_g').value)-1]||[],t=>{const sl=$('#ap_t');if(![...sl.options].some(o=>o.value==t))sl.add(new Option(t,t));sl.value=t;$('#ap_tx').style.display='none'});
  if(P)$('#ap_t').onchange=()=>{$('#ap_tx').style.display=$('#ap_t').value=='__new__'?'':'none'};
  ['ap_g','ap_s'].forEach(i=>$('#'+i).onchange=()=>{sal();rt()});
@@ -941,9 +960,10 @@ async function apFlush(id,slot,d,files){try{await arLoad()}catch(e){}const r=awa
 function apSave(kind){
  const e=S.emps.find(x=>x.id==$('#ap_e').value),d=$('#ap_d').value;
  if(!e){toast('اختر الموظف');return}if(!d){toast('اختر التاريخ');return}
+ if(inactive(e)){toast('لا يمكن إضافة ترفيع أو علاوة لموظف منقول أو متقاعد');return}
  if(kind=='p'&&isStl(e)){toast('هذا الموظف مُسكَّن: يأخذ علاوات فقط ولا يُرفَّع');return}
  if(kind=='p'&&num(e.settleG)>0&&num($('#ap_g').value)<num(e.settleG)){toast('الدرجة الجديدة أعلى من درجة التسكين المحددة ('+e.settleG+')');return}
- let nt='';if(kind=='p'){nt=$('#ap_t').value;if(nt=='__new__'){nt=$('#ap_tx').value.trim();if(!nt){toast('اكتب العنوان الوظيفي');return}const L=S.set.tg[num($('#ap_g').value)-1];if(!L.includes(nt))L.push(nt)}}
+ let nt='';if(kind=='p'){nt=$('#ap_t').value;if(!nt){toast('اختر العنوان الوظيفي الجديد المطابق للدرجة');return}if(nt=='__new__'){nt=$('#ap_tx').value.trim();if(!nt){toast('اكتب العنوان الوظيفي');return}const L=S.set.tg[num($('#ap_g').value)-1];if(!L.includes(nt))L.push(nt)}}
  if(num(e.lgpmAct)){e.lgpmPrev=num(e.lgpmPrev)+num(e.lgpmAct);e.lgpmAct=0}
  if(kind=='p')for(let i=1;i<=11;i++)delete e['lg'+i];
  e.g=$('#ap_g').value;e.s=$('#ap_s').value;
