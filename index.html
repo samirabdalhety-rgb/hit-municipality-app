@@ -97,6 +97,7 @@ textarea.sm{resize:vertical;min-height:0}
 .arvn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(15,76,71,.85);color:#fff;border:0;border-radius:50%;width:46px;height:46px;font-size:22px;cursor:pointer;z-index:2}
 .arvi{padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));color:#dfeae8;font-size:.9em;max-height:22vh;overflow:auto;background:#0b1c1a;line-height:1.6}
 .dt{display:flex;gap:6px;width:100%}.dt select{flex:1;min-width:0;padding-inline:4px}
+.sgl{max-height:240px;overflow:auto;background:var(--card);border:1.5px solid var(--pri2);border-radius:12px}.sgi{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}.sgi:last-child{border-bottom:0}.sgi:hover,.sgi:active{background:var(--bg)}
 </style>
 </head>
 <body>
@@ -144,11 +145,14 @@ const TG0=[
 const EGD={'دكتوراه':[1,5],'ماجستير':[2,6],'دبلوم عالي':[3,6],'بكالوريوس':[3,8],'دبلوم':[5,9],'اعدادية':[6,10],'متوسطة':[8,10],'ابتدائية':[8,10],'يقرأ ويكتب':[9,10]};
 let tgw=[];
 const SCALE2={grid:[[910,930,950,970,990,1010,1030,1050,1070,1090,1110],[723,740,757,774,791,808,825,842,859,876,893],[600,610,620,630,640,650,660,670,680,690,700],[509,517,525,533,541,549,557,565,573,581,589],[429,435,441,447,453,459,465,471,477,483,489],[362,368,374,380,386,392,398,404,410,416,422],[296,302,308,314,320,326,332,338,344,350,356],[260,263,266,269,272,275,278,281,284,287,290],[210,213,216,219,222,225,228,231,234,237,240],[170,173,176,179,182,185,188,191,194,197,200]].map(r=>r.map(v=>v*1000)),allow:[20,17,10,8,6,6,6,3,3,3].map(x=>x*1000),years:[0,5,5,5,5,4,4,4,4,4]};
+const LADDERS=[[["مدير اقدم اول"],["مدير اقدم"],["مدير"],["معاون مدير"],["رئيس ملاحظين"],["ملاحظ"],["معاون ملاحظ"],["كاتب"],[],[]],[[],[],[],["رئيس حرفيين اقدم اول"],["رئيس حرفيين اقدم"],["رئيس حرفيين"],["معاون رئيس حرفيين"],["حرفي اقدم"],["حرفي اول"],["معاون حرفي","حرفي"]],[[],[],[],["رئيس حراس اقدم اول"],["رئيس حراس اقدم"],["رئيس حراس"],["معاون رئيس حراس"],["حارس اقدم"],["حارس اول"],["حارس ثالث","حارس ثاني"]],[[],[],[],["رئيس سواق اقدم اول"],["رئيس سواق اقدم"],["رئيس سواق"],["معاون رئيس سواق"],["سائق اقدم"],["سائق اول"],["سائق ثالث","سائق ثاني"]],[[],[],[],["رئيس كاتب طابعة اقدم"],["رئيس كاتب طابعة"],["معاون رئيس كاتب طابعة"],["كاتب طابعة اقدم"],["كاتب طابعة اول"],["كاتب طابعة ثان"],["كاتب طابعة ثالث"]],[[],[],[],["رئيس موظف خدمات اقدم اول"],["رئيس موظف خدمة اقدم"],["رئيس موظف خدمة"],["معاون رئيس موظف خدمة"],["موظف خدمات اقدم"],["موظف خدمة اول"],["معاون موظف خدمات","موظف خدمات"]],[[],["رئيس رسامين هندسي اقدم اول"],["رئيس رسامين هندسي اقدم"],["رئيس رسامين هندسي"],["معاون رئيس رسامين هندسي"],["رسام هندسي اقدم"],["رسام هندسي"],["معاون رسام هندسي"],[],[]],[["رئيس مراقبين اقدم اول"],["رئيس مراقبين اقدم"],["رئيس مراقبين"],["معاون رئيس مراقبين"],["مراقب اقدم"],["مراقب اول"],["مراقب"],["معاون مراقب"],[],[]],[["رئيس مراقبين فنيين اقدم اول"],["رئيس مراقبين فنيين اقدم"],["رئيس مراقبين فنيين"],["معاون رئيس مراقبين فنيين"],["مراقب فني اقدم"],["مراقب فني اول"],["مراقب فني"],["معاون مراقب فني"],[],[]],[["رئيس مرشدين اقدم اول"],["رئيس مرشدين اقدم"],["رئيس مرشدين"],["معاون رئيس مرشدين"],["مرشد اقدم"],["مرشد اول"],["مرشد"],["معاون مرشد"],[],[]],[[],["رئيس مساحين اقدم اول"],["رئيس مساحين اقدم"],["رئيس مساحين"],["معاون رئيس مساحين"],["مساح اقدم"],["مساح"],["معاون مساح"],[],[]],[["رئيس مهندسين اقدم اول"],["رئيس مهندسين اقدم"],["رئيس مهندسين"],["معاون رئيس مهندسين"],["مهندس اقدم"],["مهندس"],["معاون مهندس"],[],[],[]],[["مستشار سياسي اقدم"],["مستشار سياسي"],["مشاور سياسي اقدم"],["مشاور سياسي"],["مساعد مشاور سياسي"],["باحث سياسي"],["مساعد باحث سياسي"],[],[],[]],[["رئيس فيزياويين اقدم اول"],["رئيس فيزياويين اقدم"],["رئيس فيزياويين"],["معاون رئيس فيزياويين"],["فيزياوي اقدم"],["فيزياوي"],["معاون فيزياوي"],[],[],[]],[["رئيس مترجمين اقدم اول"],["رئيس مترجمين اقدم"],["رئيس مترجمين"],["معاون رئيس مترجمين"],["مترجم اقدم"],["مترجم"],["معاون مترجم"],[],[],[]],[["مدير مأمور تسجيل"],["رئيس مأمور تسجيل اقدم"],["رئيس مأمور تسجيل"],["معاون رئيس مأمور تسجيل"],["مأمور تسجيل اقدم"],["مأمور تسجيل اول"],["مأمور تسجيل ثاني"],["مأمور تسجيل ثالث"],["مأمور تسجيل رابع"],[]],[[],[],[],[],["رئيس محصلين اقدم"],["رئيس محصلين"],["معاون رئيس محصلين"],["محصل اقدم"],["محصل"],[]],[[],[],[],[],["رئيس امناء صندوق"],["معاون رئيس امناء صندوق"],["امين صندوق اقدم"],["امين صندوق"],["معاون امين صندوق"],[]],[["مدير تدقيق اقدم اول"],["مدير تدقيق اقدم"],["مدير تدقيق"],["معاون مدير تدقيق"],["مدقق اقدم"],["مدقق"],["معاون مدقق"],["كاتب تدقيق"],[],[]],[["مدير حسابات اقدم اول"],["مدير حسابات اقدم"],["مدير حسابات"],["معاون مدير حسابات"],["محاسب اقدم"],["محاسب"],["معاون محاسب"],["كاتب حسابات"],[],[]],[[],["رئيس مرشدين زراعيين اقدم اول"],["رئيس مرشدين زراعيين اقدم"],["معاون رئيس مرشدين زراعيين"],["مرشد زراعي اقدم"],["مرشد زراعي اول"],["مرشد زراعي"],["مراقب زراعي"],[],[]],[["رئيس مهندسين زراعيين اقدم اول"],["رئيس مهندسين زراعيين اقدم"],["رئيس مهندسين زراعيين"],["معاون رئيس مهندسين زراعيين"],["مهندس زراعي اقدم"],["مهندس زراعي"],["معاون مهندس زراعي"],[],[],[]],[["رئيس مبرمجين اقدم اول"],["رئيس مبرمجين اقدم"],["رئيس مبرمجين"],["معاون رئيس مبرمجين"],["مبرمج اقدم"],["مبرمج"],["معاون مبرمج"],[],[],[]],[["مستشار قانوني"],["مستشار قانوني مساعد"],["مشاور قانوني اقدم"],["مشاور قانوني"],["مشاور قانوني مساعد"],["قانوني"],["معاون قانوني"],[],[],[]],[["مدير فني اقدم اول"],["مدير فني اقدم"],["مدير فني"],["معاون مدير فني"],["رئيس ملاحظين فنيين"],["ملاحظ فني"],["معاون ملاحظ فني"],["فني"],[],[]],[["رئيس مراقبين فنيين اقدم اول"],["رئيس مراقبين فنيين اقدم"],["رئيس مراقبين فنيين"],["معاون رئيس مراقبين فنيين"],["مراقب فني اقدم"],["مراقب فني اول"],["مراقب فني"],["معاون مراقب فني"],[],[]],[["رئيس ابحاث اقدم اول"],["رئيس ابحاث اقدم"],["رئيس ابحاث"],["معاون رئيس ابحاث"],["باحث اقدم"],["باحث"],["معاون باحث"],[],[],[]],[["مدير اعلامي اقدم اول"],["مدير اعلامي اقدم"],["مدير اعلامي"],["معاون مدير اعلامي"],["رئيس ملاحظين اعلاميين"],["ملاحظ اعلامي"],["معاون ملاحظ اعلامي"],[],[],[]],[["رئيس مهندسين تقنيين اقدم اول"],["رئيس مهندسين تقنيين اقدم"],["رئيس مهندسين تقنيين"],["معاون رئيس مهندسين تقنيين"],["مهندس تقني اقدم"],["مهندس تقني"],["معاون مهندس تقني"],[],[],[]],[[],[],[],[],[],[],[],["مشرف فني خامس"],[],[]]];
 function migrate(){
 S.emps.forEach(e=>{e.lastA=e.lastA||e.last||'';e.lastP=e.lastP||e.lastPromo||'';e.letters=e.letters||[];{const sn=e.m?String(e.m.surname||'').trim():'';if(sn){if(!String(e.name||'').includes(sn))e.name=(String(e.name||'')+' '+sn).trim();delete e.m.surname}}if(e.lgpm!==undefined){if(e.lgpmPrev===undefined)e.lgpmPrev=e.lgpm;delete e.lgpm}});
 if(!S.set.grid)S.set.grid=Array.from({length:10},(_,i)=>Array.from({length:11},(_,j)=>S.set.base[i]?S.set.base[i]+j*S.set.allow[i]:0));
 if(S.set.scaleVer!==2){S.set.grid=JSON.parse(JSON.stringify(SCALE2.grid));S.set.allow=[...SCALE2.allow];S.set.years=[...SCALE2.years];S.set.scaleVer=2}
- S.set.tg=S.set.tg||TG0.map(x=>[...new Set(x.split('/'))]);S.set.eg=Object.assign({},EGD,S.set.eg||{});S.ui=S.ui||{};
+ S.set.tg=S.set.tg||TG0.map(x=>[...new Set(x.split('/'))]);
+ if((S.set.tgv||0)<2){const D=TG0.map(x=>x.split('/'));S.set.tg=Array.from({length:10},(_,g)=>{const out=[],add=t=>{t=String(t||'').replace(/\s+/g,' ').trim();if(t&&!out.includes(t))out.push(t)};LADDERS.forEach(l=>(l[g]||[]).forEach(add));((S.set.tg||[])[g]||[]).filter(t=>!(D[g]||[]).includes(t)).forEach(add);S.emps.forEach(e=>{if(+e.g==g+1)add(e.title)});return out});S.set.tgv=2}
+ S.set.eg=Object.assign({},EGD,S.set.eg||{});S.ui=S.ui||{};
 }
 migrate();
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}cloudSave()};
@@ -179,7 +183,7 @@ function calc(e){
  return{status:promo?'ترفيع':(st&&s>=11?'نهاية السلم':'علاوة'),aDue,pDue,due,ng,ns,nsal:salary(ng,ns),amt:S.set.allow[g-1],av:[],usedTxt:ut,lastD:la,lastT:(e.lastP&&e.lastP>=(e.lastA||''))?'ترفيع':'علاوة'};
 }
 const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',leave:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',maint:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.5 1.5-2 3-2s2.5.5 3 2M14 10h4M14 14h4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
-const TILES=[['add','إضافة موظف',0,()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات',0,()=>lvHub()],['arch','ارشفة الاضابير',0,()=>arPage()],['bk','النسخ الاحتياطي','last',()=>bkPage()]];
+const TILES=[['add','إضافة موظف',0,()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات',0,()=>lvHub()],['arch','ارشفة الاضابير',0,()=>arPage()],['kaf','الكفالات',0,()=>kfPage()],['bk','النسخ الاحتياطي',0,()=>bkPage()]];
 /* ===== مُحدِّد التاريخ: اليوم يميناً ثم الشهر ثم السنة يساراً ===== */
 const DT_M=['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];
 function dtEnhance(inp){
@@ -197,6 +201,85 @@ function dtEnhance(inp){
  if(document.body)go();else document.addEventListener('DOMContentLoaded',go)})();
 /* التسكين: يرتفع الموظف بالترفيع حتى درجة التسكين ثم يتوقف عندها ويبقى يتمتع بالعلاوات فقط */
 const isStl=e=>!!e.settle||(num(e.settleG)>0&&num(e.g)<=num(e.settleG));
+/* ===== العنوان الوظيفي الجديد حسب سلّم الدرجات (من ملف العناوين) ===== */
+const ttN=t=>String(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ').trim();
+function nextTitle(e,ng){const cur=ttN(e.title),g=+e.g;if(!cur||!(g>=1&&g<=10)||!(ng>=1&&ng<=10))return[];const c=[];LADDERS.forEach(l=>{if((l[g-1]||[]).some(t=>ttN(t)==cur))(l[ng-1]||[]).forEach(t=>{if(!c.includes(t))c.push(t)})});return c}
+function nextTitleX(e,ng){
+    const ex=nextTitle(e,ng);if(ex.length)return{t:ex,m:'exact'};
+    const cur=ttN(e.title),g=+e.g;if(!cur||!(ng>=1&&ng<=10))return{t:[],m:''};
+    let c=[];LADDERS.forEach(l=>{if(l.some(gr=>gr.some(t=>ttN(t)==cur)))(l[ng-1]||[]).forEach(t=>{if(!c.includes(t))c.push(t)})});
+    if(c.length)return{t:c,m:'any'};
+    const stop=['معاون','رئيس','اقدم','اول','ثاني','ثالث','ثان'],toks=cur.split(' ').filter(w=>w.length>2&&!stop.includes(w));
+    if(toks.length){let best=0,L=[];LADDERS.forEach(l=>{let sc=0;l.forEach(gr=>gr.forEach(t=>{const n=ttN(t).split(' ');sc=Math.max(sc,toks.filter(w=>n.includes(w)).length)}));if(sc>best){best=sc;L=[l]}else if(sc==best&&sc>0)L.push(l)});
+     if(best>0){c=[];L.forEach(l=>(l[ng-1]||[]).forEach(t=>{if(!c.includes(t))c.push(t)}));if(c.length)return{t:c,m:'fuzzy'}}}
+    return{t:[],m:''}}
+/* قائمة اقتراحات تظهر بمجرد كتابة حرف (أي كلمة أو جزء منها) لاختيار العنوان الوظيفي */
+function ttSuggest(inp,getList,onPick){
+ const box=document.createElement('div');box.className='sgl';box.style.cssText='display:none;grid-column:1/-1;margin:-4px 0 10px';inp.closest('label').after(box);
+ const show=()=>{const toks=ttN(inp.value).split(' ').filter(Boolean),L=getList().filter(t=>{const n=ttN(t);return toks.every(k=>n.includes(k))}).sort((a,b)=>{const f=t=>toks.length&&ttN(t).split(' ').some(w=>w.startsWith(toks[0]))?0:1;return f(a)-f(b)});
+  box.innerHTML=L.slice(0,80).map(t=>`<div class="sgi" data-t="${lvEs(t)}">${lvEs(t)}</div>`).join('')||'<div class="sgi" style="color:var(--mut)">لا توجد عناوين مطابقة لهذه الدرجة</div>';box.style.display=''};
+ const pick=t=>{onPick(t);box.style.display='none';inp.value=''};
+ inp.addEventListener('input',show);inp.addEventListener('focus',show);inp.addEventListener('blur',()=>setTimeout(()=>box.style.display='none',180));
+ box.addEventListener('mousedown',ev=>{const it=ev.target.closest('.sgi[data-t]');if(it){ev.preventDefault();pick(it.dataset.t)}});
+ inp.addEventListener('keydown',ev=>{if(ev.key=='Enter'){ev.preventDefault();const f=box.querySelector('.sgi[data-t]');if(f)pick(f.dataset.t)}else if(ev.key=='Escape')box.style.display='none'})}
+/* ===== الكفالات: كفالة لكل موظف (e.kf)، مرتبطة بأسماء وعناوين قسم الترفيعات ===== */
+ICON.kaf='<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>';
+const kfList=e=>e.kf||[],kfN=t=>nrmA(String(t||'')).toLowerCase();
+function kfPage(){shell('الكفالات',`<div class="lvt"><button class="tile" onclick="kfSearch()"><svg viewBox="0 0 24 24">${ICON.srch}</svg>بحث</button><button class="tile" onclick="kfForm()"><svg viewBox="0 0 24 24">${ICON.plus||ICON.add}</svg>إضافة كفالة</button><button class="tile" onclick="kfExportDlg()"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>تصدير Excel</button></div><div id="kf_c" style="margin-top:14px"></div>`);kfSearch()}
+function kfSearch(){
+ $('#kf_c').innerHTML=`<div class="tools"><div style="flex:2 1 220px"><label>بحث (اسم الموظف أو المكفول أو الجهة أو رقم الكتاب)<input id="kf_q" type="search" autocomplete="off" placeholder="اكتب جزءاً من الاسم"></label></div></div><div id="kf_res"></div><div id="kf_card" style="margin-top:12px"></div>`;
+ $('#kf_q').oninput=kfDraw;kfDraw()}
+function kfDraw(){const box=$('#kf_res');if(!box)return;const q=kfN($('#kf_q').value.trim()).split(' ').filter(Boolean);
+ const L=S.emps.map(e=>{const ks=kfList(e),hay=kfN(e.name+' '+(e.title||'')),mk=ks.filter(k=>q.every(t=>kfN([k.who,k.to,k.no,k.note,e.name,e.title].join(' ')).includes(t)));return{e,ks,mk,hit:q.every(t=>hay.includes(t))}}).filter(x=>q.length?(x.hit||x.mk.length):x.ks.length).sort((a,b)=>String(a.e.name).localeCompare(String(b.e.name),'ar')).slice(0,100);
+ box.innerHTML=L.length?`<p class="note" style="color:var(--mut)">${q.length?'نتائج البحث':'الموظفون الذين لديهم كفالات'}: ${L.length}</p>`+L.map(x=>`<button class="btn alt" style="display:flex;justify-content:space-between;width:100%;margin:4px 0;text-align:start" onclick="kfCard(${x.e.id})"><span>${lvEs(x.e.name)} <small style="opacity:.75">— ${lvEs(x.e.title)||'—'}</small></span><b>${x.ks.length} كفالة</b></button>`).join(''):`<p style="color:var(--mut)">${q.length?'لا توجد نتائج.':'لا توجد كفالات مسجلة بعد. أضف كفالة من «إضافة كفالة».'}</p>`}
+function kfCard(id){const e=S.emps.find(x=>x.id==id);if(!e)return;const c=$('#kf_card');if(!c)return;const L=[...kfList(e)].sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
+ c.innerHTML=`<div class="lvcard"><h3>${lvEs(e.name)}</h3><p>${lvEs(e.title)||'—'}</p><p>عدد الكفالات: <b>${L.length}</b></p></div><div class="act" style="margin:8px 0"><button class="btn gold" onclick="kfForm(${e.id})">إضافة كفالة لهذا الموظف</button><button class="btn" onclick="kfExport(${e.id})">تصدير كفالات هذا الموظف Excel</button></div>
+ <div class="tw"><table style="min-width:680px"><thead><tr><th>ت</th><th>اسم المكفول</th><th>الجهة المرسل لها كتاب الكفالة</th><th>رقم الكتاب</th><th>تاريخ الكتاب</th><th>ملاحظات</th><th></th></tr></thead><tbody>${L.map((k,i)=>`<tr><td>${i+1}</td><td style="text-align:start">${lvEs(k.who)}</td><td style="text-align:start">${lvEs(k.to)}</td><td>${lvEs(k.no)||'—'}</td><td>${fd(pd(k.date))||'—'}</td><td style="text-align:start">${lvEs(k.note)}</td><td style="white-space:nowrap"><button class="btn alt" onclick="kfForm(${e.id},${k.id})">تعديل</button> <button class="btn red" onclick="kfDel(${e.id},${k.id},this)">حذف</button></td></tr>`).join('')||'<tr><td colspan="7">لا توجد كفالات</td></tr>'}</tbody></table></div>`;
+ c.scrollIntoView({behavior:'smooth',block:'start'})}
+function kfDel(eid,kid,b){if(!b.dataset.c){b.dataset.c=1;const t=b.textContent;b.textContent='تأكيد؟';setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent=t}},4000);return}
+ const e=S.emps.find(x=>x.id==eid);if(!e)return;e.kf=kfList(e).filter(k=>k.id!=kid);if(!e.kf.length)delete e.kf;save();toast('تم حذف الكفالة');kfCard(eid);kfDraw()}
+function kfForm(eid,kid){
+ const k=kid?kfList(S.emps.find(x=>x.id==eid)||{}).find(x=>x.id==kid):null,all=[...S.emps].sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
+ $('#kf_c').innerHTML=`<fieldset><legend>${k?'تعديل كفالة':'إضافة كفالة جديدة'}</legend>
+ <label>بحث عن الموظف<input id="kf_eq" type="search" autocomplete="off" placeholder="اكتب جزءاً من الاسم أو العنوان الوظيفي"></label>
+ <label>الموظف (من قسم الترفيعات)<select id="kf_e"></select></label>
+ <label>العنوان الوظيفي<input id="kf_t" readonly style="background:var(--bg)"></label>
+ <label>اسم المكفول<input id="kf_who" maxlength="120" value="${lvEs(k?k.who:'')}"></label>
+ <label>الجهة المرسل لها كتاب الكفالة<input id="kf_to" maxlength="160" value="${lvEs(k?k.to:'')}"></label>
+ <label>رقم الكتاب المرسل<input id="kf_no" maxlength="60" value="${lvEs(k?k.no:'')}"></label>
+ <label>تاريخ الكتاب المرسل<input id="kf_d" type="date" value="${lvEs(k?k.date:'')}"></label>
+ <label>ملاحظات<textarea id="kf_n" rows="3" class="sm" maxlength="300">${lvEs(k?k.note:'')}</textarea></label>
+ <div class="act"><button class="btn gold" onclick="kfSave(${eid||0},${kid||0})">${k?'حفظ التعديل':'حفظ الكفالة'}</button><button class="btn alt" onclick="kfSearch()">إلغاء</button></div></fieldset>`;
+ const fill=()=>{const q=kfN($('#kf_eq').value.trim()).split(' ').filter(Boolean),cur=$('#kf_e').value||eid,L=all.filter(e=>!q.length||q.every(t=>kfN(e.name+' '+(e.title||'')).includes(t)));
+  $('#kf_e').innerHTML='<option value="">— اختر الموظف ('+L.length+') —</option>'+L.map(e=>`<option value="${e.id}">${lvEs(e.name)}${inactive(e)?' ('+MST[mtSt(e)]+')':''}</option>`).join('');
+  if(q.length&&L.length==1)$('#kf_e').value=L[0].id;else if(L.some(e=>e.id==cur))$('#kf_e').value=cur;sh()},
+ sh=()=>{const e=S.emps.find(x=>x.id==$('#kf_e').value);$('#kf_t').value=e?(e.title||''):''};
+ $('#kf_eq').oninput=fill;$('#kf_e').onchange=sh;fill();if(eid){$('#kf_e').value=eid;sh();if(kid)$('#kf_e').disabled=true}
+ $('#kf_c').scrollIntoView({behavior:'smooth',block:'start'})}
+function kfSave(eid0,kid){const eid=eid0||+$('#kf_e').value,e=S.emps.find(x=>x.id==(kid?eid0:$('#kf_e').value));
+ if(!e){toast('اختر الموظف');return}
+ const who=$('#kf_who').value.trim(),to=$('#kf_to').value.trim();
+ if(!who){toast('اكتب اسم المكفول');return}if(!to){toast('اكتب الجهة المرسل لها كتاب الكفالة');return}
+ const rec={who,to,no:$('#kf_no').value.trim(),date:$('#kf_d').value,note:$('#kf_n').value.trim()};
+ e.kf=kfList(e);
+ if(kid){const k=e.kf.find(x=>x.id==kid);if(k)Object.assign(k,rec)}else e.kf.push({id:Date.now(),...rec});
+ save();toast(kid?'تم حفظ التعديل':'تمت إضافة الكفالة');kfSearch();kfCard(e.id);kfDraw()}
+function kfExportDlg(){const withK=S.emps.filter(e=>kfList(e).length).sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
+ $('#kf_c').innerHTML=`<fieldset><legend>تصدير الكفالات إلى Excel</legend><label>اختر الموظف<select id="kf_xe"><option value="">جميع الموظفين (جدول واحد)</option>${withK.map(e=>`<option value="${e.id}">${lvEs(e.name)} (${kfList(e).length})</option>`).join('')}</select></label><div class="act"><button class="btn gold" onclick="kfExport($('#kf_xe').value?+$('#kf_xe').value:0)">تصدير</button></div></fieldset>`}
+async function kfExport(eid){
+ if(!dl){toast('التصدير غير متاح في هذا العرض');return}
+ if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
+ const emps=eid?S.emps.filter(e=>e.id==eid):S.emps.filter(e=>kfList(e).length),rows=[];emps.forEach(e=>kfList(e).forEach(k=>rows.push({e,k})));
+ if(!rows.length){toast('لا توجد كفالات للتصدير');return}
+ rows.sort((a,b)=>String(a.e.name).localeCompare(String(b.e.name),'ar')||String(a.k.date||'').localeCompare(String(b.k.date||'')));
+ const single=!!eid,wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('الكفالات',{views:[{rightToLeft:true}]}),W=single?[6,30,40,16,16,36]:[6,32,26,30,40,16,16,36],n=W.length;ws.columns=W.map(w=>({width:w}));
+ ws.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};
+ ws.mergeCells(1,1,1,n);const t=ws.getCell(1,1);t.value=single?'كفالات الموظف — مديرية بلدية هيت':'سجل الكفالات لموظفي مديرية بلدية هيت';xs(t,'Arial',14,null,'center',false);ws.getRow(1).height=32;
+ if(single){const e=emps[0];[['اسم الموظف: '+e.name],['العنوان الوظيفي: '+(e.title||'')]].forEach(a=>{const r=ws.addRow(a);ws.mergeCells(r.number,1,r.number,n);xs(r.getCell(1),'Arial',12,'FFEFEFEF','right');r.height=26});ws.addRow([])}
+ const hr=ws.addRow(single?['ت','اسم المكفول','الجهة المرسل لها كتاب الكفالة','رقم الكتاب','تاريخ الكتاب','ملاحظات']:['ت','اسم الموظف','العنوان الوظيفي','اسم المكفول','الجهة المرسل لها كتاب الكفالة','رقم الكتاب','تاريخ الكتاب','ملاحظات']);hr.height=36;hr.eachCell(c=>xs(c,'Arial',12,'FFDDD9C3'));
+ rows.forEach(({e,k},i)=>{const r=ws.addRow(single?[i+1,k.who,k.to,k.no||'',UD(pd(k.date)),k.note||'']:[i+1,e.name,e.title||'',k.who,k.to,k.no||'',UD(pd(k.date)),k.note||'']);r.height=26;r.eachCell(c=>xs(c,'Arial',12,null));r.getCell(single?5:7).numFmt='yyyy/mm/dd'});
+ const buf=await wb.xlsx.writeBuffer();
+ try{await dl.save({filename:single?'كفالات_'+String(emps[0].name).replace(/[\\\/:*?"<>|]/g,'').trim()+'.xlsx':'سجل_الكفالات.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}}
 /* ===== الطباعة / السكنر / كتب القدم القانوني ===== */
 const DEF_TITLE='مديرية بلدية هيت - شعبة الموارد البشرية';
 const PR_SZ={A4:[210,297],A3:[297,420],A5:[148,210],Letter:[216,279]},PR_DEF={paper:'A4',orient:'portrait',margin:10,header:true};
@@ -501,17 +584,17 @@ function arVDel(b){if(!b.dataset.c){b.dataset.c=1;const t=b.textContent;b.textCo
  const r=arVCur();if(!r)return;const id=r.id;arV.ids.splice(arV.i,1);if(!arV.ids.length)arVClose();else{arV.i=Math.min(arV.i,arV.ids.length-1);arVShow()}arRemove(id)}
 /* ===== النسخ الاحتياطي ===== */
 ICON.bk='<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>';
-const BKN={emps:'الموظفين',leave:'الاجازات',sick:'الاجازات_المرضية',time:'الاجازات_الزمنية',maint:'الادامة',settings:'الاعدادات',all:'كل_البيانات',archive:'الارشيف'};
-const BKT={emps:'بيانات الموظفين (الترفيعات والعلاوات)',leave:'الاجازات الاعتيادية',sick:'الاجازات المرضية',time:'الاجازات الزمنية',maint:'ادامة الموظفين (ملاك/نقل/تقاعد/جنس/...)',settings:'الإعدادات وسلم الرواتب والمظهر',archive:'ارشفة الاضابير (الصور)'};
+const BKN={emps:'الموظفين',leave:'الاجازات',sick:'الاجازات_المرضية',time:'الاجازات_الزمنية',kaf:'الكفالات',maint:'الادامة',settings:'الاعدادات',all:'كل_البيانات',archive:'الارشيف'};
+const BKT={emps:'بيانات الموظفين (الترفيعات والعلاوات)',leave:'الاجازات الاعتيادية',sick:'الاجازات المرضية',time:'الاجازات الزمنية',kaf:'الكفالات',maint:'ادامة الموظفين (ملاك/نقل/تقاعد/جنس/...)',settings:'الإعدادات وسلم الرواتب والمظهر',archive:'ارشفة الاضابير (الصور)'};
 const BK_MAGIC='HITARCH1\n';
 let bkDB=null;
 const bkOpen=()=>bkDB?Promise.resolve(bkDB):new Promise((res,rej)=>{const q=indexedDB.open('hit-backup',1);q.onupgradeneeded=()=>{q.result.createObjectStore('snaps',{keyPath:'id'});q.result.createObjectStore('meta')};q.onsuccess=()=>{bkDB=q.result;res(bkDB)};q.onerror=()=>rej(q.error)});
 const bkReq=(st,mode,fn)=>bkOpen().then(d=>new Promise((res,rej)=>{const t=d.transaction(st,mode),r=fn(t.objectStore(st));t.oncomplete=()=>res(r.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)}));
 const bkLast=()=>{try{return JSON.parse(localStorage.getItem('hit-bk-last')||'{}')}catch(e){return{}}};
-function bkMark(k){const o=bkLast(),t=Date.now();(k=='all'?['emps','leave','sick','time','maint','settings']:[k]).forEach(x=>o[x]=t);try{localStorage.setItem('hit-bk-last',JSON.stringify(o))}catch(e){}}
-const bkParts=()=>({emps:S.emps.map(e=>{const{lv,lvS,lvT,m,...c}=e;return c}),leave:Object.fromEntries(S.emps.filter(e=>e.lv).map(e=>[e.id,e.lv])),sick:Object.fromEntries(S.emps.filter(e=>e.lvS).map(e=>[e.id,e.lvS])),time:Object.fromEntries(S.emps.filter(e=>e.lvT).map(e=>[e.id,e.lvT])),maint:Object.fromEntries(S.emps.filter(e=>e.m).map(e=>[e.id,e.m])),settings:{set:S.set,ui:S.ui||{}}});
+function bkMark(k){const o=bkLast(),t=Date.now();(k=='all'?['emps','leave','sick','time','kaf','maint','settings']:[k]).forEach(x=>o[x]=t);try{localStorage.setItem('hit-bk-last',JSON.stringify(o))}catch(e){}}
+const bkParts=()=>({emps:S.emps.map(e=>{const{lv,lvS,lvT,kf,m,...c}=e;return c}),leave:Object.fromEntries(S.emps.filter(e=>e.lv).map(e=>[e.id,e.lv])),sick:Object.fromEntries(S.emps.filter(e=>e.lvS).map(e=>[e.id,e.lvS])),time:Object.fromEntries(S.emps.filter(e=>e.lvT).map(e=>[e.id,e.lvT])),kaf:Object.fromEntries(S.emps.filter(e=>e.kf&&e.kf.length).map(e=>[e.id,e.kf])),maint:Object.fromEntries(S.emps.filter(e=>e.m).map(e=>[e.id,e.m])),settings:{set:S.set,ui:S.ui||{}}});
 const bkJson=parts=>new Blob([JSON.stringify({app:'hit-backup',v:1,created:Date.now(),parts})],{type:'application/json'});
-const bkCount=(k,p)=>k=='emps'?(p.emps||[]).length+' موظف':k=='leave'||k=='sick'||k=='time'||k=='maint'?Object.keys(p[k]||{}).length+' سجل':'—';
+const bkCount=(k,p)=>k=='emps'?(p.emps||[]).length+' موظف':k=='leave'||k=='sick'||k=='time'||k=='kaf'||k=='maint'?Object.keys(p[k]||{}).length+' سجل':'—';
 /* نسخ تلقائية داخل المتصفح */
 async function bkSnap(id,label){await bkReq('snaps','readwrite',s=>s.put({id,label,at:Date.now(),n:S.emps.length,parts:bkParts()}));
  const all=await bkReq('snaps','readonly',s=>s.getAll());all.sort((a,b)=>b.at-a.at);for(const x of all.slice(20))await bkReq('snaps','readwrite',s=>s.delete(x.id))}
@@ -567,7 +650,7 @@ async function bkGo(list,names,one){
  try{const P=bkParts(),done=[];
   for(let i=0;i<list.length;i++){const k=list[i];let blob;
    if(k=='archive')blob=bkArchBlob();
-   else if(k=='all')blob=bkJson({emps:P.emps,leave:P.leave,sick:P.sick,time:P.time,maint:P.maint,settings:P.settings});
+   else if(k=='all')blob=bkJson({emps:P.emps,leave:P.leave,sick:P.sick,time:P.time,kaf:P.kaf,maint:P.maint,settings:P.settings});
    else blob=bkJson({[k]:P[k]});
    if(fh){await bkWriteTo(fh,blob);done.push(fh.name)}
    else if(dir){const f=await dir.getFileHandle(names[i],{create:true});await bkWriteTo(f,blob);done.push(names[i])}
@@ -579,16 +662,16 @@ async function bkGo(list,names,one){
 /* الاستعادة */
 function bkValid(o){const p=o&&o.parts;if(!o||o.app!='hit-backup'||!p||typeof p!='object')throw new Error('الملف ليس نسخة احتياطية لهذا البرنامج');
  if(p.emps&&(!Array.isArray(p.emps)||p.emps.some(e=>!e||e.id==null)))throw new Error('بيانات الموظفين في الملف تالفة');
- ['leave','sick','time','maint'].forEach(k=>{if(p[k]&&(typeof p[k]!='object'||Array.isArray(p[k])))throw new Error('قسم تالف: '+BKT[k])});
+ ['leave','sick','time','kaf','maint'].forEach(k=>{if(p[k]&&(typeof p[k]!='object'||Array.isArray(p[k])))throw new Error('قسم تالف: '+BKT[k])});
  if(p.settings&&!(p.settings.set&&Array.isArray(p.settings.set.grid)))throw new Error('قسم الإعدادات تالف');
- if(!['emps','leave','sick','time','maint','settings'].some(k=>p[k]))throw new Error('لا يحتوي الملف على أقسام قابلة للاستعادة')}
+ if(!['emps','leave','sick','time','kaf','maint','settings'].some(k=>p[k]))throw new Error('لا يحتوي الملف على أقسام قابلة للاستعادة')}
 async function bkPick(file){
  if(!file)return;
  try{if(/\.hitarch$/i.test(file.name)||await file.slice(0,BK_MAGIC.length).text()==BK_MAGIC){const recs=await bkReadArch(file);return bkOpenArch(recs,file.name)}
   const o=JSON.parse(await file.text());bkValid(o);bkOpenData(o,file.name)}
  catch(e){toast('تعذّرت قراءة الملف: '+(e.message||'ملف غير صالح'))}}
 function bkOpenData(o,src){
- const p=o.parts,ks=['emps','leave','sick','time','maint','settings'].filter(k=>p[k]);
+ const p=o.parts,ks=['emps','leave','sick','time','kaf','maint','settings'].filter(k=>p[k]);
  arModal('استعادة نسخة احتياطية',`<p><b>المصدر:</b> ${lvEs(src)}<br><b>تاريخ النسخة:</b> ${o.created?lvEs(fdt(o.created)):'—'}</p>
  <fieldset><legend>الأقسام المراد استعادتها</legend>${ks.map(k=>`<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" class="bkc" value="${k}" checked style="width:auto"> ${BKT[k]} — ${bkCount(k,p)}</label>`).join('')}</fieldset>
  <label>طريقة الاستعادة<select id="bk_m"><option value="merge">دمج: يضيف المفقود ويحدّث الموجود (الأسلم)</option><option value="replace">استبدال كامل: يحذف الحالي ويضع ما في النسخة</option></select></label>
@@ -601,10 +684,10 @@ async function bkApply(p,w,mode){
  try{if(S.emps.length)await bkSnap('pre-'+Date.now(),'قبل الاستعادة')}catch(e){}
  const msg=[],find=id=>S.emps.find(e=>String(e.id)==String(id)),rep=mode=='replace';
  if(w.includes('emps')){const old=new Map(S.emps.map(e=>[String(e.id),e]));
-  if(rep)S.emps=p.emps.map(c=>{const o=old.get(String(c.id)),n={...c};if(o){if(o.lv&&!n.lv)n.lv=o.lv;if(o.lvS&&!n.lvS)n.lvS=o.lvS;if(o.lvT&&!n.lvT)n.lvT=o.lvT;if(o.m&&!n.m)n.m=o.m}return n});
-  else p.emps.forEach(c=>{const o=old.get(String(c.id));if(o){const lv=o.lv,lvS=o.lvS,lvT=o.lvT,m=o.m;Object.keys(o).forEach(k=>delete o[k]);Object.assign(o,c);if(lv&&!o.lv)o.lv=lv;if(lvS&&!o.lvS)o.lvS=lvS;if(lvT&&!o.lvT)o.lvT=lvT;if(m&&!o.m)o.m=m}else S.emps.push({...c})});
+  if(rep)S.emps=p.emps.map(c=>{const o=old.get(String(c.id)),n={...c};if(o){if(o.lv&&!n.lv)n.lv=o.lv;if(o.lvS&&!n.lvS)n.lvS=o.lvS;if(o.lvT&&!n.lvT)n.lvT=o.lvT;if(o.kf&&!n.kf)n.kf=o.kf;if(o.m&&!n.m)n.m=o.m}return n});
+  else p.emps.forEach(c=>{const o=old.get(String(c.id));if(o){const lv=o.lv,lvS=o.lvS,lvT=o.lvT,kf=o.kf,m=o.m;Object.keys(o).forEach(k=>delete o[k]);Object.assign(o,c);if(kf&&!c.kf)o.kf=kf;if(lv&&!o.lv)o.lv=lv;if(lvS&&!o.lvS)o.lvS=lvS;if(lvT&&!o.lvT)o.lvT=lvT;if(m&&!o.m)o.m=m}else S.emps.push({...c})});
   msg.push(p.emps.length+' موظف')}
- for(const k of['leave','sick','time','maint']){if(!w.includes(k))continue;const f=k=='leave'?'lv':k=='sick'?'lvS':k=='time'?'lvT':'m',src=p[k]||{};let n=0,sk=0;
+ for(const k of['leave','sick','time','kaf','maint']){if(!w.includes(k))continue;const f=k=='leave'?'lv':k=='sick'?'lvS':k=='time'?'lvT':k=='kaf'?'kf':'m',src=p[k]||{};let n=0,sk=0;
   if(rep)S.emps.forEach(e=>{if(!(e.id in src))delete e[f]});
   for(const id in src){const e=find(id);if(e){e[f]=src[id];n++}else sk++}
   msg.push(BKN[k]+': '+n+(sk?' (تخطّي '+sk+' لعدم وجود الموظف)':''))}
@@ -627,11 +710,11 @@ async function bkRender(){
  let na='—';try{await arLoad();na=AR.length+' صفحة'}catch(e){}
  const L=bkLast(),fmt=k=>{const t=L[k];if(!t)return'<span style="color:var(--red)">لم تُؤخذ</span>';const d=Math.floor((Date.now()-t)/864e5);return lvEs(fdt(t))+(d>7?` <b style="color:var(--red)">(منذ ${d} يوماً)</b>`:'')};
  const dir=await bkDirGet(),snaps=(await bkReq('snaps','readonly',s=>s.getAll()).catch(()=>[])).sort((a,b)=>b.at-a.at);
- const cnt={emps:S.emps.length+' موظف',leave:S.emps.filter(e=>e.lv).length+' سجل',sick:S.emps.filter(e=>e.lvS).length+' سجل',time:S.emps.filter(e=>e.lvT).length+' سجل',maint:S.emps.filter(e=>e.m).length+' سجل',settings:'—',archive:na};
+ const cnt={emps:S.emps.length+' موظف',leave:S.emps.filter(e=>e.lv).length+' سجل',sick:S.emps.filter(e=>e.lvS).length+' سجل',time:S.emps.filter(e=>e.lvT).length+' سجل',kaf:S.emps.filter(e=>e.kf&&e.kf.length).length+' سجل',maint:S.emps.filter(e=>e.m).length+' سجل',settings:'—',archive:na};
  if(!$('#bk_w'))return;
  w.innerHTML=`${S.emps.length?'':'<div class="arok" style="border-color:var(--red)">لا توجد بيانات موظفين الآن. إن فُقدت البيانات فاستعدها من ملف نسخة على الحاسوب أو من النسخ التلقائية أدناه.</div>'}
- <fieldset><legend>النسخ إلى الحاسوب</legend><p style="margin:0 0 8px">عند الضغط على أي زر نسخ ستختار مكان الحفظ (اسم الملف ومكانه لقسم واحد، أو مجلد لعدة أقسام). ${dir?`المجلد المحفوظ للاستخدام السريع: <b>${lvEs(dir.name)}</b>.`:''}</p><div class="act"><button class="btn alt" onclick="bkChooseDir()">${dir?'تغيير المجلد المحفوظ':'تحديد مجلد محفوظ للاستخدام السريع'}</button><button class="btn gold" onclick="bkRun(['emps','leave','sick','time','maint','settings','archive'])">نسخة احتياطية الآن لكل الأقسام</button><button class="btn" onclick="bkRun(['all'])">ملف واحد لكل البيانات (بدون الصور)</button></div></fieldset>
- <div class="tw" style="margin-top:12px"><table style="min-width:520px"><thead><tr><th>القسم</th><th>المحتوى الحالي</th><th>آخر نسخة على الحاسوب</th><th></th></tr></thead><tbody>${['emps','leave','sick','time','maint','settings','archive'].map(k=>`<tr><td style="text-align:start">${BKT[k]}</td><td>${cnt[k]}</td><td>${fmt(k)}</td><td><button class="btn alt" onclick="bkRun(['${k}'])">نسخ هذا القسم</button></td></tr>`).join('')}</tbody></table></div>
+ <fieldset><legend>النسخ إلى الحاسوب</legend><p style="margin:0 0 8px">عند الضغط على أي زر نسخ ستختار مكان الحفظ (اسم الملف ومكانه لقسم واحد، أو مجلد لعدة أقسام). ${dir?`المجلد المحفوظ للاستخدام السريع: <b>${lvEs(dir.name)}</b>.`:''}</p><div class="act"><button class="btn alt" onclick="bkChooseDir()">${dir?'تغيير المجلد المحفوظ':'تحديد مجلد محفوظ للاستخدام السريع'}</button><button class="btn gold" onclick="bkRun(['emps','leave','sick','time','kaf','maint','settings','archive'])">نسخة احتياطية الآن لكل الأقسام</button><button class="btn" onclick="bkRun(['all'])">ملف واحد لكل البيانات (بدون الصور)</button></div></fieldset>
+ <div class="tw" style="margin-top:12px"><table style="min-width:520px"><thead><tr><th>القسم</th><th>المحتوى الحالي</th><th>آخر نسخة على الحاسوب</th><th></th></tr></thead><tbody>${['emps','leave','sick','time','kaf','maint','settings','archive'].map(k=>`<tr><td style="text-align:start">${BKT[k]}</td><td>${cnt[k]}</td><td>${fmt(k)}</td><td><button class="btn alt" onclick="bkRun(['${k}'])">نسخ هذا القسم</button></td></tr>`).join('')}</tbody></table></div>
  <fieldset style="margin-top:14px"><legend>استعادة من ملف على الحاسوب</legend><p style="margin:0 0 8px;color:var(--mut)">اختر ملف نسخة (‎.json للبيانات أو ‎.hitarch للأرشيف). سترى محتواه وتختار الأقسام قبل التنفيذ.</p><input type="file" id="bk_f" accept=".json,.hitarch"></fieldset>
  <fieldset style="margin-top:14px"><legend>نسخ تلقائية داخل المتصفح (يومية، آخر 20)</legend>${snaps.length?`<div class="tw"><table style="min-width:420px"><thead><tr><th>التاريخ</th><th>النوع</th><th>الموظفون</th><th></th></tr></thead><tbody>${snaps.map(s=>`<tr><td>${lvEs(fdt(s.at))}</td><td>${lvEs(s.label)}</td><td>${s.n}</td><td><button class="btn alt" onclick="bkSnapOpen('${s.id}')">استعادة</button></td></tr>`).join('')}</tbody></table></div>`:'<p style="color:var(--mut)">لا توجد نسخ تلقائية بعد.</p>'}<p class="note">هذه النسخ داخل المتصفح نفسه وتحميك من خطأ أو تلف في البيانات، لكنها تُمحى إذا مُسحت بيانات المتصفح. فلا تغني عن نسخة الحاسوب.</p></fieldset>`;
  $('#bk_f').onchange=()=>{const f=$('#bk_f').files[0];$('#bk_f').value='';bkPick(f)}}
@@ -693,8 +776,8 @@ function empForm(id){
  ['f_g','f_s'].forEach(i=>$('#'+i).addEventListener('input',()=>{drawLg();rc()}));
  ['f_lastA','f_lastP','f_lgpmAct','f_pen'].forEach(i=>$('#'+i).addEventListener('input',rc));$('#f_settle').addEventListener('change',()=>{drawLg();rc()});$('#f_settleG').addEventListener('change',()=>{drawLg();rc()});
   const refG=()=>{const r=S.set.eg[$('#f_edu').value]||[1,10],c=num($('#f_g').value)||num(e.g),gs=[];for(let i=1;i<=10;i++)if((i>=r[0]&&i<=r[1])||i==c)gs.push(i);$('#f_g').innerHTML=opt(gs,c)};
- const refT=k=>{const t=$('#f_title'),g=num($('#f_g').value),L=[...(S.set.tg[g-1]||[])];let v=t.dataset.v;if(v&&!L.includes(v)){if(k)L.unshift(v);else v=''}t.dataset.v=v;const q=nrmA(($('#tq_f')||{value:''}).value.trim()),Lf=L.filter(x=>!q||nrmA(x).includes(q)||x==v);t.innerHTML='<option value="">— اختر —</option>'+opt(Lf,v)+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';$('#f_titleX').style.display='none'};
- $('#tq_f').oninput=()=>{const q=nrmA($('#tq_f').value.trim()),g=num($('#f_g').value),m=(S.set.tg[g-1]||[]).filter(x=>q&&nrmA(x).includes(q));if(m.length==1)$('#f_title').dataset.v=m[0];refT(0)};
+ const refT=k=>{const t=$('#f_title'),g=num($('#f_g').value),L=[...(S.set.tg[g-1]||[])];let v=t.dataset.v;if(v&&!L.includes(v)){if(k)L.unshift(v);else v=''}t.dataset.v=v;const Lf=L;t.innerHTML='<option value="">— اختر —</option>'+opt(Lf,v)+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';$('#f_titleX').style.display='none'};
+ ttSuggest($('#tq_f'),()=>S.set.tg[num($('#f_g').value)-1]||[],t=>{const sl=$('#f_title');if(![...sl.options].some(o=>o.value==t))sl.add(new Option(t,t));sl.value=t;sl.dataset.v=t;sl.dispatchEvent(new Event('change'))});
  $('#f_title').onchange=()=>{const t=$('#f_title');t.dataset.v=t.value;const x=$('#f_titleX');x.style.display=t.value=='__new__'?'':'none';if(t.value=='__new__')x.focus()};
  $('#f_edu').onchange=()=>{refG();refT(0);sync();drawLg();rc()};
  $('#f_g').addEventListener('input',()=>refT(0));
@@ -828,14 +911,15 @@ function apPage(kind){
  <div class="act"><button class="btn" onclick="apSave('${kind}')">إضافة</button></div>`);
  apFiles=[];$('#ap_fi').onchange=()=>{const fi=$('#ap_fi');apFiles.push(...fi.files);fi.value='';apUpd(P?'promo':'allow')};arLoad().then(()=>apUpd(P?'promo':'allow')).catch(()=>{});
  const sal=()=>{$('#ap_sal').value=nf(salary(num($('#ap_g').value),num($('#ap_s').value)))};
- const rt=()=>{if(P){const t=$('#ap_t'),cv=t.value,q=nrm($('#ap_tq').value.trim()),L=(S.set.tg[num($('#ap_g').value)-1]||[]).filter(x=>!q||nrm(x).includes(q)||x==cv);t.innerHTML=opt(L,'')+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';if(cv&&[...t.options].some(o=>o.value==cv))t.value=cv;else if(q&&L.length==1)t.value=L[0]}const x=$('#ap_tx');if(x)x.style.display='none'};
- if(P)$('#ap_tq').oninput=()=>{rt();$('#ap_tx').style.display=$('#ap_t').value=='__new__'?'':'none'};
+ const rt=()=>{if(P){const t=$('#ap_t'),cv=t.value,L=S.set.tg[num($('#ap_g').value)-1]||[];t.innerHTML=opt(L,'')+'<option value="__new__">＋ إضافة عنوان يدوياً</option>';if(cv&&[...t.options].some(o=>o.value==cv))t.value=cv}const x=$('#ap_tx');if(x)x.style.display='none'};
+ if(P)ttSuggest($('#ap_tq'),()=>S.set.tg[num($('#ap_g').value)-1]||[],t=>{const sl=$('#ap_t');if(![...sl.options].some(o=>o.value==t))sl.add(new Option(t,t));sl.value=t;$('#ap_tx').style.display='none'});
  if(P)$('#ap_t').onchange=()=>{$('#ap_tx').style.display=$('#ap_t').value=='__new__'?'':'none'};
  ['ap_g','ap_s'].forEach(i=>$('#'+i).onchange=()=>{sal();rt()});
  $('#ap_e').onchange=()=>{const e=S.emps.find(x=>x.id==$('#ap_e').value);if(!e)return;const c=calc(e),g=num(e.g),s=num(e.s);
   $('#ap_g').value=P?Math.max(g-1,num(e.settleG)||1,1):g;$('#ap_s').value=P?1:Math.min(s+1,11);
   const d=c?(P?(c.pDue||c.due):c.aDue):null;$('#ap_d').value=d?iso(d):'';
   rt();
+  if(P){const t=$('#ap_t'),nt=nextTitleX(e,num($('#ap_g').value)).t,p=nt.find(x=>[...t.options].some(o=>o.value==x));if(p){t.value=p;$('#ap_tx').style.display='none'}}
   $('#ap_cur').textContent=`الحالي: درجة ${g} مرحلة ${s} (${nf(salary(g,s))}) | آخر علاوة ${fd(pd(e.lastA))||'-'} | آخر ترفيع ${fd(pd(e.lastP))||'-'}`;sal();apUpd(P?'promo':'allow')};
  const nrm=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
  const fe=()=>{const q=nrm($('#ap_q').value.trim()),cv=$('#ap_e').value,L=S.emps.filter(e=>!inactive(e)&&(!q||nrm(e.name+' '+(e.title||'')).includes(q)));
@@ -988,6 +1072,7 @@ async function exp(mode){
  if(!dl){toast('التصدير غير متاح في هذا العرض');return}
  if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
  const m=$('#m').value,rows=rowsFor(mode,'',m,$('#allm').checked),yr=(m||mo()).slice(0,4),A=mode=='a',wb=new ExcelJS.Workbook();
+ let tMiss=0;
  rows.sort((a,b)=>(num(a.e.g)||99)-(num(b.e.g)||99)||((+a.c.due)||0)-((+b.c.due)||0)||String(a.e.name).localeCompare(String(b.e.name),'ar'));
  const wc=t=>Math.max(4,Math.round((t/15-5)/7*10)/10);
  const W=A?[540,1890,1260,810,810,1080,810,720,900,1080,1440,2880,1260].map(wc):[8,15.55,16.21,33.21,20.43,12.55,11.99,25.87,23.33,26.88,75.99,10.2,19.77,16.21,16.21,21.32],n=W.length;
@@ -1009,12 +1094,13 @@ async function exp(mode){
   for(let r=1;r<=2;r++){for(let k=1;k<=16;k++)xs(ws.getCell(r,k),'Arial',24,'FFCC99FF');ws.getRow(r).height=100.8}
   const hr=ws.addRow(['ت','اسم الوزارة','اسم البلدية','الاسم الثلاثي','العنوان الوظيفي','الدرجة الحالية','المرحلة الحالية','الشهادة','تاريخ استحقاق الترفيع السابق','امر اخر ترفيع','اوامر الشكر','العقوبات او إضافة خدمة','العنوان الوظيفي الجديد','الدرجة الجديده','المرحلة الجديده','تاريخ الاستحقاق الجديد']);
   hr.height=100.8;hr.eachCell(c=>xs(c,'Times New Roman',18,'FFFFFFFF'));
-  rows.forEach(({e,c},i)=>{const v=[i+1,'محافظة الانبار','مديرية بلدية هيت',e.name,e.title,+e.g,+e.s,e.eduX||e.edu,UD(pd(e.lastP)),e.promoOrder||'/',ltxt(perL(e))||'/',num(e.pen)?num(e.pen)+' شهر':'/',e.title,c.ng,c.ns,UD(c.due)];const r=ws.addRow(v);
-   r.eachCell(x=>xs(x,'Times New Roman',20,'FFC0C0C0'));[9,16].forEach(k=>r.getCell(k).numFmt='d/m/yyyy;@');
+  rows.forEach(({e,c},i)=>{const v=[i+1,'محافظة الانبار','مديرية بلدية هيت',e.name,e.title,+e.g,+e.s,e.eduX||e.edu,UD(pd(e.lastP)),e.promoOrder||'/',ltxt(perL(e))||'/',num(e.pen)?num(e.pen)+' شهر':'/',nextTitleX(e,c.ng).t.join(' / '),c.ng,c.ns,UD(c.due)];const r=ws.addRow(v);if(nextTitleX(e,c.ng).m!='exact'){tMiss++;}
+   r.eachCell(x=>xs(x,'Times New Roman',20,'FFC0C0C0'));if(nextTitleX(e,c.ng).m!='exact')xs(r.getCell(13),'Times New Roman',20,'FFFFFF00');[9,16].forEach(k=>r.getCell(k).numFmt='d/m/yyyy;@');
    r.height=Math.max(100.8,27*Math.max(...v.map((x,k)=>typeof x=='string'?Math.ceil(x.length/(W[k]*.5)):1)))});
   ws.addRow([]);const f=ws.addRow([]);f.getCell(1).value='الدرجة الحالية بجانب الحذف';f.getCell(13).value='جانب الاستحداث';[1,13].forEach(k=>{f.getCell(k).font={name:'Times New Roman',size:14,bold:true}});
  }
  const buf=await wb.xlsx.writeBuffer();
+ if(!A&&typeof tMiss=='number'&&tMiss)setTimeout(()=>toast('تنبيه: '+tMiss+' موظف عنوانهم الجديد تقديري أو غير موجود في سلّم العناوين (تُرك فارغاً إن لم يُعثر عليه) — ظُلّلت خلاياهم بالأصفر للمراجعة'),800);
  try{await dl.save({filename:(A?'علاوات_':'ترفيعات_')+(m||'الكل')+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}
 }
 async function expNames(){
