@@ -98,6 +98,8 @@ textarea.sm{resize:vertical;min-height:0}
 .arvi{padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px));color:#dfeae8;font-size:.9em;max-height:22vh;overflow:auto;background:#0b1c1a;line-height:1.6}
 .dt{display:flex;gap:6px;width:100%}.dt select{flex:1;min-width:0;padding-inline:4px}
 .sgl{max-height:240px;overflow:auto;background:var(--card);border:1.5px solid var(--pri2);border-radius:12px}.sgi{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}.sgi:last-child{border-bottom:0}.sgi:hover,.sgi:active{background:var(--bg)}
+.seg{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}.seg button{flex:1 1 220px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--pri2);background:var(--card);color:var(--ink);font-family:inherit;font-weight:700;font-size:1em;cursor:pointer}.seg button.on{background:var(--pri);color:#fff}.seg small{opacity:.8;font-weight:600}
+fieldset{min-width:0}
 </style>
 </head>
 <body>
@@ -155,13 +157,13 @@ if(S.set.scaleVer!==2){S.set.grid=JSON.parse(JSON.stringify(SCALE2.grid));S.set.
  S.set.eg=Object.assign({},EGD,S.set.eg||{});S.ui=S.ui||{};
 }
 migrate();
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}cloudSave()};
+const save=()=>{S.at=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){if(!save._w||Date.now()-save._w>15000){save._w=Date.now();setTimeout(()=>toast('⚠ تعذّر الحفظ على هذا الجهاز (الذاكرة ممتلئة أو التصفح الخاص) — خذ نسخة احتياطية الآن'),0)}}cloudSave()};
 const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2600)};
 const pd=s=>s?new Date(s+'T00:00:00'):null;
 const fd=d=>d?`${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`:'';
 const fdt=t=>{const d=new Date(t);return fd(d)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
 const iso=d=>d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';
-const addM=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x};
+const addM=(d,m)=>{const x=new Date(d),day=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+m);x.setDate(Math.min(day,new Date(x.getFullYear(),x.getMonth()+1,0).getDate()));return x};
 const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
 const num=v=>+v||0,nf=n=>num(n).toLocaleString('en-US');
 const salary=(g,s)=>(S.set.grid[g-1]||[])[s-1]||0;
@@ -300,6 +302,7 @@ async function kfExport(eid){
  const buf=await wb.xlsx.writeBuffer();
  try{await dl.save({filename:single?'كفالات_'+String(emps[0].name).replace(/[\\\/:*?"<>|]/g,'').trim()+'.xlsx':'سجل_الكفالات.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}}
 /* ===== الطباعة / السكنر / كتب القدم القانوني ===== */
+const APP_VER='2026.10.30';
 const DEF_TITLE='مديرية بلدية هيت - شعبة الموارد البشرية';
 const PR_SZ={A4:[210,297],A3:[297,420],A5:[148,210],Letter:[216,279]},PR_DEF={paper:'A4',orient:'portrait',margin:10,header:true};
 const prCfg=()=>({...PR_DEF,...((S.ui||{}).pr||{})});
@@ -357,7 +360,9 @@ ICON.sick='<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 1
 ICON.arch='<path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M8 13h8M8 16h5"/>';
 const AR_CATS=['كتاب القدم القانوني','كتاب قدم الستة أشهر','كتاب كفالة','أمر تعيين','أمر آخر ترفيع','أمر آخر علاوة','أمر مباشرة','هوية وجنسية','شهادة دراسية','كتاب شكر','عقوبة','ترفيع','علاوة','إجازة','نقل وانتداب','تقاعد','طبي','أخرى'];
 let arDB=null,AR=[],ARH=new Map(),arUrls=[],arCur=[],arW=null,arV=null,arKeyOn=false,arTess=null;
-const arSt={emp:null,sort:'old',cat:''};
+const arSt={emp:null,sort:'old',cat:'',grp:'act'};
+const arGrpOk=e=>inactive(e)==(arSt.grp=='out');
+const arRecGrp=r=>{const e=arEmpOf(r.emp);return e?arGrpOk(e):arSt.grp=='act'};
 const arCatList=()=>{const base=AR_CATS.filter(c=>c!='أخرى'),cu=[...new Set(AR.map(r=>r.cat).filter(c=>c&&!AR_CATS.includes(c)))].sort((a,b)=>a.localeCompare(b,'ar'));return[...base,...cu,'أخرى']};
 const arCatSel=cur=>{const L=arCatList();return L.includes(cur)?cur:(cur?'أخرى':'')};
 const arCatOpts=(cur,empty)=>{const sel=arCatSel(cur);return(empty?`<option value="">${empty}</option>`:'')+arCatList().map(c=>`<option${c==sel?' selected':''}>${lvEs(c)}</option>`).join('')};
@@ -382,19 +387,24 @@ const arExt=r=>/pdf/i.test(r.mime)?'pdf':/png/i.test(r.mime)?'png':/jpe?g/i.test
 const arDay=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 
 async function arPage(){
- shell('ارشفة الاضابير',`<div class="ar"><div class="arl"><label>الموظفون<input id="ar_eq" type="search" placeholder="اسم / رقم الاضبارة / الرقم الوظيفي" autocomplete="off"></label><div id="ar_list"></div></div>
+ {const se=arSt.emp?arEmpOf(arSt.emp):null;if(se)arSt.grp=inactive(se)?'out':'act';else if(arSt.emp)arSt.emp=null}
+ shell('ارشفة الاضابير',`<div class="seg"><button type="button" id="ar_tab_act" onclick="arTab('act')">اضبارات الموظفين العاملين <small id="ar_c_act"></small></button><button type="button" id="ar_tab_out" onclick="arTab('out')">اضبارات المنقولين والمتقاعدين <small id="ar_c_out"></small></button></div><div class="ar"><div class="arl"><label>الموظفون<input id="ar_eq" type="search" placeholder="اسم / رقم الاضبارة / الرقم الوظيفي" autocomplete="off"></label><label id="ar_estw" style="display:none">الحالة<select id="ar_est"><option value="">الكل</option><option value="ret">متقاعد</option><option value="trf">منقول</option></select></label><div id="ar_list"></div></div>
  <div><div class="tools"><div style="flex:2 1 220px"><label>بحث متقدم<span style="display:flex;gap:6px"><input id="ar_q" type="search" placeholder="اسم، رقم اضبارة، نوع وثيقة، ملاحظة، نص مستخرج" autocomplete="off" style="flex:1"><button type="button" class="btn gold" id="ar_lens" aria-label="بحث في الأرشيف" title="بحث في كل الأرشيف" style="padding:0 14px;display:flex;align-items:center"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button></span></label></div><div><label>نوع الوثيقة<select id="ar_fc"><option value="">الكل</option></select></label></div><div><label>من تاريخ<input id="ar_f1" type="date"></label></div><div><label>إلى تاريخ<input id="ar_f2" type="date"></label></div></div><div id="ar_main"></div></div></div>`);
  try{await arLoad()}catch(e){$('#ar_main').innerHTML='<p class="note">تعذّر فتح مخزن الأرشيف في هذا المتصفح (قد يكون التصفح خاصاً).</p>';return}
  let tm=0;const dr=()=>{clearTimeout(tm);tm=setTimeout(arRender,160)};
- $('#ar_eq').oninput=arList;$('#ar_q').oninput=dr;$('#ar_lens').onclick=arLens;$('#ar_q').onkeydown=ev=>{if(ev.key=='Enter'){ev.preventDefault();arLens()}};['#ar_fc','#ar_f1','#ar_f2'].forEach(k=>$(k).onchange=arRender);
+ $('#ar_eq').oninput=arList;$('#ar_est').onchange=arList;$('#ar_q').oninput=dr;$('#ar_lens').onclick=arLens;$('#ar_q').onkeydown=ev=>{if(ev.key=='Enter'){ev.preventDefault();arLens()}};['#ar_fc','#ar_f1','#ar_f2'].forEach(k=>$(k).onchange=arRender);
  arList();arRender()}
+function arTabs(){const a=$('#ar_tab_act'),o=$('#ar_tab_out');if(!a)return;const ids={};S.emps.forEach(e=>ids[e.id]=inactive(e));let pa=0,po=0;AR.forEach(r=>{if(r.emp in ids){if(ids[r.emp])po++;else pa++}else pa++});
+ a.className=arSt.grp=='act'?'on':'';o.className=arSt.grp=='out'?'on':'';$('#ar_c_act').textContent='('+S.emps.filter(e=>!inactive(e)).length+' موظف — '+pa+' صفحة)';$('#ar_c_out').textContent='('+S.emps.filter(inactive).length+' موظف — '+po+' صفحة)';
+ const w=$('#ar_estw');if(w)w.style.display=arSt.grp=='out'?'':'none'}
+function arTab(g){if(arSt.grp==g)return;arSt.grp=g;arSt.emp=null;const q=$('#ar_est');if(q)q.value='';arList();arRender()}
 function arList(){
  if(!$('#ar_list'))return;
- const q=arN($('#ar_eq').value.trim()).split(' ').filter(Boolean),cnt={};AR.forEach(r=>cnt[r.emp]=(cnt[r.emp]||0)+1);
- const L=S.emps.filter(e=>{const h=arEmpHay(e);return q.every(t=>h.includes(t))}).sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
- $('#ar_list').innerHTML=L.slice(0,300).map(e=>{const st=mtSt(e);return`<button class="are ${arSt.emp==e.id?'on':''}" onclick="arPick(${e.id})"><span>${lvEs(e.name)}${st!='perm'?` <small>(${MST[st]})</small>`:''}</span><small>${cnt[e.id]?cnt[e.id]+' صفحة':'—'}</small></button>`}).join('')||'<p style="color:var(--mut)">لا يوجد موظف</p>'}
+ const q=arN($('#ar_eq').value.trim()).split(' ').filter(Boolean),cnt={},est=($('#ar_est')||{value:''}).value;AR.forEach(r=>cnt[r.emp]=(cnt[r.emp]||0)+1);arTabs();
+ const L=S.emps.filter(e=>{if(!arGrpOk(e))return false;if(arSt.grp=='out'&&est&&mtSt(e)!=est)return false;const h=arEmpHay(e);return q.every(t=>h.includes(t))}).sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'));
+ $('#ar_list').innerHTML=L.slice(0,300).map(e=>{const st=mtSt(e);return`<button class="are ${arSt.emp==e.id?'on':''}" onclick="arPick(${e.id})"><span>${lvEs(e.name)}${st!='perm'?` <small>(${MST[st]})</small>`:''}</span><small>${cnt[e.id]?cnt[e.id]+' صفحة':'—'}</small></button>`}).join('')||'<p style="color:var(--mut)">'+(arSt.grp=='out'?'لا يوجد منقولون أو متقاعدون':'لا يوجد موظف')+'</p>'}
 function arLens(){arSt.emp=null;arList();arRender();const m=$('#ar_main');if(m)m.scrollIntoView({behavior:'smooth',block:'start'})}
-function arPick(id){arSt.emp=arSt.emp==id?null:id;arList();arRender();if(arSt.emp)window.scrollTo(0,0)}
+function arPick(id){const pe=arEmpOf(id);if(pe)arSt.grp=inactive(pe)?'out':'act';arSt.emp=arSt.emp==id?null:id;arList();arRender();if(arSt.emp)window.scrollTo(0,0)}
 function arMatch(r,q,fc,f1,f2){
  if(fc&&r.cat!=fc)return false;const d=r.docDate||arDay(r.added);if(f1&&d<f1)return false;if(f2&&d>f2)return false;
  if(!q)return true;const eh=arEmpHay(arEmpOf(r.emp)||{name:''}),h=ARH.get(r.id)||'';return q.split(' ').filter(Boolean).every(t=>h.includes(t)||eh.includes(t))}
@@ -403,15 +413,15 @@ function arCard(r,showEmp,i){
  return`<div class="arc"><div class="th" onclick="arOpenCard(${i})">${th}<span class="arpg">ص ${r._n||''}</span></div><div class="mt">${showEmp?`<b>${lvEs(e.name)}</b><br>`:''}${r.cat?`<b style="color:var(--pri2)">${lvEs(r.cat)}</b>`:'<span style="color:var(--mut)">بدون نوع</span>'}${r.stage?` · المرحلة ${ORD[r.stage-1]||r.stage}`:''}${r.docDate?` · ${lvEs(fd(pd(r.docDate)))}`:''}${r.note?`<br>${lvEs(r.note)}`:''}${r.ocrDone?'<br><small style="color:var(--mut)">✓ نص مستخرج</small>':''}</div><div class="bt"><button class="btn alt" onclick="arEdit('${r.id}')">تعديل</button>${showEmp?`<button class="btn alt" onclick="arPick(${r.emp})">الاضبارة</button>`:`<button class="btn red" onclick="arDelCard('${r.id}',this)">حذف</button>`}</div></div>`}
 function arOpenCard(i){arView(arCur.slice(),i)}
 function arRender(){
- arRevoke();arFillCats();const m=$('#ar_main');if(!m)return;
+ arRevoke();arFillCats();arTabs();const m=$('#ar_main');if(!m)return;
  const q=arN($('#ar_q').value.trim()),fc=$('#ar_fc').value,f1=$('#ar_f1').value,f2=$('#ar_f2').value,act=!!(q||fc||f1||f2),e=arSt.emp?arEmpOf(arSt.emp):null;
  if(arSt.emp&&!e)arSt.emp=null;
- let L=AR.filter(r=>(!e||r.emp==e.id)&&arMatch(r,q,fc,f1,f2));
+ let L=AR.filter(r=>(!e||r.emp==e.id)&&(e||arRecGrp(r))&&arMatch(r,q,fc,f1,f2));
  if(e){const so=arSt.sort;L.sort((a,b)=>so=='new'?b.added-a.added:so=='cat'?String(a.cat).localeCompare(String(b.cat),'ar')||a.added-b.added:a.added-b.added)}else L.sort((a,b)=>b.added-a.added);
  arCur=L.map(r=>r.id);
  if(!e&&!act){
-  const emps=new Set(AR.map(r=>r.emp)).size,mb=Math.round(AR.reduce((a,r)=>a+(r.size||0),0)/1048576*10)/10;
-  m.innerHTML=`<div class="stat"><div><b>${AR.length}</b>صفحة مؤرشفة</div><div><b>${emps}</b>اضبارة</div><div><b>${mb}</b>ميغابايت</div></div><p class="note" style="color:var(--mut)">اختر موظفاً من القائمة لفتح اضبارته وإضافة صفحات إليها، أو استخدم البحث أعلاه للبحث في كل الاضابير.</p><p class="note" id="ar_sto"></p>`;arSto();return}
+  const GA=AR.filter(arRecGrp),emps=new Set(GA.map(r=>r.emp)).size,mb=Math.round(GA.reduce((a,r)=>a+(r.size||0),0)/1048576*10)/10;
+  m.innerHTML=`<div class="stat"><div><b>${AR.length}</b>صفحة مؤرشفة</div><div><b>${emps}</b>اضبارة</div><div><b>${mb}</b>ميغابايت</div></div><p class="note" style="color:var(--mut)">${arSt.grp=='out'?'هذا القسم لاضبارات المنقولين والمتقاعدين: كل من يُنقل أو يُحال إلى التقاعد تنتقل اضبارته المؤرشفة بكل صفحاتها إلى هنا تلقائياً، وتعود إلى قسم العاملين إن أُعيد إلى الملاك. اختر موظفاً من القائمة لفتح اضبارته، أو استخدم البحث أعلاه.':'اختر موظفاً من القائمة لفتح اضبارته وإضافة صفحات إليها، أو استخدم البحث أعلاه للبحث في اضبارات هذا القسم.'}</p><p class="note" id="ar_sto"></p>`;arSto();return}
  let h='';
  if(e){const mine=AR.filter(r=>r.emp==e.id),sz=Math.round(mine.reduce((a,r)=>a+(r.size||0),0)/1048576*10)/10;
   h+=`<div class="lvcard"><h3>${lvEs(e.name)}${mtSt(e)!='perm'?` <span class="badge">${MST[mtSt(e)]}</span>`:''}</h3><p>${lvEs(e.title)||'—'}</p><p>رقم الاضبارة: ${lvEs(arFile(e))||'—'} &nbsp;|&nbsp; ${mine.length} صفحة (${sz} ميغابايت)</p></div>
@@ -421,7 +431,7 @@ function arRender(){
   <div class="drop" id="ar_drop">اسحب الصور أو ملفات PDF وأفلتها هنا</div>
   <div class="tools"><div><label>الترتيب<select id="ar_sort"><option value="old"${arSt.sort=='old'?' selected':''}>حسب التسلسل (الأقدم أولاً)</option><option value="new"${arSt.sort=='new'?' selected':''}>الأحدث أولاً</option><option value="cat"${arSt.sort=='cat'?' selected':''}>حسب نوع الوثيقة</option></select></label></div><button class="btn alt" onclick="arDlAll()">تنزيل الكل</button><button class="btn alt" onclick="arPrintAll()">طباعة الاضبارة</button><button class="btn alt" onclick="arOcrAll()">استخراج النص للصفحات الجديدة</button><button class="btn alt" onclick="arOcrAll(true)">إعادة استخراج النص للكل (استبدال)</button><button class="btn alt" onclick="arTestEngine()">اختبار محرك الاستخراج</button>
   <div><label>نمط قراءة الصفحة<select id="ar_psm"><option value="4"${arOcrPsm()=='4'?' selected':''}>عمود واحد (كتب رسمية)</option><option value="6"${arOcrPsm()=='6'?' selected':''}>كتلة نص واحدة</option><option value="3"${arOcrPsm()=='3'?' selected':''}>تلقائي</option></select></label></div><div><label>صرامة قبول الكلمات<select id="ar_thr"><option value="70"${arOcrThr()==70?' selected':''}>صارم (أقل أخطاء)</option><option value="60"${arOcrThr()==60?' selected':''}>متوسط</option><option value="40"${arOcrThr()==40?' selected':''}>متساهل (كلمات أكثر وأخطاء أكثر)</option></select></label></div><div><label>تحسين الصورة قبل القراءة<select id="ar_pre"><option value="gray"${arOcrPre()=='gray'?' selected':''}>تدرّج رمادي وتباين (الأفضل غالباً)</option><option value="bw"${arOcrPre()=='bw'?' selected':''}>أبيض وأسود</option><option value="none"${arOcrPre()=='none'?' selected':''}>بدون تحسين</option></select></label></div><button class="btn alt" onclick="arPick(${e.id})">كل الاضابير</button></div><label style="display:flex;gap:8px;align-items:center;font-weight:600;margin:6px 0"><input type="checkbox" id="ar_auto" ${arAutoOn()?'checked':''} style="width:auto"> استخراج النص من الصورة تلقائياً عند إضافتها (يُوضع في خانة النص المستخرج / الكلمات المفتاحية)</label><div id="ar_ocs" class="note" style="color:var(--mut)"></div>`}
- else h+=`<p class="note" style="color:var(--mut)">نتائج البحث في كل الاضابير: ${L.length}</p>`;
+ else h+=`<p class="note" style="color:var(--mut)">نتائج البحث في ${arSt.grp=='out'?'اضبارات المنقولين والمتقاعدين':'اضبارات الموظفين العاملين'}: ${L.length}</p>`;
  h+=`<div class="arg">${L.map((r,i)=>arCard(r,!e,i)).join('')||'<p style="color:var(--mut)">لا توجد صفحات.</p>'}</div>`;
  m.innerHTML=h;
  if(e){const fi=$('#ar_fi');fi.onchange=async()=>{const fs=[...fi.files];fi.value='';await arIngest(fs)};
@@ -745,17 +755,17 @@ function home(){
  if(typeof bkAuto=='function')bkAuto();
  lvSyncAll();
  $('#view').hidden=true;$('#home').hidden=false;
- const t=new Date(),n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c);
+ const t=new Date();t.setHours(0,0,0,0);const n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c);
  const a=n.filter(x=>x.c.status=='علاوة'&&x.c.due>=t&&x.c.due<=addD(t,S.set.dA)).length;
  const p=n.filter(x=>x.c.status=='ترفيع'&&x.c.due>=t&&x.c.due<=addM(t,1)).length;
  const tm=iso(t).slice(0,7),aM=n.filter(x=>x.c.status=='علاوة'&&iso(x.c.due).slice(0,7)==tm).length,pM=n.filter(x=>x.c.status=='ترفيع'&&iso(x.c.due).slice(0,7)==tm).length;
  $('#alerts').innerHTML=`<div><b>${a}</b>مستحقو العلاوة خلال ${S.set.dA} أيام</div><div><b>${p}</b>مستحقو الترفيع خلال شهر</div><div><b>${aM} / ${pM}</b>علاوات / ترفيعات هذا الشهر</div>`;
  const icSt=k=>{const o=((S.ui||{}).ic||{})[k]||{};return(o.size?`--is:${o.size}px;`:'')+(o.color?`--ic:${o.color};`:'')};
   $('#tiles').innerHTML=TILES.map((x,i)=>`<button class="tile ${x[2]||''}" data-i="${i}"><svg viewBox="0 0 24 24" style="${icSt(x[0])}">${ICON[x[0]]}</svg>${x[1]}</button>`).join('');
- document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{$('#home').hidden=true;$('#view').hidden=false;TILES[b.dataset.i][3]();window.scrollTo(0,0)});
+ document.querySelectorAll('#tiles .tile').forEach(b=>b.onclick=()=>{$('#home').hidden=true;$('#view').hidden=false;TILES[b.dataset.i][3]();window.scrollTo(0,0)});
 }
 const shell=(title,body)=>{$('#view').innerHTML=`<div class="bar"><button class="btn alt" onclick="home()">رجوع</button><h2>${title}</h2></div><div class="page">${body}</div>`};
-const opt=(arr,v)=>arr.map(x=>`<option ${x==v?'selected':''}>${x}</option>`).join('');
+const opt=(arr,v)=>arr.map(x=>`<option ${x==v?'selected':''}>${String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</option>`).join('');
 const rng=(n,v)=>opt(Array.from({length:n},(_,i)=>i+1),v);
 const EDU=['دكتوراه','ماجستير','دبلوم عالي','بكالوريوس','دبلوم','اعدادية','متوسطة','ابتدائية','يقرأ ويكتب'];
 let curL=[];
@@ -765,11 +775,11 @@ function empForm(id){
  const f=(k,l,t='text',x='')=>`<label>${l}<input id="f_${k}" type="${t}" value="${e[k]??''}" ${x}></label>`;
  shell(id?'تعديل بيانات موظف':'إضافة موظف',`<div class="cols">
  <fieldset><legend>معلومات عامة</legend>${f('name','اسم الموظف (رباعي)')}${f('hireDate','تاريخ التعيين','date')}${dcRow('appt')}<label>التحصيل الدراسي<select id="f_edu">${opt(EDU,e.edu)}</select></label>${f('eduX','التحصيل الدراسي الدقيق')}
- <label>العنوان الوظيفي<input id="tq_f" type="search" placeholder="🔍 ابحث عن العنوان الوظيفي" autocomplete="off" style="margin-bottom:6px"><select id="f_title" data-v="${e.title||''}"></select><input id="f_titleX" placeholder="اكتب العنوان الوظيفي" style="display:none;margin-top:6px"></label>
+ <label>العنوان الوظيفي<input id="tq_f" type="search" placeholder="🔍 ابحث عن العنوان الوظيفي" autocomplete="off" style="margin-bottom:6px"><select id="f_title" data-v="${lvEs(e.title)}"></select><input id="f_titleX" placeholder="اكتب العنوان الوظيفي" style="display:none;margin-top:6px"></label>
  <label style="display:flex;align-items:center;gap:8px;color:var(--ink);background:rgba(197,143,44,.18);border:1.5px solid var(--gold);border-radius:10px;padding:8px 10px"><input type="checkbox" id="f_settle" style="width:auto" ${e.settle?'checked':''}> تسكين الموظف (علاوات فقط بدون ترفيع، ضمن نفس الدرجة)</label>
  <label>درجة التسكين المستقبلية — يُرفَّع الموظف حتى هذه الدرجة ثم يتوقف عندها ويبقى يتمتع بالعلاوات فقط<select id="f_settleG"><option value="">— بدون —</option>${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}"${num(e.settleG)==n?' selected':''}>الدرجة ${n}</option>`).join('')}</select></label>
  <label>نوع الاجازة<select id="f_ltype">${LV_TYPES.map(t=>`<option value="${t[0]}" ${t[0]==((e.lv&&e.lv.ltype)||'')?'selected':''}>${t[1]}</option>`).join('')}</select></label>
- <label>ملاحظات<textarea id="f_notes" rows="2" class="sm">${e.notes||''}</textarea></label></fieldset>
+ <label>ملاحظات<textarea id="f_notes" rows="2" class="sm">${lvEs(e.notes)}</textarea></label></fieldset>
  <fieldset><legend>معلومات العلاوة السابقة</legend>
  <label>الدرجة الوظيفية<select id="f_g">${rng(10,e.g)}</select></label><label>المرحلة<select id="f_s">${rng(11,e.s)}</select></label>
  <label>الراتب<input id="f_sal" readonly></label>${f('lastA','تاريخ آخر علاوة','date')}${dcRow('allow')}${f('lastP','تاريخ آخر ترفيع','date')}${dcRow('promo')}
@@ -838,15 +848,22 @@ function list(mode,focus){
   const q=$('#q').value.trim(),m=mode=='all'?'':$('#m').value,am=mode!='all'&&$('#allm').checked;
   const rows=rowsFor(mode,q,m,am);
   $('#th').innerHTML='<tr><th>ت</th><th>الاسم</th><th>العنوان الوظيفي</th><th>الدرجة/المرحلة</th><th>الراتب</th><th>الجديد</th><th>الاستحقاق</th><th>الحالة</th><th>كتب الشكر بفترة الترفيع</th><th></th></tr>';
-  $('#tb').innerHTML=rows.map(({e,c},i)=>`<tr class="${isStl(e)?'stl':''}" style="box-shadow:inset -6px 0 0 hsl(${(i*47)%360} 65% 48%)"><td>${i+1}</td><td>${e.name}${isStl(e)?' <span class="badge">مُسكَّن</span>':''}</td><td>${e.title||''}</td><td>${e.g}/${e.s}</td><td>${nf(salary(e.g,e.s))}</td><td>${c.ng}/${c.ns} (${nf(c.nsal)})</td><td>${fd(c.due)}</td><td>${c.status}</td><td>${thanksIn(e)}</td><td style="white-space:nowrap"><button class="btn alt" onclick="empForm(${e.id})">تعديل</button> <button class="btn red" onclick="delEmp(${e.id},this)">حذف</button></td></tr>`).join('')||'<tr><td colspan="10">لا توجد بيانات. أضف موظفاً من الشاشة الرئيسية.</td></tr>';
+  $('#tb').innerHTML=rows.map(({e,c},i)=>`<tr class="${isStl(e)?'stl':''}" style="box-shadow:inset -6px 0 0 hsl(${(i*47)%360} 65% 48%)"><td>${i+1}</td><td>${lvEs(e.name)}${isStl(e)?' <span class="badge">مُسكَّن</span>':''}</td><td>${lvEs(e.title)}</td><td>${e.g}/${e.s}</td><td>${nf(salary(e.g,e.s))}</td><td>${c.ng}/${c.ns} (${nf(c.nsal)})</td><td>${fd(c.due)}</td><td>${c.status}</td><td>${thanksIn(e)}</td><td style="white-space:nowrap"><button class="btn alt" onclick="empForm(${e.id})">تعديل</button> <button class="btn red" onclick="delEmp(${e.id},this)">حذف</button></td></tr>`).join('')||'<tr><td colspan="10">لا توجد بيانات. أضف موظفاً من الشاشة الرئيسية.</td></tr>';
  };
  ['q','m','allm'].forEach(i=>{const el=$('#'+i);if(el)el.oninput=draw});draw();
 }
 function rowsFor(mode,q='',m='',am=true){
- return S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c&&(!q||(x.e.name+x.e.title).includes(q))&&
+ const qt=nrmA(q).trim().split(' ').filter(Boolean);
+ return S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c&&(!qt.length||qt.every(t=>nrmA(x.e.name+' '+(x.e.title||'')).includes(t)))&&
   (mode=='all'||(mode=='a'?x.c.status=='علاوة':x.c.status=='ترفيع')&&(am||iso(x.c.due).slice(0,7)==m)));
 }
-function delEmp(id,b){if(b.dataset.c){S.emps=S.emps.filter(x=>x.id!=id);save();list('all');toast('تم الحذف');return}b.dataset.c=1;b.textContent='تأكيد الحذف';setTimeout(()=>{b.dataset.c='';b.textContent='حذف'},4000)}
+async function delEmp(id,b){
+ if(b.dataset.c){
+  try{if(S.emps.length)await bkSnap('del-'+Date.now(),'قبل حذف موظف')}catch(e){}
+  let np=0;try{await arLoad();const L=AR.filter(r=>r.emp==id);np=L.length;for(const r of L)await arDelDb(r.id);AR=AR.filter(r=>r.emp!=id)}catch(e){}
+  S.emps=S.emps.filter(x=>x.id!=id);save();toast('تم حذف الموظف'+(np?' وحذف '+np+' صفحة من اضبارته المؤرشفة':''));if($('#mtb'))mtPage();else list('all');return}
+ let np=0;try{await arLoad();np=AR.filter(r=>r.emp==id).length}catch(e){}
+ const t0=b.textContent;b.dataset.c=1;b.textContent='تأكيد الحذف'+(np?' (مع '+np+' صفحة مؤرشفة)':'');setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent=t0}},5000)}
 function stats(){
  const n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c),m=mo();
  const by=Array.from({length:10},(_,i)=>n.filter(x=>x.e.g==i+1).length);
@@ -883,7 +900,7 @@ function settings(){
   <p class="note">اختيار الطابعة (سلكية USB أو لاسلكية/شبكة) يتم من نافذة الطباعة التي تظهر عند الضغط على أي زر «طباعة»، لأن المتصفح لا يسمح لأي موقع بقراءة قائمة الطابعات أو اختيار واحدة بنفسه. لتظهر طابعتك أولاً اجعلها «الطابعة الافتراضية» في إعدادات الطابعات في ويندوز. وللطباعة المباشرة بلا نافذة: انسخ اختصار Chrome وأضف في آخر خانة «الهدف» ‎--kiosk-printing‎ ثم افتح البرنامج منه، فيطبع على الطابعة الافتراضية فوراً.</p>
   <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
   <p style="margin:0 0 6px"><b>مجلد السكنر</b> — اضبط برنامج السكنر (مثل Windows Scan أو NAPS2 أو برنامج الشركة المصنّعة) ليحفظ المسح في مجلد، وحدّده هنا مرة واحدة. في «ارشفة الاضابير» يكفي ضغط «ربط مجلد السكنر» فتُسحب الصفحات الجديدة تلقائياً إلى اضبارة الموظف المفتوحة.</p>
-  <div class="act"><button class="btn alt" id="sc_b">تحديد / تغيير مجلد السكنر</button><span id="sc_n" style="color:var(--mut)"></span></div></fieldset>`);
+  <div class="act"><button class="btn alt" id="sc_b">تحديد / تغيير مجلد السكنر</button><span id="sc_n" style="color:var(--mut)"></span></div></fieldset><p class="note" style="text-align:center;color:var(--mut)">إصدار البرنامج: ${APP_VER}</p>`);
  const up=()=>{save();applyUI()};
  $('#u_c').oninput=()=>{S.ui.color=$('#u_c').value;up()};
  $('#u_r').onclick=()=>{S.ui.color='';up();settings()};
@@ -940,9 +957,9 @@ function apPage(kind){
   rt();
   if(P){const t=$('#ap_t'),nt=nextTitleX(e,num($('#ap_g').value)).t,p=nt.find(x=>[...t.options].some(o=>o.value==x));if(p){t.value=p;$('#ap_tx').style.display='none'}}
   $('#ap_cur').textContent=`الحالي: درجة ${g} مرحلة ${s} (${nf(salary(g,s))}) | آخر علاوة ${fd(pd(e.lastA))||'-'} | آخر ترفيع ${fd(pd(e.lastP))||'-'}`;sal();apUpd(P?'promo':'allow')};
- const nrm=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
+ const nrm=t=>String(t||'').replace(/[\u064B-\u0652\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\s+/g,' ').toLowerCase();
  const fe=()=>{const q=nrm($('#ap_q').value.trim()),cv=$('#ap_e').value,L=S.emps.filter(e=>!inactive(e)&&(!q||nrm(e.name+' '+(e.title||'')).includes(q)));
-  $('#ap_e').innerHTML='<option value="">— اختر ('+L.length+') —</option>'+L.map(e=>`<option value="${e.id}">${e.name}${isStl(e)?' (مُسكَّن)':''}</option>`).join('');
+  $('#ap_e').innerHTML='<option value="">— اختر ('+L.length+') —</option>'+L.map(e=>`<option value="${e.id}">${lvEs(e.name)}${isStl(e)?' (مُسكَّن)':''}</option>`).join('');
   if(q&&L.length==1){$('#ap_e').value=L[0].id;$('#ap_e').onchange()}else if(L.some(e=>e.id==cv))$('#ap_e').value=cv};
  $('#ap_q').oninput=fe;fe();
  sal();
@@ -989,12 +1006,12 @@ const lvAddAuto=e=>(lvOf(e).adds||[]).reduce((a,r)=>a+num(r.days),0);
 const lvAdded=e=>Math.round((lvAddAuto(e)+(+lvOf(e).addAdj||0))*100)/100;
 const lvRem=e=>num(lvOf(e).bal)+lvAdded(e)-lvUsed(e);
 /* إضافة 36 يوماً تلقائياً مع بداية كل سنة ميلادية (لكل سنة فائتة إن لم يُفتح البرنامج) */
-function lvSync(e){if(inactive(e)||lvKind=='time')return false;const v=lvOf(e);if(v.bal===''||v.bal==null||!v.addYear)return false;const Y=new Date().getFullYear();let ch=false;v.adds=v.adds||[];
+function lvSync(e){if(inactive(e)||lvKind=='time'||!e[LVK()])return false;const v=lvOf(e);if(v.bal===''||v.bal==null||!v.addYear)return false;const Y=new Date().getFullYear();let ch=false;v.adds=v.adds||[];
  for(let y=v.addYear+1;y<=Y;y++){if(!v.adds.some(a=>a.year==y)){v.adds.push(LV_NOADD.includes(v.ltype)?{year:y,days:0,z:1}:{year:y,days:LVA()});ch=true}v.addYear=y;ch=true}
  if(lvFixAdds(v))ch=true;
  return ch}
 function lvSyncAll(){const k=lvKind;lvKind='reg';let ch=false;S.emps.forEach(e=>{if(lvSync(e))ch=true});lvKind=k;if(ch)save()}
-const nrmA=t=>(t||'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ');
+const nrmA=t=>String(t||'').replace(/[\u064B-\u0652\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\s+/g,' ').toLowerCase();
 const lvIn=e=>{const v=e[LVK()];return !!v&&!!(v.added||v.file||v.reg||(v.bal!==''&&v.bal!=null)||(v.recs||[]).length)};
 const lvEs=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let lvMode='full',lvGrp='act';const lvOk=e=>inactive(e)==(lvGrp=='out'),lvSel=e=>lvGrp=='out'?inactive(e):(lvKind!='reg'?!inactive(e):(lvIn(e)&&!inactive(e)));
@@ -1285,7 +1302,7 @@ function inactive(e){const v=mtSt(e);return v=='ret'||v=='trf'}
 const mtSecOf=e=>{const v=mtSt(e);return v=='ret'||v=='trf'?v:'perm'};
 const mtMar=e=>{const m=e.m||{};return m.marital=='متزوج'||(!m.marital&&!!String(m.wife||'').trim())};
 let mtSec='perm';
-const mtQb=e=>{const s=mtSt(e);return s=='ret'||s=='trf'?`<button class="btn alt" onclick="mtQuick(${e.id},'perm',this)">إعادة للملاك</button>`:`<button class="btn alt" onclick="mtQuick(${e.id},'trf',this)">نقل</button> <button class="btn alt" onclick="mtQuick(${e.id},'ret',this)">تقاعد</button> <button class="btn alt" onclick="mtQuick(${e.id},'${s=='sec'?'perm':'sec'}',this)">${s=='sec'?'إلغاء الانتساب':'منسب'}</button>`};
+const mtQb=e=>{const s=mtSt(e);return s=='ret'||s=='trf'?`<button class="btn alt" onclick="mtQuick(${e.id},'perm',this)">إعادة للملاك</button> <button class="btn red" onclick="delEmp(${e.id},this)">حذف</button>`:`<button class="btn alt" onclick="mtQuick(${e.id},'trf',this)">نقل</button> <button class="btn alt" onclick="mtQuick(${e.id},'ret',this)">تقاعد</button> <button class="btn alt" onclick="mtQuick(${e.id},'${s=='sec'?'perm':'sec'}',this)">${s=='sec'?'إلغاء الانتساب':'منسب'}</button>`};
 function mtQuick(id,st,b){const e=S.emps.find(x=>x.id==id);if(!e)return;
  if((st=='ret'||st=='trf')&&!b.dataset.c){b.dataset.c=1;const t=b.textContent;b.textContent='تأكيد؟';setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent=t}},4000);return}
  e.m=e.m||{};e.m.status=st;save();toast(st=='ret'||st=='trf'?'تم نقل الموظف إلى قسم '+MSEC[st]:st=='sec'?'تم تحديد الموظف منسباً':'تمت الإعادة إلى الملاك الدائم');mtPage()}
@@ -1385,7 +1402,7 @@ const cstat=t=>{const x=$('#cstat');if(x)x.textContent=t};
 function cloudSave(){
  if(!fdb||!fuser)return;clearTimeout(ctimer);
  ctimer=setTimeout(async()=>{try{cstat('جارٍ الحفظ في السحابة...');
-  await fdb.collection('hit_unit').doc('main').set({json:JSON.stringify({emps:S.emps,set:S.set}),by:fuser.email||'anonymous',at:firebase.firestore.FieldValue.serverTimestamp()});
+  await fdb.collection('hit_unit').doc('main').set({json:JSON.stringify({emps:S.emps,set:S.set,ts:S.at||Date.now()}),by:fuser.email||'anonymous',at:firebase.firestore.FieldValue.serverTimestamp()});
   cstat('تم الحفظ في السحابة ✓')}catch(e){cstat('تعذّر الحفظ في السحابة');toast('تعذّر الحفظ في Firebase: '+(e.code||e.message))}},600);
 }
 async function cloudLoad(){
@@ -1394,12 +1411,17 @@ async function cloudLoad(){
   let c=null;
   try{c=JSON.parse(d.data().json);if(!c||!Array.isArray(c.emps))throw new Error('bad')}catch(err){
    /* بيانات السحابة تالفة: نُبقي البيانات المحلية ولا نكتب فوق السحابة */
-   cstat('بيانات السحابة تالفة — تم الاحتفاظ ببيانات هذا الجهاز');toast('تعذّر قراءة بيانات السحابة (تالفة). لم يتم تغيير أي شيء.');applyUI();home();return}
-  try{S.emps=c.emps;S.set=c.set||S.set;migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('تعذّر الحفظ المحلي: الذاكرة ممتلئة أو التصفح خاص')}cstat('متصل بالسحابة ✓')}catch(err){cstat('تعذّر تطبيق بيانات السحابة');toast('خطأ أثناء تحميل البيانات: '+(err.message||err));applyUI();home();return}}
+   cstat('بيانات السحابة تالفة — تم الاحتفاظ ببيانات هذا الجهاز');toast('تعذّر قراءة بيانات السحابة (تالفة). لم يتم تغيير أي شيء.');applyUI();homeIdle();return}
+  {const lt=num(S.at),ct=num(c.ts);
+   if(S.emps.length&&lt&&ct&&lt>ct+2000){cstat('بيانات هذا الجهاز أحدث من السحابة — تُرفع إليها الآن');toast('تم الاحتفاظ بتعديلاتك المحلية الأحدث ورفعها إلى السحابة');cloudSave();applyUI();homeIdle();return}
+   try{if(S.emps.length&&JSON.stringify(S.emps)!=JSON.stringify(c.emps))await bkSnap('cloud-'+Date.now(),'قبل التحميل من السحابة')}catch(e){}
+   S.at=ct||S.at}
+  try{S.emps=c.emps;S.set=c.set||S.set;migrate();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('تعذّر الحفظ المحلي: الذاكرة ممتلئة أو التصفح خاص')}cstat('متصل بالسحابة ✓')}catch(err){cstat('تعذّر تطبيق بيانات السحابة');toast('خطأ أثناء تحميل البيانات: '+(err.message||err));applyUI();homeIdle();return}}
  else if(S.emps.length){cstat('رفع البيانات المحلية إلى السحابة...');cloudSave()}
  else cstat('متصل بالسحابة - لا توجد بيانات بعد');
- applyUI();home();
+ applyUI();homeIdle();
 }
+const homeIdle=()=>{if(!$('#home').hidden)home()};
 function fbInit(){
  if(!FB_ON){if(gateOK())$('#login').style.display='none';cstat('وضع محلي: Firebase غير مُعدّ (البيانات على هذا الجهاز فقط)');return}
  firebase.initializeApp(FB_CONFIG);fdb=firebase.firestore();
@@ -1410,12 +1432,12 @@ function fbInit(){
 const GU='سامر',GH='33ce62d441d82235a2e4640a3248a3ef5eb45edd095d27fbf880ee97e98d9c38';
 const gateOK=()=>sessionStorage.getItem('hit-ok')=='1';
 async function doLogin(){const u=$('#lg_em').value.replace(/\s/g,''),p=$('#lg_pw').value.trim().replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
- const h=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+ let h='';try{h=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)))].map(b=>b.toString(16).padStart(2,'0')).join('')}catch(e){$('#lg_err').textContent='تعذّر التحقق: افتح البرنامج من رابطه الأصلي (https) وبمتصفح حديث';return}
  if(u==GU&&h==GH){sessionStorage.setItem('hit-ok','1');$('#lg_err').textContent='';$('#login').style.display='none';$('#outb').style.display='';$('#lg_pw').value=''}
  else $('#lg_err').textContent='اسم المستخدم أو رمز الدخول غير صحيح'}
 function doLogout(){sessionStorage.removeItem('hit-ok');location.reload()}
 dl={save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}};
-fbInit();
+try{fbInit()}catch(e){cstat('تعذّر تحميل Firebase (لا يوجد اتصال؟) — وضع محلي: البيانات على هذا الجهاز');if(gateOK())$('#login').style.display='none'}
 home();
 </script>
 <script>if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script>
