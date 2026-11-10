@@ -107,6 +107,7 @@ fieldset{min-width:0}
 .dqleg{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}.dqleg span{border-radius:8px;padding:2px 12px;font-weight:700;font-size:.9em}
 .dqf{border-radius:10px;padding:8px 10px;margin:2px 0}.dqmsg{font-size:.88em;font-weight:800;margin-top:5px}
 .dqf-n{background:#eaf3f7;box-shadow:0 0 0 3px #4a9bb5}.dqf-w{background:#fff7d6;box-shadow:0 0 0 3px #e0b400}.dqf-m{background:#ffe9d1;box-shadow:0 0 0 3px #f08a1c}.dqf-e{background:#fdeaea;box-shadow:0 0 0 3px #d83a3a}
+.lpg{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin:8px 0}.lpc{border:1.5px solid var(--line);border-radius:12px;text-align:center;padding:6px 4px;background:var(--card)}.lpc b{display:block;font-size:1.45em;color:var(--pri2)}.lpc small{opacity:.8;font-weight:600}.lpc.cur{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)}.lpc.full b{color:#d83a3a}
 </style>
 </head>
 <body>
@@ -192,7 +193,7 @@ function calc(e){
  return{status:promo?'ترفيع':(st&&s>=11?'نهاية السلم':'علاوة'),aDue,pDue,due,ng,ns,nsal:salary(ng,ns),amt:S.set.allow[g-1],av:[],usedTxt:ut,lastD:la,lastT:(e.lastP&&e.lastP>=(e.lastA||''))?'ترفيع':'علاوة'};
 }
 const ICON={add:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="10"/>',srch:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',up:'<path d="M12 19V5M5 12l7-7 7 7"/>',cash:'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M16 5a3 3 0 010 6M21 20c0-3-1.5-5-4-5.6"/>',chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',scale:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/>',plus:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',promo:'<path d="M6 14l6-6 6 6M6 20l6-6 6 6"/>',leave:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M9 15l2 2 4-4"/>',maint:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-1.5 1.5-2 3-2s2.5.5 3 2M14 10h4M14 14h4"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'};
-const TILES=[['add','إضافة موظف',0,()=>empForm()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات',0,()=>lvHub()],['arch','ارشفة الاضابير',0,()=>arPage()],['kaf','الكفالات',0,()=>kfPage()],['dq','فحص البيانات',0,()=>dqPage()],['bk','النسخ الاحتياطي',0,()=>bkPage()]];
+const TILES=[['add','إضافة قدم قانوني',0,()=>lgpPage()],['srch','بحث',0,()=>list('all',true)],['up','استعلام لمستحقي الترفيع',0,()=>list('p')],['cash','استعلام لمستحقي العلاوات',0,()=>list('a')],['users','بيانات الموظفين',0,()=>list('all')],['maint','ادامة الموظفين',0,()=>mtHub()],['chart','احصائيات',0,()=>stats()],['scale','سلم الرواتب',0,()=>scalePage()],['plus','إضافة علاوة جديدة',0,()=>apPage('a')],['promo','إضافة ترفيع جديد',0,()=>apPage('p')],['leave','الاجازات',0,()=>lvHub()],['arch','ارشفة الاضابير',0,()=>arPage()],['kaf','الكفالات',0,()=>kfPage()],['dq','فحص البيانات',0,()=>dqPage()],['bk','النسخ الاحتياطي',0,()=>bkPage()]];
 /* ===== مرفقات الهوية والبطاقة الموحدة (تُحفظ في أرشيف الموظف) ===== */
 const MX={idc:{t:'الهوية',cat:'هوية'},uni:{t:'البطاقة الموحدة',cat:'بطاقة موحدة'}};
 let mxPend=[],mxId=null,mxFor='';
@@ -207,6 +208,71 @@ async function mxFiles(){const fi=$('#mx_fi'),fs=[...fi.files];fi.value='';if(!f
 const mxView=k=>{const L=mxRecs(k);if(L.length)arView(L.map(r=>r.id),0)};
 const mxPrint=k=>prPrint(mxRecs(k),()=>'');
 async function mxFlush(id){const L=mxPend;mxPend=[];if(!L.length)return;try{await arLoad()}catch(e){}for(const p of L)await arAddFiles(id,p.files,{cat:p.cat,slot:p.slot})}
+/* ===== إضافة قدم قانوني: بحث عن موظف في الأعلى ثم خانات القدم القانوني كما في نموذج الموظف بكل حساباتها وترابطها مع العلاوة والترفيع ===== */
+let lpId=null,lpS={};
+const lpE=()=>S.emps.find(x=>x.id==lpId);
+function lgpPage(){
+ lpId=null;lpS={};editId=null;
+ shell('إضافة قدم قانوني',`<div class="tools"><div style="flex:2 1 240px"><label>ابحث عن الموظف بالاسم أو العنوان الوظيفي<input id="lp_q" type="search" autocomplete="off" placeholder="اكتب جزءاً من الاسم"></label></div></div>
+ <div id="lp_res"></div><div id="lp_card"></div><input type="file" id="dc_fi" hidden multiple accept="image/*,.pdf">`);
+ $('#lp_q').oninput=lpSearch;$('#dc_fi').onchange=dcFiles;
+ arLoad().catch(()=>{});lpSearch()}
+function lpSearch(){const r=$('#lp_res');if(!r)return;const qt=nrmA($('#lp_q').value.trim()).split(' ').filter(Boolean);
+ const L=S.emps.filter(e=>!inactive(e)&&qt.every(t=>nrmA(e.name+' '+(e.title||'')).includes(t))).sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar')).slice(0,40);
+ r.innerHTML=L.length?L.map(e=>`<button type="button" class="btn alt" style="display:block;width:100%;text-align:start;margin:4px 0;${e.id==lpId?'border-color:var(--gold)':''}" onclick="lpPick(${e.id})">${lvEs(e.name)} <small style="opacity:.75">— ${lvEs(e.title)||'—'} (درجة ${lvEs(e.g)||'—'} / مرحلة ${lvEs(e.s)||'—'})</small></button>`).join(''):'<p style="color:var(--mut)">لا يوجد موظف مطابق</p>'}
+async function lpPick(id){lpId=id;editId=id;lpS={};try{await arLoad()}catch(e){}const e=lpE();if(!e)return;for(let i=1;i<=11;i++)if(e['lg'+i]!==undefined&&e['lg'+i]!=='')lpS['lg'+i]=e['lg'+i];
+ $('#lp_res').innerHTML='';$('#lp_q').value=e.name;lpCard();const c=$('#lp_card');if(c)c.scrollIntoView({behavior:'smooth',block:'start'})}
+/* نسخة الموظف بعد تطبيق القيم المُدخلة في الصفحة (لا تُحفظ إلا بزر الحفظ) */
+function lpTemp(){const e=lpE(),t=JSON.parse(JSON.stringify(e));for(let i=1;i<=11;i++){const v=lpS['lg'+i];if(v===undefined||v==='')delete t['lg'+i];else t['lg'+i]=v}
+ const p=$('#lp_p'),a=$('#lp_a');if(p)t.lgpmPrev=p.value;if(a)t.lgpmAct=a.value;return t}
+function lpCalc(manual){const e=lpE();if(!e)return null;const c=calc(lpTemp()),set=(id,v)=>{const x=$(id);if(x)x.value=v};
+ if(!c){['#lp_ng','#lp_ns','#lp_nsal','#lp_nd','#lp_namt','#lp_nst'].forEach(i=>set(i,''));if(manual)toast('أكمل الدرجة والمرحلة وتاريخ آخر علاوة أو ترفيع من نموذج الموظف');return null}
+ set('#lp_ng',c.ng);set('#lp_ns',c.ns);set('#lp_nsal',nf(c.nsal));set('#lp_nd',fd(c.due));set('#lp_namt',nf(c.amt));set('#lp_nst',c.status);return c}
+function lpDrawLg(){
+ const box=$('#lp_lgc'),e=lpE();if(!box||!e)return;const g=num(e.g),s=num(e.s),N=Math.max(4,((S.set||{}).years||[])[g-1]||0,s);let h='';
+ for(let i=N;i>=1;i--){const cu=i==s;
+  h+=`<label>عدد القدم القانوني في المرحلة ${ORD[i-1]} <b style="color:${cu?'var(--pri2)':'var(--mut)'}">${cu?'(المرحلة الحالية - يُحتسب)':'(شكلي - لا يُحتسب)'}</b><input id="lp_lg${i}" type="number" min="0" max="3" value="${lpS['lg'+i]??''}" placeholder="إدخال يدوي" ${cu?'style="border:2px solid var(--gold)"':''}></label><div class="lgat" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:-4px 0 10px"><button type="button" class="btn alt" onclick="lgAtt(${i})">إرفاق كتاب القدم (صورة / ملف)</button><span id="lga_${i}"></span></div>`}
+ box.innerHTML=h+'<input type="file" id="lg_fi" hidden multiple accept="image/*,.pdf">';
+ box.querySelectorAll('input[type=number]').forEach(x=>x.oninput=()=>{lpS['lg'+x.id.slice(5)]=x.value;lpCalc()});
+ $('#lg_fi').onchange=lgFiles;lgaUpd()}
+function lpCard(){
+ const c=$('#lp_card');if(!c)return;const e=lpE();if(!c||!e){if(c)c.innerHTML='';return}
+ const g=num(e.g),s=num(e.s);
+ c.innerHTML=`<div class="lvcard"><h3>${lvEs(e.name)}</h3><p>${lvEs(e.title)||'—'}</p><div class="act" style="margin-top:6px"><button type="button" class="btn alt" onclick="empForm(${e.id})">فتح نموذج الموظف الكامل</button></div></div>
+ <div class="cols" style="margin-top:12px"><fieldset><legend>معلومات العلاوة السابقة</legend>
+  <label>الدرجة الوظيفية<input readonly value="${lvEs(e.g)||''}"></label><label>المرحلة<input readonly value="${lvEs(e.s)||''}"></label><label>الراتب<input readonly value="${nf(salary(g,s))}"></label>
+  <label>تاريخ آخر علاوة<input readonly value="${e.lastA?fd(pd(e.lastA)):''}"></label><label>تاريخ آخر ترفيع<input readonly value="${e.lastP?fd(pd(e.lastP)):''}"></label><label>العقوبة (شهر)<input readonly value="${num(e.pen)}"></label>${isStl(e)?'<p class="note">الموظف مُسكَّن: علاوات فقط بلا ترفيع.</p>':''}</fieldset>
+ <fieldset><legend>معلومات العلاوة الجديدة</legend>
+  <label>الدرجة الوظيفية<input id="lp_ng" readonly></label><label>المرحلة<input id="lp_ns" readonly></label><label>الراتب<input id="lp_nsal" readonly></label>
+  <label>التاريخ (الاستحقاق)<input id="lp_nd" readonly></label><label>مقدار العلاوة<input id="lp_namt" readonly></label><label>حالة الاستحقاق<input id="lp_nst" readonly></label></fieldset></div>
+ <fieldset style="margin-top:14px"><legend>القدم القانوني</legend><div class="lgbox" id="lp_lgc"></div>
+  <div class="lgbox" style="margin-top:8px"><label>قدم ستة أشهر الممنوح سابقاً (للملاحظة فقط، لا يُحتسب)<input id="lp_p" type="number" min="0" max="2" placeholder="إدخال يدوي" value="${e.lgpmPrev??''}"></label><label>قدم ستة أشهر الفعلي (1 = 6 أشهر، 2 = 12 شهراً، يُحتسب)<input id="lp_a" type="number" min="0" max="2" placeholder="إدخال يدوي" value="${e.lgpmAct??''}"></label>${dcRow('lg6')}</div>
+  <p class="note">ملاحظة // يمنح الموظف القدم القانوني واحد شهر ثلاث مرات في السنة فقط، ويمنح قدم لمدة ستة اشهر مرتين فقط خلال العمر الوظيفي</p></fieldset>
+ <div class="act"><button class="btn gold" onclick="lpCalc(true)">حسب</button><button class="btn" onclick="lpSaveFoot()">حفظ القدم القانوني</button></div>`;
+ $('#lp_a').addEventListener('input',()=>lpCalc());lpDrawLg();dcUpd();lpCalc()}
+function lpSaveFoot(){
+ const e=lpE();if(!e)return;const t=lpTemp();
+ if(Array.from({length:11},(_,i)=>i+1).some(i=>num(t['lg'+i])>3||num(t['lg'+i])<0)){toast('القدم القانوني: الحد 3 مرات (شهر لكل مرة) في كل مرحلة');return}
+ if([t.lgpmPrev,t.lgpmAct].some(v=>num(v)<0||num(v)>2)||num(t.lgpmPrev)+num(t.lgpmAct)>2){toast('قدم الستة أشهر: مرتان فقط خلال العمر الوظيفي (السابق + الفعلي)');return}
+ for(let i=1;i<=11;i++){const v=lpS['lg'+i];if(v===undefined||v==='')delete e['lg'+i];else e['lg'+i]=num(v)}
+ const p=$('#lp_p').value,a=$('#lp_a').value;if(p==='')delete e.lgpmPrev;else e.lgpmPrev=num(p);if(a==='')delete e.lgpmAct;else e.lgpmAct=num(a);
+ save();const c=lpCalc();toast('تم حفظ القدم القانوني'+(c?' — الاستحقاق: '+fd(c.due)+' ('+c.status+')':''))}
+/* ===== التحقق من وجود نسخة أحدث من البرنامج (يتجاوز النسخة القديمة المخزّنة في المتصفح) ===== */
+async function updCheck(manual){
+ try{
+  if(!/^https?:$/.test(location.protocol)){if(manual)toast('التحقق من التحديث يعمل عند فتح البرنامج من رابطه على الإنترنت');return}
+  const u=location.pathname+(location.search?location.search+'&':'?')+'_u='+Date.now(),r=await fetch(u,{cache:'no-store'});
+  const m=new RegExp('APP_VER\\s*=\\s*\'(\\d{4}\\.\\d{2}\\.\\d{2})\'').exec(await r.text());
+  if(!m){if(manual)toast('تعذّر قراءة رقم الإصدار من الخادم');return}
+  if(m[1]>APP_VER){updBanner(m[1])}
+  else if(manual)toast(m[1]==APP_VER?'أنت تستخدم أحدث إصدار ('+APP_VER+')':'الإصدار على الخادم ('+m[1]+') أقدم من إصدارك ('+APP_VER+') — تأكد من رفع الملف الجديد')}
+ catch(e){if(manual)toast('تعذّر التحقق من التحديث (لا يوجد اتصال؟)')}}
+function updBanner(v){if($('#updbar'))return;const d=document.createElement('div');d.id='updbar';d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:50;background:#f08a1c;color:#fff;font-weight:800;padding:10px 14px;text-align:center;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap';
+ d.innerHTML=`<span>يتوفر إصدار أحدث من البرنامج (${lvEs(v)}) وأنت تستخدم ${lvEs(APP_VER)}</span><button class="btn" style="background:#fff;color:#7a3f00" onclick="updApply()">تحديث الآن</button>`;document.body.appendChild(d)}
+async function updApply(){
+ try{if(navigator.serviceWorker){const rs=await navigator.serviceWorker.getRegistrations();for(const r of rs)await r.unregister()}}catch(e){}
+ try{if(window.caches){const ks=await caches.keys();for(const k of ks)await caches.delete(k)}}catch(e){}
+ location.reload()}
 /* ===== فحص جودة البيانات ===== */
 ICON.dq='<path d="M12 3l8 3v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M8.5 12l2.5 2.5L16 9.5"/>';
 const DQ_SEV={e:'خطأ',m:'نقص',w:'تحذير',n:'ملاحظة'};
@@ -241,7 +307,7 @@ function dqCheck(){
     if(dB>=today)add(e,'e','تواريخ','تاريخ التولد في المستقبل','التاريخ: '+fd(dB),null,dqK('birth'));
     else{if(ageH!==null&&ageH<0)add(e,'e','تواريخ','تاريخ التولد بعد تاريخ التعيين','تولد: '+fd(dB)+' — تعيين: '+fd(dH),null,{fields:['m_birth','f_hireDate','m_hireDate'],w:'تاريخ التولد / التعيين'});
      else if(ageH!==null&&ageH<18)add(e,'w','تواريخ','عمر الموظف عند التعيين أقل من 18 سنة (≈'+Math.floor(ageH)+')','تولد: '+fd(dB)+' — تعيين: '+fd(dH),null,{fields:['m_birth','f_hireDate','m_hireDate'],w:'تاريخ التولد / التعيين'});
-     if(ageN>=63)add(e,'n','تواريخ','بلغ سن التقاعد (≈'+Math.floor(ageN)+' سنة)','تاريخ التولد: '+fd(dB),null,dqK('birth'))}}
+     if(ageN>=retCfg().age)add(e,'n','تواريخ','بلغ سن التقاعد (≈'+Math.floor(ageN)+' سنة)','تاريخ التولد: '+fd(dB),null,dqK('birth'))}}
    const ttl=String(e.title||'').trim();
    if(!ttl)add(e,'m','عناوين وظيفية','العنوان الوظيفي ناقص','',null,dqK('title'));
    else if(Number.isInteger(g)&&g>=1&&g<=10&&!LADDERS.some(l=>(l[g-1]||[]).some(t=>ttN(t)==ttN(ttl))))add(e,'w','عناوين وظيفية','العنوان لا يطابق سلّم العناوين للدرجة '+g,'العنوان: '+ttl,null,dqK('title'));
@@ -445,7 +511,7 @@ async function kfExport(eid){
  const buf=await wb.xlsx.writeBuffer();
  try{await dl.save({filename:single?'كفالات_'+String(emps[0].name).replace(/[\\\/:*?"<>|]/g,'').trim()+'.xlsx':'سجل_الكفالات.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}}
 /* ===== الطباعة / السكنر / كتب القدم القانوني ===== */
-const APP_VER='2026.10.30';
+const APP_VER='2026.11.09';
 const DEF_TITLE='مديرية بلدية هيت - شعبة الموارد البشرية';
 const PR_SZ={A4:[210,297],A3:[297,420],A5:[148,210],Letter:[216,279]},PR_DEF={paper:'A4',orient:'portrait',margin:10,header:true};
 const prCfg=()=>({...PR_DEF,...((S.ui||{}).pr||{})});
@@ -600,7 +666,7 @@ async function arAddFiles(emp,files,o={}){
  for(const f of files){
   if(!(/^image\//.test(f.type)||f.type=='application/pdf'||/\.(jpe?g|png|bmp|webp|gif|tiff?|pdf)$/i.test(f.name))){skip++;continue}
   const key=arKey(f);if(AR.some(r=>r.emp==emp&&r.key==key)){skip++;continue}
-  try{const p=await arPrep(f),rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),emp,name:f.name,kind:p.kind,mime:p.blob.type||f.type||'',blob:p.blob,thumb:p.thumb,size:p.blob.size,key,cat:o.cat||'',stage:o.stage||0,slot:o.slot||'',kf:o.kf||0,note:'',docDate:o.docDate||'',added:Date.now(),ocr:'',ocrDone:false};
+  try{const p=await arPrep(f),rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),emp,name:f.name,kind:p.kind,mime:p.blob.type||f.type||'',blob:p.blob,thumb:p.thumb,size:p.blob.size,key,cat:o.cat||'',stage:o.stage||0,slot:o.slot||'',lgb:o.lgb||0,kf:o.kf||0,note:'',docDate:o.docDate||'',added:Date.now(),ocr:'',ocrDone:false};
    await arPut(rec);AR.push(rec);arIndex(rec);n++;if(arAutoOn()&&(rec.kind=='img'||rec.kind=='pdf'))arEnqueue(rec.id);await new Promise(r=>setTimeout(r,2))}
   catch(e){skip++;toast(e&&e.name=='QuotaExceededError'?'امتلأت مساحة التخزين في المتصفح':'تعذّرت إضافة ملف')}}
  arNums();return{n,skip}}
@@ -907,6 +973,7 @@ function home(){
   $('#tiles').innerHTML=TILES.map((x,i)=>`<button class="tile ${x[2]||''}" data-i="${i}"><svg viewBox="0 0 24 24" style="${icSt(x[0])}">${ICON[x[0]]}</svg>${x[1]}</button>`).join('');
  document.querySelectorAll('#tiles .tile').forEach(b=>b.onclick=()=>{$('#home').hidden=true;$('#view').hidden=false;TILES[b.dataset.i][3]();window.scrollTo(0,0)});
  try{dqBadge()}catch(e){}
+ try{retHomeAlert()}catch(e){}
 }
 const shell=(title,body)=>{$('#view').innerHTML=`<div class="bar"><button class="btn alt" onclick="home()">رجوع</button><h2>${title}</h2></div><div class="page">${body}</div>`};
 const opt=(arr,v)=>arr.map(x=>`<option ${x==v?'selected':''}>${String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</option>`).join('');
@@ -986,7 +1053,7 @@ const mo=()=>iso(new Date()).slice(0,7);
 function list(mode,focus){
  const T={a:'مستحقو العلاوات',p:'مستحقو الترفيع',all:'بيانات الموظفين'}[mode];
  shell(T,`<div class="tools"><div><label>بحث بالاسم أو العنوان<input id="q" ${focus?'autofocus':''}></label></div>
- ${mode=='all'?`<div style="max-width:110px"><label>عدد الموظفين<input id="cnt" readonly value="${S.emps.filter(e=>!inactive(e)).length}" style="text-align:center;font-weight:700"></label></div><button class="btn gold" onclick="expNames()">تصدير الأسماء Excel</button>`:`<div><label>شهر الاستحقاق<input id="m" type="month" value="${mo()}"></label></div><div><label><input id="allm" type="checkbox" style="width:auto"> كل الأشهر</label></div><button class="btn gold" onclick="exp('${mode}')">تصدير Excel</button>`}</div>
+ ${mode=='all'?`<div style="max-width:110px"><label>عدد الموظفين<input id="cnt" readonly value="${S.emps.filter(e=>!inactive(e)).length}" style="text-align:center;font-weight:700"></label></div><button class="btn" onclick="empForm()">إضافة موظف جديد</button><button class="btn gold" onclick="expNames()">تصدير الأسماء Excel</button>`:`<div><label>شهر الاستحقاق<input id="m" type="month" value="${mo()}"></label></div><div><label><input id="allm" type="checkbox" style="width:auto"> كل الأشهر</label></div><button class="btn gold" onclick="exp('${mode}')">تصدير Excel</button>`}</div>
  <div class="tw"><table><thead id="th"></thead><tbody id="tb"></tbody></table></div>`);
  const draw=()=>{
   const q=$('#q').value.trim(),m=mode=='all'?'':$('#m').value,am=mode!='all'&&$('#allm').checked;
@@ -1008,12 +1075,44 @@ async function delEmp(id,b){
   S.emps=S.emps.filter(x=>x.id!=id);save();toast('تم حذف الموظف'+(np?' وحذف '+np+' صفحة من اضبارته المؤرشفة':''));if($('#mtb'))mtPage();else list('all');return}
  let np=0;try{await arLoad();np=AR.filter(r=>r.emp==id).length}catch(e){}
  const t0=b.textContent;b.dataset.c=1;b.textContent='تأكيد الحذف'+(np?' (مع '+np+' صفحة مؤرشفة)':'');setTimeout(()=>{if(b.isConnected){b.dataset.c='';b.textContent=t0}},5000)}
+/* ===== المقتربون من سن التقاعد (سن التقاعد وعدد أشهر التنبيه قابلان للضبط) ===== */
+const retCfg=()=>{const a=num((S.set||{}).retAge),mv=parseFloat((S.set||{}).retMonths);return{age:a>=30&&a<=80?a:60,mon:isNaN(mv)?12:Math.max(0,Math.min(120,Math.round(mv)))}};
+const arCnt=(n,one,two,few,many)=>n==1?'1 '+one:n==2?'2 '+two:n>=3&&n<=10?n+' '+few:n+' '+many;
+function retLeft(today,rd){let m=(rd.getFullYear()-today.getFullYear())*12+rd.getMonth()-today.getMonth();if(rd.getDate()<today.getDate())m--;if(m<0){const dd=Math.round((rd-today)/864e5);return arCnt(dd,'يوم','يومان','أيام','يوماً')}const d=Math.round((rd-addM(today,m))/864e5);return(m?arCnt(m,'شهر','شهران','أشهر','شهراً'):'')+(m&&d?' و':'')+(d||!m?arCnt(d,'يوم','يومان','أيام','يوماً'):'')}
+function retList(){
+ const cf=retCfg(),today=new Date();today.setHours(0,0,0,0);const lim=addM(today,cf.mon),list=[],miss=[];
+ S.emps.forEach(e=>{if(inactive(e))return;const b=dqD((e.m||{}).birth);if(!b||b==='bad'){miss.push(e);return}
+  const rd=addM(b,cf.age*12);if(rd<=lim){const days=Math.round((rd-today)/864e5);list.push({e,rd,days,age:Math.floor((today-b)/31557600000),left:days<0?'تجاوز السن منذ '+retLeft(rd,today):days==0?'اليوم':retLeft(today,rd)})}});
+ list.sort((x,y)=>x.rd-y.rd);return{list,miss,cf}}
+function retSet(n){const m=$('#ret_m');if(m){m.value=n;m.dispatchEvent(new Event('input'))}}
+function retBuckets(){const today=new Date();today.setHours(0,0,0,0);const o={over:0,b:{1:0,2:0,3:0,6:0,12:0}};
+ S.emps.forEach(e=>{if(inactive(e))return;const bd=dqD((e.m||{}).birth);if(!bd||bd==='bad')return;const rd=addM(bd,retCfg().age*12);if(rd<today){o.over++;return}[1,2,3,6,12].forEach(k=>{if(rd<=addM(today,k))o.b[k]++})});return o}
+function retOpen(id){const e=S.emps.find(x=>x.id==id);if(!e)return;mtSec=mtSecOf(e);mtPage(mtSec);mtForm(e.id)}
+function retDraw(){const box=$('#ret_box');if(!box)return;const R=retList(),near=R.list.filter(x=>x.days>=0),over=R.list.filter(x=>x.days<0);
+ const BK=retBuckets();
+ box.innerHTML=`<div class="stat"><div><b>${BK.b[1]}</b>خلال شهر</div><div><b>${BK.b[2]}</b>خلال شهرين</div><div><b>${BK.b[3]}</b>خلال 3 أشهر</div><div><b>${BK.b[6]}</b>خلال 6 أشهر</div><div><b>${BK.b[12]}</b>خلال 12 شهراً</div></div><div class="stat" style="margin-top:8px"><div><b style="color:#d9740f">${near.length}</b>يقتربون من سن التقاعد (خلال ${R.cf.mon} شهراً)</div><div><b style="color:#d83a3a">${over.length}</b>بلغوا سن التقاعد (${R.cf.age} سنة)</div><div><b>${R.miss.length}</b>بلا تاريخ تولد</div></div>${R.miss.length?'<p class="note">الموظفون بلا تاريخ تولد لا يدخلون في هذه الاحصائية — أكمل «تاريخ التولد» من ادامة الموظفين.</p>':''}
+ <div class="tw"><table style="min-width:760px"><thead><tr><th>ت</th><th>الموظف</th><th>العنوان الوظيفي</th><th>تاريخ التولد</th><th>العمر الآن</th><th>تاريخ بلوغ السن</th><th>المتبقي</th><th></th></tr></thead><tbody>${R.list.map((x,i)=>`<tr class="${x.days<0?'dqr-e':x.days<=90?'dqr-m':'dqr-w'}"><td>${i+1}</td><td style="text-align:start">${lvEs(x.e.name)}</td><td>${lvEs(x.e.title)}</td><td>${fd(pd(x.e.m.birth))}</td><td>${x.age}</td><td>${fd(x.rd)}</td><td style="font-weight:700">${lvEs(x.left)}</td><td><button class="btn alt" onclick="retOpen(${x.e.id})">فتح</button></td></tr>`).join('')||'<tr><td colspan="8">لا يوجد موظفون ضمن المدة المحددة.</td></tr>'}</tbody></table></div>`}
+async function retExport(){
+ if(typeof dl=='undefined'||!dl){toast('التصدير غير متاح في هذا العرض');return}
+ if(typeof ExcelJS=='undefined'){toast('تعذّر تحميل مكتبة التصدير');return}
+ const R=retList();if(!R.list.length){toast('لا يوجد موظفون للتصدير');return}
+ const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('المقتربون من التقاعد',{views:[{rightToLeft:true}]});ws.columns=[6,36,28,16,12,18,24].map(w=>({width:w}));ws.pageSetup={orientation:'landscape',paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0};
+ ws.mergeCells(1,1,1,7);const t=ws.getCell(1,1);t.value='الموظفون المقتربون من سن التقاعد ('+R.cf.age+' سنة) خلال '+R.cf.mon+' شهراً — '+fd(new Date());xs(t,'Arial',14,null,'center',false);ws.getRow(1).height=32;
+ const hr=ws.addRow(['ت','الموظف','العنوان الوظيفي','تاريخ التولد','العمر الآن','تاريخ بلوغ السن','المتبقي']);hr.height=30;hr.eachCell(c=>xs(c,'Arial',12,'FFDDD9C3'));
+ R.list.forEach((x,i)=>{const r=ws.addRow([i+1,x.e.name,x.e.title||'',UD(pd(x.e.m.birth)),x.age,UD(x.rd),x.left]);r.height=24;const col=x.days<0?'FFFBD5D5':x.days<=90?'FFFFD7A8':'FFFFF0B8';r.eachCell(c=>xs(c,'Arial',12,col));r.getCell(4).numFmt='yyyy/mm/dd';r.getCell(6).numFmt='yyyy/mm/dd'});
+ const buf=await wb.xlsx.writeBuffer();
+ try{await dl.save({filename:'المقتربون_من_التقاعد_'+arDay(Date.now())+'.xlsx',data:buf})}catch(err){if(err.code!='declined')toast('تعذّر الحفظ: '+(err.message||err.code))}}
+function retHomeAlert(){const el=$('#alerts');if(!el)return;const R=retList(),n=R.list.filter(x=>x.days>=0).length,o=R.list.filter(x=>x.days<0).length;
+ el.insertAdjacentHTML('beforeend',`<div style="cursor:pointer;${n||o?'outline:2px solid #f08a1c':''}" onclick="document.querySelectorAll('#tiles .tile')[TILES.findIndex(t=>t[1]=='احصائيات')].click()" title="افتح الإحصائيات"><b>${n}</b>يقتربون من سن التقاعد${o?' ('+o+' بلغوا السن)':''}</div>`)}
 function stats(){
  const n=S.emps.map(e=>({e,c:calc(e)})).filter(x=>x.c),m=mo();
  const by=Array.from({length:10},(_,i)=>n.filter(x=>x.e.g==i+1).length);
  const A=S.emps.filter(e=>!inactive(e)),gM=A.filter(e=>(e.m||{}).gender=='ذكر').length,gF=A.filter(e=>(e.m||{}).gender=='أنثى').length,mr=A.filter(mtMar).length,sg=A.filter(e=>(e.m||{}).marital=='أعزب').length,nR=S.emps.filter(e=>mtSt(e)=='ret').length,nT=S.emps.filter(e=>mtSt(e)=='trf').length,uG=A.length-gM-gF,uM=A.length-mr-sg;
- shell('احصائيات',`<div class="stat"><div><b>${A.length}</b>عدد الموظفين الكلي</div><div><b>${gM}</b>الذكور</div><div><b>${gF}</b>الإناث</div><div><b>${mr}</b>المتزوجون</div><div><b>${sg}</b>العزاب</div></div>${uG||uM?`<p class="note">${uG?`غير محدد الجنس: ${uG}. `:''}${uM?`غير محددة الحالة الاجتماعية: ${uM}. `:''}يمكن إكمالها من «ادامة الموظفين».</p>`:''}<div class="stat"><div><b>${nR}</b>المحالون على التقاعد</div><div><b>${nT}</b>المنقولون</div></div><div class="stat"><div><b>${n.filter(x=>x.c.status=='علاوة'&&iso(x.c.due).slice(0,7)==m).length}</b>علاوات هذا الشهر</div><div><b>${n.filter(x=>x.c.status=='ترفيع'&&iso(x.c.due).slice(0,7)==m).length}</b>ترفيعات هذا الشهر</div><div><b>${nf(n.reduce((s,x)=>s+salary(x.e.g,x.e.s),0))}</b>مجموع الرواتب</div></div>
- <div class="tw"><table><thead><tr><th>الدرجة</th>${by.map((_,i)=>`<th>${i+1}</th>`).join('')}</tr></thead><tbody><tr><td>عدد الموظفين</td>${by.map(v=>`<td>${v}</td>`).join('')}</tr></tbody></table></div>`);
+ shell('احصائيات',`<fieldset style="margin-bottom:16px"><legend>المحالون على التقاعد — من سيبلغ سن التقاعد قريباً</legend><div class="cols"><label>سن التقاعد (سنة)<input id="ret_a" type="number" min="30" max="80" value="${retCfg().age}"></label><label>التنبيه قبل بلوغ السن بـ (أشهر)<input id="ret_m" type="number" min="0" max="120" value="${retCfg().mon}"></label></div><div class="act"><span style="font-weight:700">اختيار سريع:</span>${[1,2,3,6,12].map(n=>`<button type="button" class="btn alt" onclick="retSet(${n})">${n==1?'شهر':n==2?'شهران':n+' أشهر'}</button>`).join('')}<button class="btn" onclick="retExport()">تصدير القائمة Excel</button></div><div id="ret_box"></div></fieldset><div class="stat"><div><b>${A.length}</b>عدد الموظفين الكلي</div><div><b>${gM}</b>الذكور</div><div><b>${gF}</b>الإناث</div><div><b>${mr}</b>المتزوجون</div><div><b>${sg}</b>العزاب</div></div>${uG||uM?`<p class="note">${uG?`غير محدد الجنس: ${uG}. `:''}${uM?`غير محددة الحالة الاجتماعية: ${uM}. `:''}يمكن إكمالها من «ادامة الموظفين».</p>`:''}<div class="stat"><div><b>${nR}</b>المحالون على التقاعد</div><div><b>${nT}</b>المنقولون</div></div><div class="stat"><div><b>${n.filter(x=>x.c.status=='علاوة'&&iso(x.c.due).slice(0,7)==m).length}</b>علاوات هذا الشهر</div><div><b>${n.filter(x=>x.c.status=='ترفيع'&&iso(x.c.due).slice(0,7)==m).length}</b>ترفيعات هذا الشهر</div><div><b>${nf(n.reduce((s,x)=>s+salary(x.e.g,x.e.s),0))}</b>مجموع الرواتب</div></div>
+ <div class="tw"><table><thead><tr><th>الدرجة</th>${by.map((_,i)=>`<th>${i+1}</th>`).join('')}</tr></thead><tbody><tr><td>عدد الموظفين</td>${by.map(v=>`<td>${v}</td>`).join('')}</tr></tbody></table></div>
+ `);
+ const sv=()=>{S.set.retAge=num($('#ret_a').value);S.set.retMonths=$('#ret_m').value===''?12:num($('#ret_m').value);save();retDraw()};
+ $('#ret_a').oninput=sv;$('#ret_m').oninput=sv;retDraw();
 }
 const BGS={'افتراضي':null,'أبيض':['#ffffff','#f3f5f5'],'أخضر هادئ':['#e3efe6','#f8fcf9'],'كريمي':['#f3ecdd','#fffaf0'],'رمادي':['#e6e8ea','#f8f9fa'],'نقوش':['#eaf1ef','#ffffff'],'داكن':null};
 function applyUI(){
@@ -1044,7 +1143,7 @@ function settings(){
   <p class="note">اختيار الطابعة (سلكية USB أو لاسلكية/شبكة) يتم من نافذة الطباعة التي تظهر عند الضغط على أي زر «طباعة»، لأن المتصفح لا يسمح لأي موقع بقراءة قائمة الطابعات أو اختيار واحدة بنفسه. لتظهر طابعتك أولاً اجعلها «الطابعة الافتراضية» في إعدادات الطابعات في ويندوز. وللطباعة المباشرة بلا نافذة: انسخ اختصار Chrome وأضف في آخر خانة «الهدف» ‎--kiosk-printing‎ ثم افتح البرنامج منه، فيطبع على الطابعة الافتراضية فوراً.</p>
   <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
   <p style="margin:0 0 6px"><b>مجلد السكنر</b> — اضبط برنامج السكنر (مثل Windows Scan أو NAPS2 أو برنامج الشركة المصنّعة) ليحفظ المسح في مجلد، وحدّده هنا مرة واحدة. في «ارشفة الاضابير» يكفي ضغط «ربط مجلد السكنر» فتُسحب الصفحات الجديدة تلقائياً إلى اضبارة الموظف المفتوحة.</p>
-  <div class="act"><button class="btn alt" id="sc_b">تحديد / تغيير مجلد السكنر</button><span id="sc_n" style="color:var(--mut)"></span></div></fieldset><p class="note" style="text-align:center;color:var(--mut)">إصدار البرنامج: ${APP_VER}</p>`);
+  <div class="act"><button class="btn alt" id="sc_b">تحديد / تغيير مجلد السكنر</button><span id="sc_n" style="color:var(--mut)"></span></div></fieldset><p class="note" style="text-align:center;color:var(--mut)">إصدار البرنامج: ${APP_VER}</p><div class="act" style="justify-content:center"><button class="btn alt" onclick="updCheck(true)">التحقق من وجود تحديث للبرنامج</button></div>`);
  const up=()=>{save();applyUI()};
  $('#u_c').oninput=()=>{S.ui.color=$('#u_c').value;up()};
  $('#u_r').onclick=()=>{S.ui.color='';up();settings()};
@@ -1229,7 +1328,7 @@ function lvCard(){
  <fieldset style="margin-top:12px"><legend>تصدير إجازات هذا الموظف إلى Excel</legend><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:end"><label style="flex:1;min-width:140px">اختر السنة<select id="lv_eyr">${lvYears().map(y=>`<option value="${y}">${y}</option>`).join('')}</select></label><button class="btn gold" onclick="lvExportEmp()">تصدير</button></div></fieldset>
  ${lvKind=='sick'?'<p class="note">الرصيد المتراكم هو عدد الأيام المرضية المسموح بها للموظف. تُخصم أيام كل إجازة مرضية منه ويظهر الباقي في «المتبقي». ولا تُضاف أيام تلقائياً كل سنة؛ ويمكنك زيادة المسموح يدوياً عبر «المضاف». العنوان الوظيفي يتغير تلقائياً مع الترفيعات ولا يمكن تعديله من هنا.</p>':`<p class="note">الرصيد المتراكم يبقى ثابتاً كما أُدخل، (ويمكن تعديله يدوياً) وتُضاف إليه ${LV_ADD} يوماً تلقائياً مع بداية كل سنة ميلادية في خانة «المضاف سنوياً» (تبدأ الإضافة من السنة التالية لسنة إدخال الرصيد)، ويمكن تعديل «المضاف سنوياً» يدوياً أيضاً (تبقى الإضافة التلقائية للسنوات القادمة فوق القيمة المعدّلة)، وتُخصم أيام كل إجازة ويظهر الباقي في «المتبقي». إجازة الخمس سنوات لا تُخصم من الرصيد، ولا تُضاف الـ${LV_ADD} يوماً في بداية أي سنة تشمل مدتها 1 كانون الثاني. العنوان الوظيفي يتغير تلقائياً مع الترفيعات ولا يمكن تعديله من هنا.</p>`}
  <div class="tw"><table style="min-width:520px"><thead><tr><th>ت</th><th>من</th><th>إلى</th><th>الأيام</th><th>النوع</th><th>المتبقي بعدها</th><th>ملاحظات</th><th></th></tr></thead><tbody>${(()=>{let r=num(v.bal)+lvAdded(e);return v.recs.map((x,i)=>{if(lvIsReg(x))r-=num(x.days);return`<tr${x.auto=='time'?' style="background:#fff200;color:#000"':''}><td>${i+1}</td><td>${fd(pd(x.from))||'-'}</td><td>${fd(pd(x.to))||'-'}</td><td>${x.days}</td><td>${LVN(x)}</td><td>${lvIsReg(x)?r:'—'}</td><td style="text-align:start">${lvEs(x.note)}</td><td><button class="btn red" onclick="lvDel(${i},this)">حذف</button></td></tr>`}).join('')||'<tr><td colspan="8">لا توجد إجازات مسجلة</td></tr>'})()}</tbody></table></div>`;
- const calcD=()=>{const a=pd($('#lv_from').value),b=pd($('#lv_to').value);if(a&&b&&b>=a)$('#lv_days').value=Math.round((b-a)/864e5)+1};
+ const calcD=()=>{const f=$('#lv_from'),t=$('#lv_to'),d=$('#lv_days');if(!f||!t||!d)return;const a=pd(f.value),b=pd(t.value);if(a&&b&&b>=a)d.value=Math.round((b-a)/864e5)+1};
  if($('#lv_from')){$('#lv_from').oninput=calcD;$('#lv_to').oninput=calcD}
  if($('#lo_b'))lvOutDraw();
 }
@@ -1588,6 +1687,7 @@ function doLogout(){sessionStorage.removeItem('hit-ok');location.reload()}
 dl={save:async({filename,data})=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}};
 try{fbInit()}catch(e){cstat('تعذّر تحميل Firebase (لا يوجد اتصال؟) — وضع محلي: البيانات على هذا الجهاز');if(gateOK())$('#login').style.display='none'}
 home();
+setTimeout(()=>{try{updCheck(false)}catch(e){}},2500);
 </script>
 <script>if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script>
 </body>
